@@ -1,4 +1,5 @@
 // Час: NTP, RTC DS3231, ручне встановлення, тексти дат (перенесено з 2.7.1)
+// EN: Time: NTP, RTC DS3231, manual setting, date texts (from 2.7.1; NTP now waits for a fresh reply).
 #include "fw.h"
 
 static String two(uint8_t v) { return v < 10 ? String("0") + String(v, 10) : String(v, 10); }
@@ -13,22 +14,31 @@ static String rtc_stamp(const DateTime &rt) {
   return t + ":" + String(ss / 10) + String((uint32_t)ss % 10) + " - " + two(dd) + "." + two(mm) + "." + String(yo + 2000);
 }
 
-// @400db554: запит NTP (configTime) і очікування до 5 с
+// @400db554: запит NTP (configTime) і очікування до 5 с.
+// Виправлено: автор вважав «отриманим від NTP» будь-який системний час після 2021 р. — а системний час переживає
+// програмний перезапуск (іде від неточного RC-генератора RTC), тож після кожного перезапуску годинник одразу брав
+// старий час за синхронізований і до наступної синхронізації (t_syn хв) показував його з похибкою; потім — стрибок
+// (скарги користувачів: «время прыгает на 10–20 минут»). Тепер чекаємо свіжої відповіді сервера (лічильник
+// встановлень часу SNTP, netfix.cpp).
 void ntp_request() {
   float f = g_c3430 * 3600.0;
-  int dst = 0;
-  if (g_c32e4 != 0) dst = 0xe10;
+  int dst = fx_dst_offset(time(nullptr));          // виправлено: sumT 2 — авто (timefix.cpp)
   int off = (int)f;
   const char *srv = "pool.ntp.org";
   if (g_c3434.length() != 0) srv = g_c3434.c_str();
   g_c22b5 = 0;
   g_c3464 = 0;
+  uint32_t n0 = g_fx_sntp_n;
   configTime(dst + off, 0, srv, "time.nist.gov", 0);
-  time_t t = time(nullptr);
+  time_t t = 0;
   uint32_t t0 = millis();
   while (true) {
+    if (g_fx_sntp_n != n0) t = time(nullptr);
     if (0x5fee65ff < t) {
+      dst = fx_dst_offset(t);
       g_c3464 = t + dst + off;
+      g_fx_off_applied = dst + off;
+      g_fx_off_known = true;
       dbg_ws_print(String("NTP server - data received, unix=") + String((long)g_c3464, 10));
       g_c22b5 = 1;
       g_c2eb4 = 1;
@@ -82,6 +92,7 @@ void manual_time_set() {
   g_c22d0 = g_c344c;
   g_c22c4 = g_c3440;
   setTime(g_c22c0, g_c22bf, 0, g_c22be, g_c22bd, g_c22b8);
+  fx_time_offset_set();                              // нове: подальші переходи літнього часу — від цього часу
   if (g_c3468 != 0) {
     DateTime d(g_c22b8 & 0xffff, g_c22bd, g_c22be, g_c22c0, g_c22bf, 0);
     g_c346c.adjust(d);

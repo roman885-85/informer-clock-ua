@@ -1,4 +1,5 @@
 // GET /content: живі значення й ключі конфігурації (перенесено з 2.7.1: @400fab4c, @400f9430)
+// EN: GET /content: live values and configuration keys (from 2.7.1).
 #include "fw.h"
 
 static String two(uint8_t v) { return v < 10 ? String("0") + String(v, 10) : String(v, 10); }
@@ -73,7 +74,7 @@ void content_json_build(String &out, const String &key) {
     pc = "[{\"event\":\"No API\"}]"; goto setc;
   }
   if (key.equals("latest_version_fw")) { ps = &g_c2ea8; goto sets; }
-  if (key.equals("current_controller_version")) { out = "2.7.1"; return; }
+  if (key.equals("current_controller_version")) { out = FX_VERSION; return; }
   if (key.equals("CPU")) { pc = "32"; goto setc; }
   if (key.equals("chip")) { pc = ""; goto setc; }
   if (key.equals("test")) {
@@ -164,7 +165,7 @@ void h_content(AsyncWebServerRequest *r) {
       out["hist"] = h;
     }
   }
-  if (g_c2ea8 != "" && g_c2ea8 != "2.7.1") out["update_version"] = g_c2ea8;
+  if (g_c2ea8 != "" && fx_version_newer(g_c2ea8, FX_VERSION)) out["update_version"] = g_c2ea8;   // змінено: лише новіша
   AsyncResponseStream *resp = r->beginResponseStream(String("application/json"), 0x5b4);
   serializeJson(out, *resp);
   r->send(resp);

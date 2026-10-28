@@ -1,4 +1,5 @@
 // Фрази табло: мовний пакет /lang/<id>.led (формат LED1) і англійські фрази за замовчуванням; назви днів і місяців.
+// EN: Display phrases: language pack /lang/<id>.led (LED1 format) and built-in English phrases (from 2.7.1).
 // Перенесено з 2.7.1.
 #include "fw.h"
 

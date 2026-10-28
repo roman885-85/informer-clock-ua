@@ -1,4 +1,5 @@
 // Новини (GNews, NewsData), анекдоти/афоризми/статуси (rzhunemogu.ru), YouTube (лічильники каналу).
+// EN: News (GNews, NewsData), jokes/quotes, YouTube channel counters (from 2.7.1).
 // Перенесено з 2.7.1 (адреси в коментарях).
 #include "fw.h"
 

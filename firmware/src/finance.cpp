@@ -1,4 +1,5 @@
 // Курс валюти (Frankfurter) і біткоїна (CoinGecko). Перенесено з 2.7.1 (адреси в коментарях).
+// EN: Currency (Frankfurter) and Bitcoin (CoinGecko) rates (from 2.7.1).
 #include "fw.h"
 
 // @401016a4: курс g_c312c → g_c3120 (раз на 30 хв; помилка — 3 год)

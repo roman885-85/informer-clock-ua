@@ -1,4 +1,5 @@
 // Ядро: setup/loop, журнал подій, конфігурація (файл ↔ рядок JSON), кнопка. Перенесено з 2.7.1 один в один.
+// EN: Core: setup()/loop(), event log, config file <-> JSON string, button (from 2.7.1; loop restructured, see fix.h).
 #include "fw.h"
 
 // ---------- setup @40120794 ----------
@@ -9,17 +10,24 @@ void setup() {
 #else
 #define DIAG(x)
 #endif
+  loop_guard_start();                            // нове: сторож головного циклу (guard.cpp)
   ws.onEvent(ws_on_event);                       // обробник подій WebSocket @400d3288
   server.addHandler(&ws);
   Wire.begin(21, 22, 0);
   g_c3468 = g_c346c.begin(&Wire);                // RTC DS3231 знайдено
   SPIFFS.begin(true, "/spiffs", 10);
   evlog_boot_reason();
+  fx_crash_text(g_fx_crash_last);                // нове: причина аварії, записана обробником ядра (crash.cpp)
+  if (g_fx_crash_last.length()) evlog_write(String("[BOOT] crash: ") + g_fx_crash_last);
+  rtc_crash.magic = 0;
+  if (rtc_guard == LOOP_GUARD_MAGIC)             // нове: перезапуск зробив сторож циклу
+    evlog_write(String("[BOOT] loop guard: loop() stuck > ") + String(LOOP_GUARD_MS / 1000) + String(" s — restarted"));
+  rtc_guard = 0;
   uint32_t st = 0xffffffff;
   if (rtc_magic == 0xc10c0fe5) st = rtc_stage;
   if (st - 1 < 0xfffffffe) {
     String m = String("[BOOT] loop was stalled in: ");
-    m += (st < 6) ? STAGE_NAMES[st] : "n/a";
+    m += (st < 7) ? STAGE_NAMES[st] : "n/a";
     evlog_write(m);
   }
   rtc_magic = 0xc10c0fe5; rtc_stage = 0;
@@ -33,6 +41,11 @@ void setup() {
     if (g_c34ba == 8) { z = 2; if (g_c34b8 == 8) z = 4; }
     P.begin(z);
     P.begin(g_c34ba != 8 ? 1 : 4);
+    // нове: «Запуск» на табло, поки ініціалізуються плеєр і стрічка (status.cpp); мова й шрифт — з конфігурації
+    g_c2eef = doc["lang"].as<String>().toInt();
+    g_c349b = doc["fs"].as<String>().toInt();
+    if (g_c34ba == 8) display_zones_init();
+    fx_status_begin(FXS_BOOT, true);
     pinMode(2, OUTPUT);
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
@@ -69,7 +82,9 @@ void setup() {
     DIAG("D3");
     led_off();                                        // @400e4224
     DIAG("D4");
+    fx_status_end();
     config_apply_all();
+    fx_time_boot();                                   // нове: час після перезапуску (timefix.cpp)
     DIAG("D5");
     display_zones_init();                             // @400d8824
     DIAG("D6");
@@ -86,14 +101,19 @@ void setup() {
 // ---------- loop @40121d5c ----------
 void loop() {
   ws.cleanupClients(2);
-  dnsServer.processNextRequest();
+  // Виправлено: у автора — щоциклу, навіть коли DNS captive-порталу не запущено (звичайний режим клієнта): тоді
+  // WiFiUDP::parsePacket() на неіснуючому сокеті щоразу виділяє й звільняє 1460 Б і пише в Serial «parsePacket():
+  // could not receive data: 9» — ~180 рядків/с, цикл упирається в швидкість порту (115200 бод), анімація табло
+  // оновлюється ривками, пам'ять дрібниться.
+  if (g_fx_dns_on) dnsServer.processNextRequest();
   if (g_c3090 == 1) mqtt_loop();
   ha_discovery_step();
   f_400e4200();
   uint8_t gol = g_c2f1b;
   if (g_c3000) {
     g_c3000 = 0;
-    if (g_c2fc9 == 1) myDFPlayer.playFolder(gol, random(1, 0x18));
+    // виправлено: в автора — випадковий трек години (1–23); тепер — повне оголошення поточного часу (sound.cpp)
+    if (g_c2fc9 == 1) { (void)gol; g_fx_voice_test = true; g_c2f21 = 99; }
     else if (g_c2fc9 == 2) g_c2f21 = 99;
   }
   if (g_c2ffd) { g_c2ffd = 0; manual_time_set(); }
@@ -132,16 +152,28 @@ void loop() {
     config_apply_all();
     if (g_c3090 == 1 && g_c30c5) { g_c244c = 0; mqtt_ha_publish_state(); }
   }
-  if (P.getZoneStatus(0)) {
+  // Виправлено: в автора весь блок нижче чекав кінця анімації зони 0 (P.getZoneStatus(0)). Поки біжить
+  // новина (2–4,5 хв), стояли яскравість, нічний режим, ранкове ввімкнення табло, стан для веб-інтерфейсу,
+  // а за анімації, що не закінчується, — і відновлення мережі (годинник «не видно в мережі» до перезапуску).
+  // Швидкі задачі (без мережі й без зміни зон табло) — щоциклу:
+  rtc_magic = 0xc10c0fe5; rtc_stage = 6;
+  display_brightness_tick(1000);
+  fx_bright_tick();
+  fx_night_tick();
+  fx_wdbg_tick();
+  if (millis() - g_fx_dst_t > 60000) { g_fx_dst_t = millis(); fx_time_offset_apply(); }   // переходи літнього часу
+  night_mode_tick(10000);
+  ws_state_tick_5s(5000);
+  night_lowmem_reboot_tick(60000);
+  // Мережа, MQTT, датчики, історія (блокують на секунди — смикали б прокрутку) — як в автора, після анімації,
+  // але не рідше ніж раз на NET_DEFER_MAX_MS.
+  if (g_fx_quiet || P.getZoneStatus(0) || millis() - g_fx_gate > NET_DEFER_MAX_MS) {
+    g_fx_gate = millis();
     rtc_magic = 0xc10c0fe5; rtc_stage = 1;
     net_check_periodic(90000);
     wifi_reconnect_cycle(5000);
     dbg_ram_print(7000);
     dbg_time_print(120000);
-    display_brightness_tick(1000);
-    ws_state_tick_5s(5000);
-    night_mode_tick(10000);
-    night_lowmem_reboot_tick(60000);
     content_cleanup_30s(30000);
     if (millis() - g_c22dc > 3999) { g_c22dc = millis(); hist_init(); }
     if (millis() - g_c22e0 > 29999) { g_c22e0 = millis(); hist_sample(); }
@@ -212,7 +244,8 @@ void loop() {
   if (g_c2fc9 == 1) voice_hourly();
   else if (g_c2fc9 == 2) buzzer_hourly();
   rtc_magic = 0xc10c0fe5; rtc_stage = 5;
-  if (g_c34ba == 4) {
+  if (g_fx_quiet) sensors_read_all();                 // нове: табло погашене — вміст стоїть, датчики читаємо (night.cpp)
+  else if (g_c34ba == 4) {
     if (g_c3470 == 1) content_cycle_4m();
     else if (g_c3470 == 0) content_cycle_default();
     else if (g_c3470 == 2) content_cycle_4m_mixed(g_c3428 * 1000);
@@ -222,6 +255,7 @@ void loop() {
     else if (g_c3471 == 2) content_cycle_8m();
   } else content_cycle_default();
   rtc_magic = 0xc10c0fe5; rtc_stage = 0;
+  loop_guard_feed();
 }
 
 // ---------- журнал подій ----------

@@ -1,4 +1,5 @@
 // Згенеровано автоматично під час реконструкції — прототипи функцій з src/*.cpp
+// EN: Function prototypes of src/*.cpp.
 #pragma once
 
 void clock_font_mx();
@@ -273,7 +274,6 @@ void sensor_dht();
 void sensor_other();
 void sensor_air();
 void sensors_read_all();
-void fw_url_check(const String &url);
 void ota_progress(size_t done, size_t total);
 void ota_phase(uint8_t phase);
 void fw_version_check();

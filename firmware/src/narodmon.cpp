@@ -1,4 +1,5 @@
 // narodmon.ru: показання сусідніх датчиків (API) і відправка своїх (TCP 8283). Перенесено з 2.7.1 (адреси в коментарях).
+// EN: narodmon.ru: nearby sensors (API) and sending own readings (TCP 8283), from 2.7.1.
 #include "fw.h"
 
 static void nm_mac_id() {

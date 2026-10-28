@@ -1,4 +1,5 @@
 // Зони 2 і 3 двоповерхового циферблата (8 модулів у два ряди, режим g_c34a9 = 3): напис/дата й показання датчиків.
+// EN: Zones 2 and 3 of the two-floor clock face (8 modules in two rows): caption/date and sensor readings (from 2.7.1).
 // Перенесено з 2.7.1 (адреси оригіналу в коментарях).
 #include "fw.h"
 

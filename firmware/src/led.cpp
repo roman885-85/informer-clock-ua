@@ -1,4 +1,5 @@
 // Світлодіодна стрічка WS2812B (GPIO27, до 30 шт.): 28 ефектів і 18 варіантів мерехтіння, режим CO2, будильник.
+// EN: WS2812B LED strip (GPIO27, up to 30 px): 28 effects, flicker variants, brightness modes (from 2.7.1).
 // Ефекти автора зібрані з прикладів FastLED (DemoReel100, Fire2012, ColorTwinkles, TwinkleFOX, Pride2015, ColorWaves),
 // tweaking4all (м'ячики, вогонь) та Andrew Tuline (three_sin, two_sin, ripples, plasma, matrix, beatwave).
 // Перенесено з 2.7.1 (адреси оригіналу в коментарях).
@@ -137,8 +138,8 @@ void led_show() {
     b = &g_c2ee3;
   }
   if (g_c2ee2 != *b) {
-    g_c2ee2 = *b;
-    FastLED.setBrightness(*b);
+    g_c2ee2 = (g_c2f25 == 1) ? fx_led_ramp(g_c2ee2, *b) : *b;   // виправлено: за фоторезистором — плавно (bright.cpp)
+    FastLED.setBrightness(g_c2ee2);
   }
 show:
   FastLED.show();

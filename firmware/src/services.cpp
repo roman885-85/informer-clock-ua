@@ -1,23 +1,21 @@
 // Перевірка нової прошивки, оновлення по мережі (OTA), визначення координат за IP. Перенесено з 2.7.1 (адреси в коментарях).
+// EN: Firmware update check and OTA from this project's repository (version.h), IP geolocation.
 #include "fw.h"
 
-static const char FW_URL_B64[] = "aHR0cDovL2dvbGRhcnQuZWUvYXBpL2VzcDMyLw==";   // http://goldart.ee/api/esp32/
+// Оновлення — з репозиторію цього проєкту (version.h), не з сервера автора (http://goldart.ee/api/esp32/). Перевірку
+// «адреса оновлень має бути незмінною» (@400e3990 — інакше 25 повідомлень у Serial і перезапуск) прибрано разом з адресою.
 
-// @400e3990: адреса оновлень має бути незмінною, інакше — 25 повідомлень у Serial і перезапуск.
-// (Текст повідомлення автора тут замінено нейтральним; у копії адреса та сама, тож гілка не виконується.)
-void fw_url_check(const String &url) {
-  String u(url);
-  if (u != String("http://goldart.ee/api/esp32/")) {
-    Serial.begin(115200);
-    delay(300);
-    for (int i = 25; i != 0; i--) Serial.println("firmware update URL was changed");
-    delay(5000);
-    df_silence();
-    ESP.restart();
-  }
+bool fx_version_newer(const String &a, const String &b) {
+  long x[3] = {0, 0, 0}, y[3] = {0, 0, 0};
+  sscanf(a.c_str(), "%ld.%ld.%ld", &x[0], &x[1], &x[2]);
+  sscanf(b.c_str(), "%ld.%ld.%ld", &y[0], &y[1], &y[2]);
+  for (int i = 0; i < 3; i++) if (x[i] != y[i]) return x[i] > y[i];
+  return false;
 }
+
 // @400d30c8: відсоток завантаження OTA у веб-інтерфейс (не частіше ніж раз на 250 мс, крок ≥ 2 %)
 void ota_progress(size_t done, size_t total) {
+  loop_guard_feed();                             // нове: завантаження прошивки може йти довше межі сторожа
   int pct = 0;
   if (0 < (int)total) pct = (int)(((long long)done * 100) / (long long)(int)total);
   uint32_t now = millis();
@@ -32,31 +30,30 @@ void ota_phase(uint8_t phase) {
   g_c2e98 = phase;
   ws.printfAll("{\"ota_pct\":\"0\",\"ota_phase\":\"%d\"}", phase);
 }
-// @4011629c: перевірка версії на сервері автора (раз на 6 год; помилка — 3 год)
+// @4011629c: перевірка нової версії (раз на 6 год; помилка — 3 год). Змінено: опис версії — FX_UPDATE_URL (HTTPS,
+// GitHub) у форматі {"ver":"1.0.1","bin":"https://…/informer-clock-ua-esp32.bin",…}; g_c2ea8 — остання версія,
+// g_c2e9c — адреса файла прошивки (у автора там було ім'я файла на його сервері).
 void fw_version_check() {
   if (millis() - g_c19c0 < g_c2eb8 || g_c3319 != 0) return;
   dbg_ws_print(String("SERVICES: checking for new firmware"));
+  FxStatusScope fxs(FXS_UPDATE);                 // нове: стан на табло під час запуску
   g_c19c0 = millis();
-  WiFiClient client;
+  WiFiClientSecure client;
   HTTPClient http;
-  client.setTimeout(5000);
-  http.setTimeout(5000);
+  client.setCACert(NULL);
+  http.setTimeout(8000);
   http.useHTTP10(true);
-  char url[128];
-  base64_decode(url, (char *)String(FW_URL_B64).c_str(), String(FW_URL_B64).length());
-  fw_url_check(String(url));
-  if (!http.begin(client, String(url))) {
+  if (!http.begin(client, String(FX_UPDATE_URL))) {
     g_c2eb8 = 21600000;
     return;
   }
-  http.addHeader(String("Content-Type"), String("text/plain"), false, true);
   if (http.GET() == 200) {
     JsonDocument doc;
     if (!deserializeJson(doc, http.getStream())) {
       http.end();
       g_c2ea8 = doc["ver"].as<String>();
-      g_c2e9c = doc["ru"].as<String>();
-      dbg_ws_print(String("Firmware ver=") + g_c2ea8 + "  file=" + g_c2e9c);
+      g_c2e9c = doc["bin"].as<String>();
+      dbg_ws_print(String("Firmware: this ") + FX_VERSION + ", latest " + g_c2ea8 + "  file=" + g_c2e9c);
       g_c2eb8 = 21600000;
       return;
     }
@@ -115,11 +112,19 @@ static void ota_result(t_httpUpdate_return r) {
   }
   display_zones_init();
 }
-// @40108d70: оновлення прошивки (g_c2eec: 1 — з веб-інтерфейсу, 2 — автоматично) з goldart.ee/api/esp32/ESP32_<файл>
+// @40108d70: оновлення прошивки (g_c2eec: 1 — з веб-інтерфейсу, 2 — автоматично). Змінено: файл — за адресою з опису
+// версії (g_c2e9c, HTTPS, GitHub), а не goldart.ee/api/esp32/ESP32_<файл>; без адреси (перевірки ще не було) — нічого.
 void ota_update() {
-  WiFiClient client;
-  char url[128];
-  base64_decode(url, (char *)String(FW_URL_B64).c_str(), String(FW_URL_B64).length());
+  if (!g_c2e9c.startsWith("https://")) {
+    config_set(String("fw_up"), String("0"));
+    g_c2d28 = 1;
+    config_save_atomic();
+    g_c2eec = 0;
+    dbg_ws_print(String("OTA: no update file yet — check for new firmware first"));
+    return;
+  }
+  WiFiClientSecure client;
+  client.setCACert(NULL);
   Update.onProgress(ota_progress);
   if (g_c2eec == 1) {
     ota_screen();
@@ -128,7 +133,7 @@ void ota_update() {
     config_save_atomic();
     digitalWrite(0, 0);
     ota_phase(2);
-    t_httpUpdate_return r = httpUpdate.update(client, String(String(url)) + String("ESP32_") + String(g_c2e9c), String(""));
+    t_httpUpdate_return r = httpUpdate.update(client, g_c2e9c, String(FX_VERSION));
     ota_result(r);
   } else if (g_c2eec == 2) {
     ota_screen();
@@ -137,7 +142,7 @@ void ota_update() {
     g_c2d28 = 1;
     config_save_atomic();
     ota_phase(2);
-    t_httpUpdate_return r = httpUpdate.update(client, String(String(url)) + String("ESP32_") + String(g_c2e9c), String(""));
+    t_httpUpdate_return r = httpUpdate.update(client, g_c2e9c, String(FX_VERSION));
     ota_result(r);
   }
 }

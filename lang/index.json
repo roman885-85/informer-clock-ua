@@ -1,0 +1,129 @@
+[
+  {
+    "id": 0,
+    "code": "ru",
+    "name": "Русский",
+    "flag": "🇷🇺",
+    "led": true,
+    "rev": "d654bc73",
+    "keys": 355,
+    "bytes": 17938,
+    "ledrev": "2193bb8"
+  },
+  {
+    "id": 1,
+    "code": "en",
+    "name": "English",
+    "flag": "🇬🇧",
+    "led": true,
+    "rev": "64a0238c",
+    "keys": 387,
+    "bytes": 13223
+  },
+  {
+    "id": 2,
+    "code": "be",
+    "name": "Беларуская",
+    "flag": "🇧🇾",
+    "led": true,
+    "rev": "77e1eadb",
+    "keys": 354,
+    "bytes": 17457,
+    "ledrev": "67d8d5af"
+  },
+  {
+    "id": 3,
+    "code": "uk",
+    "name": "Українська",
+    "flag": "🇺🇦",
+    "led": true,
+    "rev": "b7656c40",
+    "keys": 355,
+    "bytes": 18142,
+    "ledrev": "1c54556f"
+  },
+  {
+    "id": 4,
+    "code": "ro",
+    "name": "Română",
+    "flag": "🇷🇴",
+    "led": true,
+    "rev": "2fdb8660",
+    "keys": 354,
+    "bytes": 12569,
+    "ledrev": "4caa0c3f"
+  },
+  {
+    "id": 5,
+    "code": "bg",
+    "name": "Български",
+    "flag": "🇧🇬",
+    "led": true,
+    "rev": "36ab642d",
+    "keys": 354,
+    "bytes": 17846,
+    "ledrev": "1f4d0c51"
+  },
+  {
+    "id": 6,
+    "code": "pl",
+    "name": "Polski",
+    "flag": "🇵🇱",
+    "led": true,
+    "rev": "4069105a",
+    "keys": 354,
+    "bytes": 12592,
+    "ledrev": "7d70579a"
+  },
+  {
+    "id": 7,
+    "code": "et",
+    "name": "Eesti",
+    "flag": "🇪🇪",
+    "led": true,
+    "rev": "6c6fba7f",
+    "keys": 354,
+    "bytes": 11800,
+    "ledrev": "a6c48abf"
+  },
+  {
+    "id": 8,
+    "code": "lv",
+    "name": "Latviešu",
+    "flag": "🇱🇻",
+    "led": false,
+    "rev": "5adaf89",
+    "keys": 354,
+    "bytes": 12815
+  },
+  {
+    "id": 9,
+    "code": "lt",
+    "name": "Lietuvių",
+    "flag": "🇱🇹",
+    "led": false,
+    "rev": "f6f8cf3c",
+    "keys": 354,
+    "bytes": 12751
+  },
+  {
+    "id": 10,
+    "code": "sr",
+    "name": "Српски",
+    "flag": "🇷🇸",
+    "led": false,
+    "rev": "4ed945a5",
+    "keys": 354,
+    "bytes": 17164
+  },
+  {
+    "id": 11,
+    "code": "es",
+    "name": "Español",
+    "flag": "🇪🇸",
+    "led": false,
+    "rev": "189bbe8e",
+    "keys": 354,
+    "bytes": 12664
+  }
+]

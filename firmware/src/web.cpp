@@ -1,4 +1,5 @@
 // Веб-сервер: маршрути й обробники (перенесено з 2.7.1). Відповіді й коди — як в оригіналі.
+// EN: Web server: routes and handlers (from 2.7.1).
 #include "fw.h"
 #include "web_assets.h"
 
@@ -417,12 +418,14 @@ void captive_request(AsyncWebServerRequest *r) {
     if (!r->authenticate(g_c33a4.c_str(), g_c3398.c_str(), nullptr, false)) { r->requestAuthentication(nullptr, true); return; }
   }
   g_c34c0 = millis();
-  String etag = String("\"h") + "2.7.1" + "\"";
+  // Виправлено: мітка була «"h2.7.1"» — за версією, а не за вмістом: після оновлення сторінки з тією ж версією браузер
+  // отримував 304 і показував старий інтерфейс із кешу. Тепер — за вмістом (web/webui_patch.py).
+  String etag = String(INDEX_HTML_ETAG);
   if (r->hasHeader("If-None-Match") && r->getHeader("If-None-Match")->value().equals(etag)) {
     r->send(0x130, String(""), String(""));
     return;
   }
-  AsyncWebServerResponse *resp = r->beginResponse_P(200, String("text/html"), INDEX_HTML_GZ, 0x332fc);
+  AsyncWebServerResponse *resp = r->beginResponse_P(200, String("text/html"), INDEX_HTML_GZ, sizeof(INDEX_HTML_GZ));
   resp->addHeader("Content-Encoding", "gzip");
   resp->addHeader("Cache-Control", "no-cache");
   resp->addHeader("ETag", etag);

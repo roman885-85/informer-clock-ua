@@ -1,4 +1,5 @@
 // Згенеровано автоматично під час реконструкції прошивки — не редагувати вручну
+// EN: Global variables of the original firmware (names keep the original RAM addresses, e.g. g_c34ba @0x3ffc34ba).
 #include "fw.h"
 
 int32_t g_bebe8 = -1;  // 0x3ffbebe8

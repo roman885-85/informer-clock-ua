@@ -1,7 +1,15 @@
 // Годинник «зі зсувом цифр» (An=1): цифри малюються стовпцями через MD_MAX72XX::setColumn і «виїжджають» по пікселю.
+// EN: "Sliding digits" clock face (An=1): digits drawn column by column via MD_MAX72XX::setColumn (from 2.7.1; clipped to its zone).
 // Перенесено з 2.7.1. Цифра — 16 байт: [0] поточний символ, [1] новий, [2] крок 0..8, [4..7] час кроку, [8] ширина, [9..] стовпці.
 #include "fw.h"
 #define DT(a, i) (*(uint32_t *)&(a)[(i) * 16 + 4])
+
+// Виправлено (скарга користувачів: «лишні точки о 9:59→10:00 при годині без нуля попереду»): при переході години з
+// однієї цифри на дві цифра десятків на мить малювалась стовпцем за межею зони годинника (у першому стовпці сусіднього
+// модуля), а очищення під час зсуву циферблата стирає лише свою зону — точка лишалась (на 2×8 з c_position=1 — у зоні
+// дати/датчиків). Тепер усі стовпці годинника — лише в межах його зони (симуляція tools/sim/slidesim).
+static int16_t s_clip_lo, s_clip_hi = 0x7fff;
+static inline void slide_col(int16_t c, uint8_t v) { if (c >= s_clip_lo && c <= s_clip_hi) g_c34bc->setColumn(c, v); }
 
 // @400d7fe0: шрифт циферблата для MD_MAX72XX за font_l
 void clock_font_mx() {
@@ -38,7 +46,7 @@ void slide_draw(int8_t n, uint8_t *dg, int8_t col) {
       c1 = c1 - 1;
       c4 = (int8_t)((col + c3) - c1);
       if (c1 < 0) break;
-      g_c34bc->setColumn(c4, d[c1 + 9]);
+      slide_col(c4, d[c1 + 9]);
     }
     col = c4 + 1;
   }
@@ -333,33 +341,33 @@ void slide_colon_draw(uint32_t c1, uint32_t c2, uint8_t ph) {
     case 0: case 1:
       if (ph == 0) {
         if (g_c349c < 6 && ((1 << (g_c349c & 0x1f)) & 0x2d) != 0) {
-          if (c1 != 200) g_c34bc->setColumn(c1, 0x24);
+          if (c1 != 200) slide_col(c1, 0x24);
           val = 0x24; col = c2;
           goto L21;
         }
         if (c1 != 200) {
 L943:
-          g_c34bc->setColumn(c1, 0x36);
-          g_c34bc->setColumn(c1 + 1, 0x36);
+          slide_col(c1, 0x36);
+          slide_col(c1 + 1, 0x36);
         }
-        g_c34bc->setColumn(c2, 0x36);
+        slide_col(c2, 0x36);
         val = 0x36;
       } else {
         if (ph != 1) goto L29;
-        if (c1 != 200) { g_c34bc->setColumn(c1, 0); g_c34bc->setColumn(c1 + 1, 0); }
-        g_c34bc->setColumn(c2, 0);
+        if (c1 != 200) { slide_col(c1, 0); slide_col(c1 + 1, 0); }
+        slide_col(c2, 0);
         val = 0;
       }
       break;
     case 2:
       if (5 < g_c349c || ((1 << (g_c349c & 0x1f)) & 0x2d) == 0) {
         if (ph == 1) {
-          g_c34bc->setColumn(c1, 0x14); g_c34bc->setColumn(c1 + 1, 0x22); g_c34bc->setColumn(c2, 0x14);
+          slide_col(c1, 0x14); slide_col(c1 + 1, 0x22); slide_col(c2, 0x14);
           val = 0x22;
         } else {
           if (ph == 0 || ph == 2) goto L943;
           if (ph != 3) goto L29;
-          g_c34bc->setColumn(c1, 0x22); g_c34bc->setColumn(c1 + 1, 0x14); g_c34bc->setColumn(c2, 0x22);
+          slide_col(c1, 0x22); slide_col(c1 + 1, 0x14); slide_col(c2, 0x22);
           val = 0x14;
         }
         break;
@@ -376,33 +384,33 @@ LB8C:
       col = c2 + 1;
       switch (ph) {
         default:
-          if (c1 != 200) { g_c34bc->setColumn(c1, 0x24); g_c34bc->setColumn(c1 + 1, 0x36); }
+          if (c1 != 200) { slide_col(c1, 0x24); slide_col(c1 + 1, 0x36); }
           val = 0x24; break;
         case 1:
-          if (c1 != 200) { g_c34bc->setColumn(c1, 0x36); g_c34bc->setColumn(c1 + 1, 0x24); }
-          g_c34bc->setColumn(c2, 0x36); val = 0x24; goto L21;
+          if (c1 != 200) { slide_col(c1, 0x36); slide_col(c1 + 1, 0x24); }
+          slide_col(c2, 0x36); val = 0x24; goto L21;
         case 2:
-          if (c1 != 200) { g_c34bc->setColumn(c1, 0x36); g_c34bc->setColumn(c1 + 1, 0x12); }
-          g_c34bc->setColumn(c2, 0x36); val = 0x12; goto L21;
+          if (c1 != 200) { slide_col(c1, 0x36); slide_col(c1 + 1, 0x12); }
+          slide_col(c2, 0x36); val = 0x12; goto L21;
         case 3:
-          if (c1 != 200) { g_c34bc->setColumn(c1, 0x12); g_c34bc->setColumn(c1 + 1, 0x36); }
+          if (c1 != 200) { slide_col(c1, 0x12); slide_col(c1 + 1, 0x36); }
           val = 0x12; break;
         case 5:
-          if (c1 != 200) { g_c34bc->setColumn(c1, 0x36); g_c34bc->setColumn(c1 + 1, 0x36); }
+          if (c1 != 200) { slide_col(c1, 0x36); slide_col(c1 + 1, 0x36); }
           val = 0x36; break;
       }
-      g_c34bc->setColumn(c2, val);
+      slide_col(c2, val);
       val = 0x36;
       goto L21;
     case 4:
       if (g_c349c < 6 && ((1 << (g_c349c & 0x1f)) & 0x2d) != 0) { config_set("pAn", "0"); goto LB8C; }
       if (ph == 0) {
-        if (c1 != 200) { g_c34bc->setColumn(c1, 6); g_c34bc->setColumn(c1 + 1, 0x30); }
-        g_c34bc->setColumn(c2, 6); val = 0x30;
+        if (c1 != 200) { slide_col(c1, 6); slide_col(c1 + 1, 0x30); }
+        slide_col(c2, 6); val = 0x30;
       } else {
         if (ph != 1) goto L29;
-        if (c1 != 200) { g_c34bc->setColumn(c1, 0x30); g_c34bc->setColumn(c1 + 1, 6); }
-        g_c34bc->setColumn(c2, 0x30); val = 6;
+        if (c1 != 200) { slide_col(c1, 0x30); slide_col(c1 + 1, 6); }
+        slide_col(c2, 0x30); val = 6;
       }
       break;
     default:
@@ -410,7 +418,7 @@ LB8C:
   }
   col = c2 + 1;
 L21:
-  g_c34bc->setColumn(col, val);
+  slide_col(col, val);
 L29:
   g_c2c0c = 0;
 }
@@ -440,6 +448,12 @@ void slide_colon(uint8_t sec, uint8_t c1, uint8_t c2) {
 
 // @400fcd48: годинник зі зсувом цифр — розміщення за типом табло, font_l і c_position
 void clock_slide() {
+  {
+    uint8_t zs = 0, ze = 0x0f;
+    P.getZone(g_c34ba == 8 ? 1 : 0, zs, ze);
+    s_clip_lo = zs * 8;
+    s_clip_hi = ze * 8 + 7;
+  }
   int8_t sec = second();
   uint32_t mn = minute();
   uint32_t hr = hour();

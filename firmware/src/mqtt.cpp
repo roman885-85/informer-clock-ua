@@ -1,4 +1,5 @@
 // MQTT (AsyncMqttClient): підключення, команди, стан, датчики, автовиявлення Home Assistant.
+// EN: MQTT (AsyncMqttClient): connection, commands, state, sensors, Home Assistant discovery (from 2.7.1).
 // Перенесено з 2.7.1 (адреси оригіналу в коментарях).
 #include "fw.h"
 
@@ -615,9 +616,10 @@ void ha_device(JsonObject dev, const char *subId, const char *subName) {
     ha_client_id(c);
     dev["via_device"] = c;
   }
-  dev["mf"] = "Sem Prygorodov";
-  dev["mdl"] = "Clock Informer";
-  dev["sw"] = String("GoldArtOS ") + "2.7.1";
+  // змінено: окремий проєкт (version.h); основа — Clock Informer 2.7.1 автора Semen_p
+  dev["mf"] = FX_NAME;
+  dev["mdl"] = "Informer Clock (based on Clock Informer by Semen_p)";
+  dev["sw"] = String(FX_NAME " ") + FX_VERSION;
   dev["hw"] = String("ESP32");
   dev["cu"] = String("http://") + WiFi.localIP().toString() + "/";
   if (subId == nullptr || *subId == 0) {
@@ -629,9 +631,9 @@ void ha_device(JsonObject dev, const char *subId, const char *subName) {
 static void ha_dev_origin(JsonDocument &doc, const char *subId = nullptr, const char *subName = nullptr) {
   ha_device(doc["dev"].to<JsonObject>(), subId, subName);
   JsonObject o = doc["o"].to<JsonObject>();
-  o["name"] = "GoldArtOS";
-  o["sw"] = "2.7.1";
-  o["url"] = "https://goldart.ee";
+  o["name"] = FX_NAME;
+  o["sw"] = FX_VERSION;
+  o["url"] = FX_REPO_URL;
 }
 // опублікувати config сутності
 static void ha_publish_config(JsonDocument &doc, const String &topic) {

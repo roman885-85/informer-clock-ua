@@ -1,4 +1,5 @@
 // Перенесено з 2.7.1 (чернетка xlat, доведена вручну)
+// EN: Sound: DFPlayer hourly voice, buzzer, alarm clock (from 2.7.1; fixes marked "Виправлено").
 #include "fw.h"
 
 // @400e3500 (FUN_400e3500)
@@ -50,6 +51,21 @@ void voice_hourly()
   int32_t iVar6;
   uint32_t uVar7;
   uint32_t uVar8;
+  // Виправлено (скарги користувачів «голос грає звук, але не каже час»):
+  // 1) перше оголошення після запуску автомат автора «з'їдав»: позначки часу нульові, тож одразу звучало «Зараз»
+  //    (трек 30) без мелодії, і година позначалась оголошеною — години не було; тепер автомат готується як після
+  //    завершеного оголошення;
+  // 2) оголошення починалось будь-коли, коли година «змінилась» — після запуску, синхронізації NTP (14:23 —
+  //    «Зараз»), переходу літнього часу; тепер — лише на межі години (хвилина 0) і при відомому часі;
+  // 3) кнопка «Тест голоса» грала випадковий трек години (1–23); тепер — повне оголошення поточного часу.
+  if (!g_fx_voice_init) {
+    g_fx_voice_init = true;
+    g_c19c8 = 1; g_c19c7 = 1; g_c19d9 = 0; g_c19c6 = 0;
+    g_c19d4 = millis(); g_c19d0 = millis();
+    g_c2f21 = hour();
+  }
+  if (g_c2f21 != (uint8_t)hour() && g_c19c5 == 0 && !g_fx_voice_test && (minute() != 0 || !fx_time_known()))
+    g_c2f21 = hour();
   if (g_c2f1a != g_c2f1c) {
     if (g_c19d8 == '\0') {
       g_c19d8 = '\x01';
@@ -65,7 +81,7 @@ void voice_hourly()
   uVar8 = (uint)g_c2f21;
   uVar4 = hour();
   if (uVar8 != uVar4) {
-    if (g_c2f1d == '\x01') {
+    if (g_c2f1d == '\x01' && !g_fx_voice_test) {    // тест — і в тихі години
       iVar5 = time_in_range(g_c2e5c,g_c2e58);
       g_c2e70 = (char)iVar5;
       if (iVar5 == 0) {
@@ -122,6 +138,7 @@ void voice_hourly()
             g_c2f21 = hour();
             g_c19d9 = '\0';
           }
+          g_fx_voice_test = false;
         }
       }
     }
@@ -214,6 +231,8 @@ void buzzer_hourly()
   if (uVar3 == uVar1) {
     return;
   }
+  // виправлено: як і голос — лише на межі години (не після синхронізації часу о 14:23); 99 — кнопка тесту
+  if (g_c2f21 != 99 && (minute() != 0 || !fx_time_known())) goto LAB_400e3988;
   if (g_c2f1d == '\x01') {
     iVar2 = time_in_range(g_c2e5c,g_c2e58);
     g_c2e70 = (undefined1)iVar2;
@@ -293,6 +312,8 @@ void f_400e466c()
   iVar1 = g_c1a9c;
   iVar2 = millis();
   if (599999 < (uint)(iVar2 - iVar1)) {
+    // виправлено: будильник вимикається сам через 10 хв — в автора мелодія DFPlayer при цьому догравала трек
+    if ((byte)(g_c2fc7 - 4U) < 4) { myDFPlayer.stop(); delay(0x32); myDFPlayer.volume(g_c2f1c); }
     g_c1a9a = 1;
     g_c1a97 = weekday();
     g_c1a89 = 1;
@@ -316,6 +337,8 @@ void alarm_check()
   uint32_t uVar7;
   uint32_t uVar8;
   g_c1a9c = millis();
+  // Виправлено: у автора будильник уночі (табло погашене за розкладом чи з MQTT) дзвонив при темному табло
+  if (g_c1a28 != '\0' || g_c3080 != '\0') P.displayShutdown(0);
   if ((byte)(g_c2fc7 - 4U) < 4) {
     myDFPlayer.volume(0);
     delay(0x32);
@@ -362,8 +385,10 @@ LAB_400e4821:
   led_off();
   do {
     if (g_c1a89 != '\0') {
+      if (g_c1a28 != '\0' || g_c3080 != '\0') P.displayShutdown(1);   // виправлено: після будильника — як було
       return;
     }
+    loop_guard_feed();                           // нове: будильник дзвонить довше межі сторожа
     yield();
     f_400e466c();
     if ((byte)(g_c2fc7 - 4U) < 4) {
@@ -438,6 +463,10 @@ LAB_400e4949:
   g_c1a8d = 0;
   if (g_c1a8e != '\x01') {
     if ((byte)(g_c2fc7 - 4U) < 4) {
+      // Виправлено (скарга «кнопка не вимикає будильник DFPlayer»): в автора довге натискання лише запускало звук
+      // підтвердження (папка 16, треки 50–53) поверх мелодії; якщо цих файлів на картці немає — мелодія грала далі
+      myDFPlayer.stop();
+      delay(0x32);
       myDFPlayer.volume(g_c2f1c);
       delay(0x32);
       uVar1 = random(0x32, 0x36);

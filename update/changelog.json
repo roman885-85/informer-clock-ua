@@ -1,0 +1,18 @@
+[
+  {
+    "v": "1.0.0",
+    "date": "2026-10-28",
+    "items": [
+      { "t": "added", "text": "Окремий незалежний проєкт на основі Clock Informer 2.7.1 (автор Semen_p, CC BY-NC 4.0): оновлення прошивки, мовні пакети й файли — з репозиторію roman885-85/informer-clock-ua. / Independent project based on Clock Informer 2.7.1 by Semen_p (CC BY-NC 4.0): firmware updates, language packs and files come from this project's repository." },
+      { "t": "fixed", "text": "Годинник більше не «зависає» вночі й не зникає з мережі: перевірка інтернету з тайм-аутами, без розривів Wi-Fi, коли інтернету немає лише в провайдера, безпечний DNS, сторож головного циклу. / Night freezes and dropping off the network fixed: timed internet checks, no Wi-Fi resets when only the provider is down, safe DNS, main-loop watchdog." },
+      { "t": "added", "text": "Під час запуску табло показує, що відбувається: значок із рухом і напис (синхронізація часу, перевірка інтернету, завантаження даних). / The display shows what is happening during start-up: an animated icon and text (time sync, internet check, data loading)." },
+      { "t": "improved", "text": "Нічна тиша: поки табло погашене, новини, погода й курси не завантажуються. / Night quiet: no news, weather or rates downloads while the display is off." },
+      { "t": "improved", "text": "Плавна яскравість за датчиком світла, без очікування кінця прокрутки; уранці табло плавно розгоряється. / Smooth light-sensor brightness that no longer waits for scrolling; gentle fade-in in the morning." },
+      { "t": "added", "text": "Літній час: «Авто» за правилами ЄС; зміна пояса чи літнього часу діє одразу. / Summer time: \"Auto\" (EU rules); time zone and summer time changes apply immediately." },
+      { "t": "added", "text": "Налагодження по Wi-Fi (сторінка System): журнал на порту 23 і прошивка по Wi-Fi; причина аварії записується в журнал подій. / Wi-Fi debugging (System page): network log on port 23 and firmware upload over Wi-Fi; the crash cause is saved to the event log." },
+      { "t": "fixed", "text": "Голос щогодини завжди називає годину, «Тест голосу» — поточний час; кнопка вимикає мелодію будильника DFPlayer. / The hourly voice always says the hour, the voice test announces the current time, the button stops the DFPlayer alarm melody." },
+      { "t": "fixed", "text": "Час не «стрибає» після перезапуску (потрібна свіжа відповідь NTP); немає хибного «нема інтернету» після однієї невдалої перевірки. / No time jumps after restarts (a fresh NTP reply is required); no false \"no internet\" after a single failed check." },
+      { "t": "fixed", "text": "Рівніша прокрутка, без лишньої точки о 9:59→10:00, повідомлення вночі не лишає табло ввімкненим, паролі Wi-Fi приховано в консолі. / Smoother scrolling, no stray dot at 9:59→10:00, night messages no longer leave the display on, Wi-Fi passwords hidden in the console." }
+    ]
+  }
+]

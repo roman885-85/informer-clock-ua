@@ -1,0 +1,9 @@
+{
+  "ver": "1.0.0",
+  "date": "2026-10-28",
+  "bin": "https://raw.githubusercontent.com/roman885-85/informer-clock-ua/v1.0.0/docs/firmware/informer-clock-ua-esp32.bin",
+  "size": 1799568,
+  "md5": "7a7f34890daa25f3032fc3682b6fbf1b",
+  "sha256": "80d3f0e97e5d02fba9044d4da74bbaefdbe174931aa2c9b327b0adb0bbd14b36",
+  "notes": "https://github.com/roman885-85/informer-clock-ua/releases/tag/v1.0.0"
+}

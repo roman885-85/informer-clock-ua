@@ -1,4 +1,5 @@
-// Мовні пакети: пакети табло (.led) з сервера автора й через веб, пакети веб-інтерфейсу (/lang/*.json.gz).
+// Мовні пакети: пакети табло (.led) з репозиторію проєкту (FX_LANG_URL) й через веб, пакети веб-інтерфейсу (/lang/*.json.gz).
+// EN: Language packs: display packs (.led) downloaded from this project's repository, web UI packs uploaded by the browser.
 // Перенесено з 2.7.1 (адреси оригіналу в коментарях).
 #include "fw.h"
 
@@ -18,15 +19,17 @@ bool led_pack_valid(const String &path) {
   }
   return ok;
 }
-// @40120e50: завантажити пакет табло з goldart.ee у /lang/<n>.led (через .tmp)
+// @40120e50: завантажити пакет табло у /lang/<n>.led (через .tmp). Змінено: з репозиторію проєкту (FX_LANG_URL, HTTPS),
+// а не з http://goldart.ee/api/lang/
 int32_t led_lang_download(uint8_t lang) {
   if (lang == 1) return 0;
-  WiFiClient c;
+  FxStatusScope fxs(FXS_LANG);                   // нове: стан на табло під час запуску
+  WiFiClientSecure c;
   HTTPClient h;
-  c.setTimeout(5000);
-  h.setTimeout(5000);
+  c.setCACert(NULL);
+  h.setTimeout(8000);
   h.useHTTP10(true);
-  String url = String("http://goldart.ee/api/lang/") + String((int)lang) + ".led";
+  String url = String(FX_LANG_URL "/") + String((int)lang) + ".led";
   if (!h.begin(c, url)) { g_c19b4 = -1; return 0; }
   g_c19b4 = h.GET();
   if (g_c19b4 != 200) { h.end(); return 0; }

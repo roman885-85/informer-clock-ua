@@ -1,4 +1,5 @@
 // Фоторезистор (GPIO34): рівень яскравості за освітленням. Перенесено з 2.7.1 (чернетка xlat, доведена вручну)
+// EN: Photoresistor (GPIO34): brightness level table of the original (now fed with the filtered value).
 #include "fw.h"
 
 // @400de620 (photo_brightness_read)
@@ -10,7 +11,7 @@ void photo_brightness_read()
   int32_t iVar2;
   uint8_t bVar4;
   if ((g_c2ee9 != '\x01') && (g_c2f25 != '\x01')) goto LAB_400debfc;
-  uVar1 = analogRead(0x22);
+  uVar1 = fx_photo_adc();                          // виправлено: згладжене значення (bright.cpp), не один замір
   g_c3284 = (uint16_t)uVar1;
   iVar2 = (uint)g_c34b2 * 0x44;
   if (g_c2f25 == '\0') {
@@ -63,7 +64,7 @@ LAB_400de690:
     t_78 += t_3c;
     t_30 = String(g_bf041, 10);
     t_78 += t_30;
-    dbg_ws_print(t_78);
+    // рядок налагодження — fx_photo_print() раз на 7 с (тут функція тепер викликається двічі на секунду)
   }
   else {
     if ((uVar1 < 1000) || (iVar2 <= (int)uVar1)) {
@@ -159,7 +160,7 @@ LAB_400dea43:
     t_78 += t_3c;
     t_30 = String(g_bf041, 10);
     t_78 += t_30;
-    dbg_ws_print(t_78);
+    // рядок налагодження — fx_photo_print() раз на 7 с (тут функція тепер викликається двічі на секунду)
   }
 LAB_400debfc:
   return;

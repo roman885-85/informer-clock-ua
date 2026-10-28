@@ -1,4 +1,5 @@
 // Бібліотеки прошивки автора (ті самі, що в оригіналі 2.7.1)
+// EN: Libraries of the original firmware (same versions as in 2.7.1).
 #pragma once
 #include <Arduino.h>
 #include <WiFi.h>

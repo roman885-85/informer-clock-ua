@@ -1,4 +1,5 @@
 // Перенесено з 2.7.1 (чернетка xlat, доведена вручну)
+// EN: Display helpers: night/day schedule, brightness modes, messages, typography fixes (from 2.7.1).
 #include "fw.h"
 
 // @400e1480 (FUN_400e1480)
@@ -426,6 +427,7 @@ void display_schedule_wake_shutdown()
     t_30 = "Display: wake up";
     dbg_ws_print(t_30);
 LAB_400e1e4c:
+    fx_bright_actual(0);                         // нове: після пробудження — плавно від 0 до рівня за світлом
     uVar1 = 0;
     g_c1a28 = '\0';
     g_c34b4 = 0x18;
@@ -470,11 +472,8 @@ void display_brightness_tick(uint32_t param_1)
       g_c1754 = millis();
       if (g_c2ee9 == '\x01') {
         display_schedule_wake_shutdown();
-        if (g_c34b3 != g_bf041) {
-          P.setIntensity(g_bf041);
-          g_c34b3 = g_bf041;
-          g_c34b4 = '\x18';
-        }
+        // виправлено: у автора тут P.setIntensity(g_bf041) — стрибок на кілька рівнів; тепер плавно (bright.cpp)
+        g_c34b4 = '\x18';
       }
       else if (g_c2ee9 == '\0') {
         display_schedule_wake_shutdown();
@@ -675,6 +674,7 @@ LAB_400e3fd3:
       P.displayReset(0);
       iVar3 = millis();
       while (iVar6 = P.getZoneStatus(0), iVar6 == 0) {
+        loop_guard_feed();                       // нове: повідомлення з повторами може йти кілька хвилин
         P.displayAnimate();
         iVar6 = millis();
         if (25000 < (uint)(iVar6 - iVar3)) break;
@@ -696,6 +696,9 @@ LAB_400e3fd3:
     g_c3471 = 0;
     g_c34af = 0;
     g_c3001 = '\0';
+    // Виправлено: повідомлення вмикає погашене табло (displayShutdown(0) вище), а гасити знову автор забув —
+    // уночі за розкладом табло після повідомлення світило до ранку (розклад гасить лише при переході «день → ніч»).
+    if (g_c1a28 != '\0' || g_c3080 != '\0') P.displayShutdown(1);
     t_3c = "";
     g_c3004 = t_3c;
     g_c241c = 0;
@@ -789,6 +792,7 @@ void night_mode_tick(uint32_t param_1)
     g_c2e72 = time_in_range(g_c2e6c,g_c2e68);
     g_c2e71 = time_in_range(g_c2e64,g_c2e60);
     g_c2e70 = time_in_range(g_c2e5c,g_c2e58);
+    if (!fx_time_known()) { g_c2e72 = 1; g_c2e71 = 1; }   // виправлено: час невідомий (1970) — табло як удень
     t_60 = "NightMode clock=";
     t_48 = t_60;
     pcVar3 = "day";

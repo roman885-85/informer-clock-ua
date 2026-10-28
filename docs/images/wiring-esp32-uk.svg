@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1216" width="1500" height="1216" font-family="Helvetica, Arial, sans-serif">
+<style>:root{--bg:#ffffff;--fg:#1d1d1f;--muted:#555;--card:#f7f7f9;--line:#d0d0d6;--board:#1f3b57}@media (prefers-color-scheme: dark){:root{--bg:#0d1117;--fg:#e6edf3;--muted:#9aa4ae;--card:#161b22;--line:#30363d;--board:#24476b}}</style>
+<rect width="1500" height="1216" fill="var(--bg)"/>
+<text x="750.0" y="42" font-size="24" text-anchor="middle" font-weight="bold" fill="var(--fg)">Informer Clock UA — схема підключення</text>
+<text x="750.0" y="68" font-size="14" text-anchor="middle" font-weight="normal" fill="var(--muted)">ESP32 DevKit V1 (30 виводів). Мітка біля виводу — куди він підключається; кольори — як у картках модулів нижче.</text>
+<rect x="640" y="120" width="220" height="540" rx="14" fill="var(--board)"/>
+<rect x="700" y="134" width="100" height="70" rx="6" fill="#9aa7b4" opacity="0.45"/>
+<text x="750.0" y="175" font-size="13" text-anchor="middle" font-weight="bold" fill="#ffffff">ESP32-WROOM-32</text>
+<text x="750.0" y="646" font-size="13" text-anchor="middle" font-weight="bold" fill="#ffffff">USB</text>
+<rect x="631" y="223.0" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="656" y="235.0" font-size="13" text-anchor="start" font-weight="normal" fill="#ffffff">EN</text>
+<rect x="631" y="250.88" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="656" y="262.88" font-size="13" text-anchor="start" font-weight="normal" fill="#ffffff">VP·36</text>
+<rect x="631" y="278.76" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="656" y="290.76" font-size="13" text-anchor="start" font-weight="normal" fill="#ffffff">VN·39</text>
+<rect x="631" y="306.64" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="656" y="318.64" font-size="13" text-anchor="start" font-weight="normal" fill="#ffffff">D34</text>
+<line x1="631" y1="313.64" x2="631.0" y2="313.64" stroke="#2a9d8f" stroke-width="3"/>
+<rect x="531.2" y="302.64" width="99.80000000000001" height="22" rx="11" fill="#2a9d8f"/>
+<text x="581.1" y="318.64" font-size="12.5" text-anchor="middle" font-weight="bold" fill="#ffffff">фоторезистор</text>
+<rect x="631" y="334.52" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="656" y="346.52" font-size="13" text-anchor="start" font-weight="normal" fill="#ffffff">D35</text>
+<rect x="631" y="362.4" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="656" y="374.4" font-size="13" text-anchor="start" font-weight="normal" fill="#ffffff">D32</text>
+<rect x="631" y="390.28" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="656" y="402.28" font-size="13" text-anchor="start" font-weight="normal" fill="#ffffff">D33</text>
+<rect x="631" y="418.15999999999997" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="656" y="430.15999999999997" font-size="13" text-anchor="start" font-weight="normal" fill="#ffffff">D25</text>
+<rect x="631" y="446.03999999999996" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="656" y="458.03999999999996" font-size="13" text-anchor="start" font-weight="normal" fill="#ffffff">D26</text>
+<line x1="631" y1="453.03999999999996" x2="631.0" y2="453.03999999999996" stroke="#2a9d8f" stroke-width="3"/>
+<rect x="568.2" y="442.03999999999996" width="62.800000000000004" height="22" rx="11" fill="#2a9d8f"/>
+<text x="599.6" y="458.03999999999996" font-size="12.5" text-anchor="middle" font-weight="bold" fill="#ffffff">DS18B20</text>
+<rect x="631" y="473.91999999999996" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="656" y="485.91999999999996" font-size="13" text-anchor="start" font-weight="normal" fill="#ffffff">D27</text>
+<line x1="631" y1="480.91999999999996" x2="631.0" y2="480.91999999999996" stroke="#3a86ff" stroke-width="3"/>
+<rect x="457.2" y="469.91999999999996" width="173.8" height="22" rx="11" fill="#3a86ff"/>
+<text x="544.1" y="485.91999999999996" font-size="12.5" text-anchor="middle" font-weight="bold" fill="#ffffff">WS2812B (через 220 Ом)</text>
+<rect x="631" y="501.8" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="656" y="513.8" font-size="13" text-anchor="start" font-weight="normal" fill="#ffffff">D14</text>
+<line x1="631" y1="508.8" x2="631.0" y2="508.8" stroke="#2a9d8f" stroke-width="3"/>
+<rect x="560.8" y="497.8" width="70.2" height="22" rx="11" fill="#2a9d8f"/>
+<text x="595.9" y="513.8" font-size="12.5" text-anchor="middle" font-weight="bold" fill="#ffffff">DHT11/22</text>
+<rect x="631" y="529.6800000000001" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="656" y="541.6800000000001" font-size="13" text-anchor="start" font-weight="normal" fill="#ffffff">D12</text>
+<rect x="631" y="557.56" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="656" y="569.56" font-size="13" text-anchor="start" font-weight="normal" fill="#ffffff">D13</text>
+<rect x="631" y="585.44" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="656" y="597.44" font-size="13" text-anchor="start" font-weight="normal" fill="#ffffff">GND</text>
+<line x1="631" y1="592.44" x2="631.0" y2="592.44" stroke="#333333" stroke-width="3"/>
+<rect x="597.8" y="581.44" width="33.2" height="22" rx="11" fill="#333333"/>
+<text x="614.4" y="597.44" font-size="12.5" text-anchor="middle" font-weight="bold" fill="#ffffff">GND</text>
+<rect x="631" y="613.3199999999999" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="656" y="625.3199999999999" font-size="13" text-anchor="start" font-weight="normal" fill="#ffffff">VIN</text>
+<line x1="631" y1="620.3199999999999" x2="631.0" y2="620.3199999999999" stroke="#d62828" stroke-width="3"/>
+<rect x="516.4" y="609.3199999999999" width="114.60000000000001" height="22" rx="11" fill="#d62828"/>
+<text x="573.6999999999999" y="625.3199999999999" font-size="12.5" text-anchor="middle" font-weight="bold" fill="#ffffff">5 В (живлення)</text>
+<rect x="851" y="223.0" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="844" y="235.0" font-size="13" text-anchor="end" font-weight="normal" fill="#ffffff">D23</text>
+<line x1="869" y1="230.0" x2="869" y2="230.0" stroke="#8e44ad" stroke-width="3"/>
+<rect x="869" y="219.0" width="107.2" height="22" rx="11" fill="#8e44ad"/>
+<text x="922.6" y="235.0" font-size="12.5" text-anchor="middle" font-weight="bold" fill="#ffffff">DIN · MAX7219</text>
+<rect x="851" y="250.88" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="844" y="262.88" font-size="13" text-anchor="end" font-weight="normal" fill="#ffffff">D22</text>
+<line x1="869" y1="257.88" x2="869" y2="257.88" stroke="#2b9348" stroke-width="3"/>
+<rect x="869" y="246.88" width="136.8" height="22" rx="11" fill="#2b9348"/>
+<text x="937.4" y="262.88" font-size="12.5" text-anchor="middle" font-weight="bold" fill="#ffffff">SCL · датчики I²C</text>
+<rect x="851" y="278.76" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="844" y="290.76" font-size="13" text-anchor="end" font-weight="normal" fill="#ffffff">TX0</text>
+<rect x="851" y="306.64" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="844" y="318.64" font-size="13" text-anchor="end" font-weight="normal" fill="#ffffff">RX0</text>
+<rect x="851" y="334.52" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="844" y="346.52" font-size="13" text-anchor="end" font-weight="normal" fill="#ffffff">D21</text>
+<line x1="869" y1="341.52" x2="869" y2="341.52" stroke="#1d70b8" stroke-width="3"/>
+<rect x="869" y="330.52" width="136.8" height="22" rx="11" fill="#1d70b8"/>
+<text x="937.4" y="346.52" font-size="12.5" text-anchor="middle" font-weight="bold" fill="#ffffff">SDA · датчики I²C</text>
+<rect x="851" y="362.4" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="844" y="374.4" font-size="13" text-anchor="end" font-weight="normal" fill="#ffffff">D19</text>
+<rect x="851" y="390.28" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="844" y="402.28" font-size="13" text-anchor="end" font-weight="normal" fill="#ffffff">D18</text>
+<line x1="869" y1="397.28" x2="869" y2="397.28" stroke="#8e44ad" stroke-width="3"/>
+<rect x="869" y="386.28" width="107.2" height="22" rx="11" fill="#8e44ad"/>
+<text x="922.6" y="402.28" font-size="12.5" text-anchor="middle" font-weight="bold" fill="#ffffff">CLK · MAX7219</text>
+<rect x="851" y="418.15999999999997" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="844" y="430.15999999999997" font-size="13" text-anchor="end" font-weight="normal" fill="#ffffff">D5</text>
+<line x1="869" y1="425.15999999999997" x2="869" y2="425.15999999999997" stroke="#8e44ad" stroke-width="3"/>
+<rect x="869" y="414.15999999999997" width="99.80000000000001" height="22" rx="11" fill="#8e44ad"/>
+<text x="918.9" y="430.15999999999997" font-size="12.5" text-anchor="middle" font-weight="bold" fill="#ffffff">CS · MAX7219</text>
+<rect x="851" y="446.03999999999996" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="844" y="458.03999999999996" font-size="13" text-anchor="end" font-weight="normal" fill="#ffffff">TX2·17</text>
+<line x1="869" y1="453.03999999999996" x2="869" y2="453.03999999999996" stroke="#e09f3e" stroke-width="3"/>
+<rect x="869" y="442.03999999999996" width="166.4" height="22" rx="11" fill="#e09f3e"/>
+<text x="952.2" y="458.03999999999996" font-size="12.5" text-anchor="middle" font-weight="bold" fill="#ffffff">→ RX DFPlayer (1 кОм)</text>
+<rect x="851" y="473.91999999999996" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="844" y="485.91999999999996" font-size="13" text-anchor="end" font-weight="normal" fill="#ffffff">RX2·16</text>
+<line x1="869" y1="480.91999999999996" x2="869" y2="480.91999999999996" stroke="#e09f3e" stroke-width="3"/>
+<rect x="869" y="469.91999999999996" width="107.2" height="22" rx="11" fill="#e09f3e"/>
+<text x="922.6" y="485.91999999999996" font-size="12.5" text-anchor="middle" font-weight="bold" fill="#ffffff">← TX DFPlayer</text>
+<rect x="851" y="501.8" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="844" y="513.8" font-size="13" text-anchor="end" font-weight="normal" fill="#ffffff">D4</text>
+<line x1="869" y1="508.8" x2="869" y2="508.8" stroke="#c77d00" stroke-width="3"/>
+<rect x="869" y="497.8" width="99.80000000000001" height="22" rx="11" fill="#c77d00"/>
+<text x="918.9" y="513.8" font-size="12.5" text-anchor="middle" font-weight="bold" fill="#ffffff">→ RX MH-Z19B</text>
+<rect x="851" y="529.6800000000001" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="844" y="541.6800000000001" font-size="13" text-anchor="end" font-weight="normal" fill="#ffffff">D2</text>
+<line x1="869" y1="536.6800000000001" x2="869" y2="536.6800000000001" stroke="#b5838d" stroke-width="3"/>
+<rect x="869" y="525.6800000000001" width="173.8" height="22" rx="11" fill="#b5838d"/>
+<text x="955.9" y="541.6800000000001" font-size="12.5" text-anchor="middle" font-weight="bold" fill="#ffffff">зумер/LED (через C945)</text>
+<rect x="851" y="557.56" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="844" y="569.56" font-size="13" text-anchor="end" font-weight="normal" fill="#ffffff">D15</text>
+<line x1="869" y1="564.56" x2="869" y2="564.56" stroke="#c77d00" stroke-width="3"/>
+<rect x="869" y="553.56" width="99.80000000000001" height="22" rx="11" fill="#c77d00"/>
+<text x="918.9" y="569.56" font-size="12.5" text-anchor="middle" font-weight="bold" fill="#ffffff">← TX MH-Z19B</text>
+<rect x="851" y="585.44" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="844" y="597.44" font-size="13" text-anchor="end" font-weight="normal" fill="#ffffff">GND</text>
+<line x1="869" y1="592.44" x2="869" y2="592.44" stroke="#333333" stroke-width="3"/>
+<rect x="869" y="581.44" width="33.2" height="22" rx="11" fill="#333333"/>
+<text x="885.6" y="597.44" font-size="12.5" text-anchor="middle" font-weight="bold" fill="#ffffff">GND</text>
+<rect x="851" y="613.3199999999999" width="18" height="14" rx="3" fill="#c9a227"/>
+<text x="844" y="625.3199999999999" font-size="13" text-anchor="end" font-weight="normal" fill="#ffffff">3V3</text>
+<line x1="869" y1="620.3199999999999" x2="869" y2="620.3199999999999" stroke="#e76f51" stroke-width="3"/>
+<rect x="869" y="609.3199999999999" width="122.0" height="22" rx="11" fill="#e76f51"/>
+<text x="930.0" y="625.3199999999999" font-size="12.5" text-anchor="middle" font-weight="bold" fill="#ffffff">3,3 В → датчики</text>
+<rect x="27.0" y="690" width="470" height="108" rx="12" fill="var(--card)" stroke="var(--line)"/>
+<rect x="27.0" y="690" width="8" height="108" rx="4" fill="#8e44ad"/>
+<text x="49.0" y="716" font-size="15" text-anchor="start" font-weight="bold" fill="var(--fg)">Табло MAX7219 (FC16): 4–16 модулів 8×8</text>
+<text x="49.0" y="740" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">VCC → 5 В   GND → GND</text>
+<text x="49.0" y="759" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">DIN → GPIO23   CLK → GPIO18   CS → GPIO5</text>
+<text x="49.0" y="778" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">2 поверхи по 4 або 8: DIN 2-го ← DOUT 1-го; CLK, CS, 5 В — паралельно</text>
+<rect x="515.0" y="690" width="470" height="108" rx="12" fill="var(--card)" stroke="var(--line)"/>
+<rect x="515.0" y="690" width="8" height="108" rx="4" fill="#d62828"/>
+<text x="537.0" y="716" font-size="15" text-anchor="start" font-weight="bold" fill="var(--fg)">Живлення 5 В, 2 А</text>
+<text x="537.0" y="740" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">5 В → VIN плати, табло, стрічка, DFPlayer</text>
+<text x="537.0" y="759" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">1000 мкФ 6,3 В між 5 В і GND — на вході</text>
+<text x="537.0" y="778" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">усі GND — разом; датчики — від 3,3 В плати</text>
+<rect x="1003.0" y="690" width="470" height="108" rx="12" fill="var(--card)" stroke="var(--line)"/>
+<rect x="1003.0" y="690" width="8" height="108" rx="4" fill="#2a9d8f"/>
+<text x="1025.0" y="716" font-size="15" text-anchor="start" font-weight="bold" fill="var(--fg)">Фоторезистор 5528 (яскравість)</text>
+<text x="1025.0" y="740" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">3,3 В → фоторезистор → GPIO34</text>
+<text x="1025.0" y="759" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">GPIO34 → 10 кОм → GND</text>
+<rect x="27.0" y="814" width="470" height="108" rx="12" fill="var(--card)" stroke="var(--line)"/>
+<rect x="27.0" y="814" width="8" height="108" rx="4" fill="#3a86ff"/>
+<text x="49.0" y="840" font-size="15" text-anchor="start" font-weight="bold" fill="var(--fg)">Стрічка WS2812B (до 30 світлодіодів)</text>
+<text x="49.0" y="864" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">DIN ← 220 Ом ← GPIO27; +5 В, GND</text>
+<text x="49.0" y="883" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">кількість задається в «LED підсвічування»</text>
+<rect x="515.0" y="814" width="470" height="108" rx="12" fill="var(--card)" stroke="var(--line)"/>
+<rect x="515.0" y="814" width="8" height="108" rx="4" fill="#1d70b8"/>
+<text x="537.0" y="840" font-size="15" text-anchor="start" font-weight="bold" fill="var(--fg)">Датчики I²C (необов.)</text>
+<text x="537.0" y="864" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">SDA → GPIO21   SCL → GPIO22   VCC → 3,3 В</text>
+<text x="537.0" y="883" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">RTC DS3231/DS1307, BME280/BMP280/BMP180,</text>
+<text x="537.0" y="902" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">AHT10, HDC1080, AM2320, SGP30, CCS811, SCD40/41</text>
+<rect x="1003.0" y="814" width="470" height="108" rx="12" fill="var(--card)" stroke="var(--line)"/>
+<rect x="1003.0" y="814" width="8" height="108" rx="4" fill="#2a9d8f"/>
+<text x="1025.0" y="840" font-size="15" text-anchor="start" font-weight="bold" fill="var(--fg)">DS18B20 · DHT11/DHT22 (необов.)</text>
+<text x="1025.0" y="864" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">DS18B20: дані → GPIO26, 4,7–10 кОм до 3,3 В</text>
+<text x="1025.0" y="883" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">DHT: дані → GPIO14, 10 кОм до 3,3 В</text>
+<rect x="27.0" y="938" width="470" height="108" rx="12" fill="var(--card)" stroke="var(--line)"/>
+<rect x="27.0" y="938" width="8" height="108" rx="4" fill="#e09f3e"/>
+<text x="49.0" y="964" font-size="15" text-anchor="start" font-weight="bold" fill="var(--fg)">DFPlayer Mini + динамік (голос, будильник)</text>
+<text x="49.0" y="988" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">VCC → 5 В; RX ← 1 кОм ← GPIO17; TX → GPIO16</text>
+<text x="49.0" y="1007" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">SPK1/SPK2 → динамік 3 Вт; файли — на microSD</text>
+<rect x="515.0" y="938" width="470" height="108" rx="12" fill="var(--card)" stroke="var(--line)"/>
+<rect x="515.0" y="938" width="8" height="108" rx="4" fill="#c77d00"/>
+<text x="537.0" y="964" font-size="15" text-anchor="start" font-weight="bold" fill="var(--fg)">MH-Z19B, CO₂ (необов.)</text>
+<text x="537.0" y="988" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">VIN → 5 В; TX → GPIO15; RX ← GPIO4</text>
+<text x="537.0" y="1007" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">разом із DFPlayer не працює (спільний UART1)</text>
+<rect x="1003.0" y="938" width="470" height="108" rx="12" fill="var(--card)" stroke="var(--line)"/>
+<rect x="1003.0" y="938" width="8" height="108" rx="4" fill="#b5838d"/>
+<text x="1025.0" y="964" font-size="15" text-anchor="start" font-weight="bold" fill="var(--fg)">Зумер і світлодіод (необов.)</text>
+<text x="1025.0" y="988" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">GPIO2 → 220 Ом → база C945 (NPN), емітер → GND</text>
+<text x="1025.0" y="1007" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">зумер і LED (з 220 Ом) — між 5 В і колектором</text>
+<rect x="515.0" y="1062" width="470" height="108" rx="12" fill="var(--card)" stroke="var(--line)"/>
+<rect x="515.0" y="1062" width="8" height="108" rx="4" fill="#888888"/>
+<text x="537.0" y="1088" font-size="15" text-anchor="start" font-weight="bold" fill="var(--fg)">Кнопка</text>
+<text x="537.0" y="1112" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">GPIO0 — це кнопка BOOT на платі</text>
+<text x="537.0" y="1131" font-size="13" text-anchor="start" font-weight="normal" fill="var(--muted)">зовнішня — паралельно BOOT: GPIO0 ↔ GND</text>
+<text x="750.0" y="1204" font-size="12.5" text-anchor="middle" font-weight="normal" fill="var(--muted)">Виводи — з коду прошивки (firmware/src). Розташування модулів у корпусі — на оригінальній схемі автора: docs/images/original-esp32-schematic.png</text>
+</svg>

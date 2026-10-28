@@ -1,4 +1,5 @@
 // Шрифти й спрайти автора (витягнуті з 2.7.1 байт у байт): зовнішні оголошення
+// EN: Author's fonts and sprites (extracted from 2.7.1 byte for byte): declarations.
 #pragma once
 #include <Arduino.h>
 extern const uint8_t font_clock12_sorcery[];

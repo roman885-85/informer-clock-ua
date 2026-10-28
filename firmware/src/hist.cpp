@@ -1,4 +1,5 @@
 // Історія датчиків: 5 джерел, до 48 точок по 30 хв, файли /h_<ім'я>.bin, JSON для /hist (перенесено з 2.7.1)
+// EN: Sensor history: 5 sources, up to 48 points every 30 min, /h_<name>.bin files, JSON for /hist (from 2.7.1).
 #include "fw.h"
 
 // функції «увімкнено» @400d2918…@400d2968 і читання @400d2880…@400d28ec

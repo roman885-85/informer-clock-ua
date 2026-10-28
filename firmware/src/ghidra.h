@@ -1,4 +1,5 @@
 // Типи з декомпіляції Ghidra — щоб перенесений код зберігав ті самі перетворення типів, що й оригінал
+// EN: Types used by the reconstruction (keeps the same type conversions as the original machine code).
 #pragma once
 #include <stdint.h>
 typedef uint32_t uint;

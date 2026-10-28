@@ -1,4 +1,5 @@
 // Табло: рядок часу, двокрапка, зони/шрифти, ефекти входу/виходу циферблата, великий 2-поверховий, інфо-цикл.
+// EN: Display: time string, colon, zones/fonts, clock-face in/out effects, big clock, information cycle (from 2.7.1).
 // Перенесено з 2.7.1 функція за функцією (адреси оригіналу в коментарях).
 #include "fw.h"
 
@@ -617,6 +618,7 @@ void content_show_slot_8m() {
       }
       P.displayZoneText(0, g_c27f9, al, spd, pause, (textEffect_t)eff, (textEffect_t)eff);
       P.displayReset(0);
+      if (g_c34a9 == 3) g_fx_booting = false;   // нове: перший звичайний вміст — запуск закінчено (status.cpp)
     }
   }
   if (g_c34af < 0x3c) g_c34af = g_c34af + 1;
@@ -658,6 +660,7 @@ void content_show_slot_4m() {
       }
       P.displayZoneText(0, g_c27f9, al, spd, pause, (textEffect_t)eff, (textEffect_t)eff);
       P.displayReset(0);
+      if (g_c34a9 == 3) g_fx_booting = false;   // нове: перший звичайний вміст — запуск закінчено (status.cpp)
     }
   }
   if (g_c34af < 0x3c) g_c34af = g_c34af + 1;

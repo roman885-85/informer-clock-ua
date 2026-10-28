@@ -1,4 +1,5 @@
 // Погода: OpenWeatherMap і Яндекс («зараз»), Weatherbit («зараз» і «завтра»).
+// EN: Weather: OpenWeatherMap and Yandex (now), Weatherbit (now and tomorrow), from 2.7.1.
 // Текст для табло (з гліфами), поля для веб-інтерфейсу {"weather_now": …} тощо. Перенесено з 2.7.1 (адреси в коментарях).
 #include "fw.h"
 

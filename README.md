@@ -1,22 +1,83 @@
-# Clock Informer 2.7.1 — відтворений код / reconstructed source
+# Informer Clock UA
 
-**UA.** Цей стан репозиторію (тег `reconstructed-2.7.1`) — код прошивки **Clock Informer 2.7.1** для ESP32 автора
-**Semen_p** (<https://www.thingiverse.com/thing:3924947>, CC BY-NC 4.0), відтворений з машинного коду оригіналу з
-поведінкою оригіналу, разом з його помилками. Автор не публікує вихідного коду ESP32-версії; це не код автора, а
-реконструкція. Проєкт **Informer Clock UA** (виправлення, нові функції, власні оновлення) починається з наступного
-коміту — див. гілку `main`. Порівняння: `git diff reconstructed-2.7.1 v1.0.0`.
+[English](README.en.md) · [Сайт проєкту](https://roman885-85.github.io/informer-clock-ua/) ·
+[Прошити з браузера](https://roman885-85.github.io/informer-clock-ua/flasher/) ·
+[Інструкція](https://roman885-85.github.io/informer-clock-ua/manual/?lang=uk) ·
+[Документація](docs/uk/README.md) · [Випуски](https://github.com/roman885-85/informer-clock-ua/releases)
 
-Збирання: `cd firmware && pio run -e clock` (PlatformIO, Arduino-ESP32 1.0.4). Веб-інтерфейс у
-`firmware/src/web_assets.h` і `web/original/` — оригінальний інтерфейс автора без змін.
+**Незалежна прошивка для годинника-інформера на ESP32 і світлодіодних матрицях MAX7219**, заснована на прошивці
+**Clock Informer 2.7.1** автора **Semen_p**.
 
-**EN.** This state of the repository (tag `reconstructed-2.7.1`) is the source of the **Clock Informer 2.7.1** ESP32
-firmware by **Semen_p** (<https://www.thingiverse.com/thing:3924947>, CC BY-NC 4.0), reconstructed from the original
-machine code with the original's behaviour, bugs included. The author does not publish the ESP32 source; this is not the
-author's code but a reconstruction. The **Informer Clock UA** project (fixes, new features, its own updates) starts with
-the next commit — see the `main` branch. Compare: `git diff reconstructed-2.7.1 v1.0.0`.
+> **Попередній випуск 1.0.0.** Зібрано й перевірено на імітаторах і в браузері, але ще не на годиннику. Про помилки —
+> у [Issues](https://github.com/roman885-85/informer-clock-ua/issues).
 
-Build: `cd firmware && pio run -e clock` (PlatformIO, Arduino-ESP32 1.0.4). The web interface in
-`firmware/src/web_assets.h` and `web/original/` is the author's original interface, unchanged.
+## Що це й навіщо
 
-License: [CC BY-NC 4.0](LICENSE) (attribution, non-commercial). `firmware/lib/MD_Parola` and `firmware/lib/MD_MAX72XX` —
-LGPL-2.1 (majicDesigns; MD_Parola with the author's effects, see `FORK.md`); `MHZ19_uart`, `Base64` — MIT.
+Саморобний настільний годинник: час (NTP, RTC), погода, новини, курси валют і біткоїна, показання датчиків (температура,
+вологість, тиск, CO₂), підсвітка WS2812B, оголошення часу голосом щогодини (DFPlayer), будильники, MQTT і Home Assistant.
+Табло — матриці MAX7219 в один або два поверхи; налаштування — з браузера у вашій мережі.
+
+Годинник створив Semen_p (Clock Informer): корпуси, схема й прошивка. Informer Clock UA — для тих, хто зібрав
+Clock Informer на ESP32 і хоче, щоб годинник працював стабільно: тут виправлено помилки прошивки 2.7.1, додано нові
+функції, а оновлення приходять із цього репозиторію. Документація — українською й англійською.
+
+## Чим відрізняється від оригіналу
+
+- **Окремий проєкт зі своїми прошивками.** Власна назва й нумерація версій (1.x). Перевірка й файли оновлень, мовні
+  пакети, історія змін, звуки для SD-карти, корпуси, картинки та інструкція завантажуються з цього проєкту, а не з
+  сервера автора. Прошивки цього проєкту не потрапляють в оригінальний проєкт, а прошивки автора — сюди; годинник
+  пропонує оновлення лише на новішу версію Informer Clock UA.
+- **Виправлено** (докладно — [architecture.md](docs/uk/architecture.md)): зависання без інтернету, «годинник не видно
+  в мережі», зайві розриви Wi-Fi, падіння через DNS ядра, хвилинні зупинки HTTPS без тайм-ауту, службові задачі, що
+  чекали кінця прокрутки новин, «стрибки» часу після перезапуску, літній час, що не перемикався, голос щогодини без
+  години, будильник при темному табло, кнопку, що не вимикала мелодію, табло, що світило вночі після повідомлення,
+  зайву точку о 9:59→10:00, старий інтерфейс із кешу, паролі Wi-Fi у консолі.
+- **Нове:** стан запуску на табло (значок і напис, і на двох поверхах), плавна яскравість за датчиком світла, нічна
+  тиша, літній час «Авто» за правилами ЄС, час після перезапуску без інтернету, налагодження по Wi-Fi (журнал і прошивка),
+  причина аварії в журналі подій, сторож головного циклу.
+- **Те саме залізо й налаштування:** схема й таблиця розділів як в оригіналі — перехід із прошивки автора зберігає
+  Wi-Fi і всі налаштування. Веб-інтерфейс — інтерфейс автора з доповненнями на існуючих сторінках.
+- Підтримується лише **ESP32** (класичний, 4 МБ); ESP8266 і ESP32-C3/C6/S3 — ні.
+
+## Автор оригіналу
+
+**Clock Informer** — проєкт **Semen_p**: [сторінка на Thingiverse](https://www.thingiverse.com/thing:3924947) (корпуси,
+схема, опис), [goldart.ee](https://www.goldart.ee/), підтримати автора — [ko-fi.com/clockinformer](https://ko-fi.com/clockinformer).
+Informer Clock UA не пов'язаний з автором і не підтримується ним: з питаннями щодо цієї прошивки звертайтеся сюди.
+
+## Швидкий старт
+
+1. Зберіть годинник за [схемою підключення](docs/uk/wiring.md) (або візьміть уже зібраний Clock Informer на ESP32).
+2. Прошийте з браузера: <https://roman885-85.github.io/informer-clock-ua/flasher/> (Chrome, Edge, Opera; USB-кабель).
+   Інші способи — [прошивка](docs/uk/flashing.md).
+3. Новий годинник: Wi-Fi **«Clock ESP»** → `http://192.168.4.1` → майстер налаштування. Перехід із прошивки автора без
+   стирання — годинник одразу у вашій мережі з усіма налаштуваннями.
+4. Далі оновлення — у веб-інтерфейсі: «Оновлення» → «Оновити».
+
+## Документація
+
+| | |
+|---|---|
+| [Інструкція користувача](https://roman885-85.github.io/informer-clock-ua/manual/?lang=uk) | користування годинником |
+| [Прошивка](docs/uk/flashing.md) | з браузера, скриптами, Flash Download Tool, esptool, PlatformIO, по мережі |
+| [Підключення](docs/uk/wiring.md) | схема, виводи, живлення, датчики, звук |
+| [Збирання](docs/uk/building.md) | PlatformIO, веб-інтерфейс, випуск версії, імітатори |
+| [Як влаштована прошивка](docs/uk/architecture.md) | походження коду, модулі, виправлення, нові функції |
+| [Налагодження по Wi-Fi](docs/uk/wifi-debug.md) | журнал по мережі, OTA, аварії |
+| [Якщо щось не так](docs/uk/troubleshooting.md) | типові проблеми |
+
+## Що в репозиторії
+
+```
+firmware/     вихідний код прошивки (PlatformIO, Arduino-ESP32 1.0.4) з поясненнями в коментарях
+web/          оригінальний веб-інтерфейс автора і скрипт правок (webui_patch.py)
+update/       опис останньої версії для годинників і історія змін
+lang/         мовні пакети інтерфейсу й табло
+docs/         сайт проєкту: прошивальник, інструкція, файли прошивки, документація uk/en
+tools/        скрипти прошивки (Windows, macOS, Linux), випуску, імітатори й перевірки
+```
+
+## Ліцензія
+
+[CC BY-NC 4.0](LICENSE), як і в оригіналу: можна копіювати й змінювати із зазначенням авторства, не з комерційною
+метою. Авторство й ліцензії складових (MD_Parola і MD_MAX72XX — LGPL-2.1 тощо) — [NOTICE.md](NOTICE.md).

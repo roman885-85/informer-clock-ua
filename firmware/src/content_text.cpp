@@ -1,4 +1,5 @@
 // Тексти пунктів інформаційного циклу (слоти 0…60). Перенесено з 2.7.1 (@4011675c) майже дослівно.
+// EN: Texts of the information cycle slots 0…60 (date, weather, news, rates, sensors…), from 2.7.1.
 #include "fw.h"
 
 // ===== content_slot_text @ 4011675c size=1059
@@ -75,7 +76,7 @@ void content_slot_text(uint8_t param_1, String &param_2)
       goto LAB_4011aaa4;
     }
     if (g_c3319 != 0) {
-      g_c2ea8 = "2.7.1";
+      g_c2ea8 = FX_VERSION;
     }
     if (param_1 == '\x02') {
       g_c34a9 = '\x01';
@@ -91,7 +92,7 @@ void content_slot_text(uint8_t param_1, String &param_2)
       g_c34a9 = '\x02';
       led_phrase(t_78,g_c34b0,0xa9);
       t_60 = t_78;
-      t_6c = "2.7.1";
+      t_6c = FX_VERSION;
       t_60 += t_6c;
       led_phrase(t_54,g_c34b0,0xaa);
       t_60 += t_54;
@@ -1497,15 +1498,15 @@ LAB_40119af2:
     if ((uVar20 == 1) && (uVar20 = (uint)g_c3319, uVar20 == 0)) {
       uVar19 = (uint)g_c3138;
       if (uVar19 == 0) {
-        currency_fetch();
+        { FxStatusScope fxs(FXS_RATES); currency_fetch(); }   // нове: стан на табло під час запуску
         g_c3494 = bVar6;
         g_c3490 = uVar19;
         param_2 = g_c1aec;
         goto LAB_4011aaa4;
       }
       if (uVar19 == 1) {
-        currency_fetch();
-        bitcoin_fetch();
+        { FxStatusScope fxs(FXS_RATES); currency_fetch(); }   // нове: стан на табло під час запуску
+        { FxStatusScope fxs(FXS_RATES); bitcoin_fetch(); }   // нове: стан на табло під час запуску
         g_c3494 = bVar5;
         g_c3490 = uVar20;
         t_30 = g_c1aec;
@@ -1522,7 +1523,7 @@ LAB_40119af2:
     if (uVar19 == 1) {
       iVar16 = (g_c3148 != "");
       if (iVar16 != 0) {
-        weather_owm(g_c316c,g_c3168,g_c3148);
+        { FxStatusScope fxs(FXS_WEATHER); weather_owm(g_c316c,g_c3168,g_c3148); }   // нове: стан на табло під час запуску
         g_c3494 = bVar7;
         g_c3490 = uVar20;
         param_2 = g_c1a6c;
@@ -1540,9 +1541,9 @@ LAB_40119af2:
         iVar16 = (g_c313c != "");
         if (iVar16 != 0) {
           if (g_c3158 == 1) {
-            weather_weatherbit_tomorrow(g_c316c,g_c3168,g_c313c);
+            { FxStatusScope fxs(FXS_WEATHER); weather_weatherbit_tomorrow(g_c316c,g_c3168,g_c313c); }   // нове: стан на табло під час запуску
           }
-          weather_weatherbit_now(g_c316c,g_c3168,g_c313c);
+          { FxStatusScope fxs(FXS_WEATHER); weather_weatherbit_now(g_c316c,g_c3168,g_c313c); }   // нове: стан на табло під час запуску
           g_c3494 = 1;
           g_c3490 = 0;
           param_2 = g_c1a54;
@@ -1553,7 +1554,7 @@ LAB_40119af2:
         if (uVar19 != 3) break;
         iVar16 = (g_c3148 != "");
         if (iVar16 != 0) {
-          weather_yandex(g_c3148);
+          { FxStatusScope fxs(FXS_WEATHER); weather_yandex(g_c3148); }   // нове: стан на табло під час запуску
           g_c3494 = 1;
           g_c3490 = uVar20;
           param_2 = g_c1a34;
@@ -1591,7 +1592,7 @@ LAB_40119d24:
     }
     uVar20 = (uint)g_c3319;
     if (uVar20 == 0) {
-      jokes_fetch();
+      { FxStatusScope fxs(FXS_DATA); jokes_fetch(); }   // нове: стан на табло під час запуску
       g_c3494 = 1;
       g_c3490 = uVar20;
       param_2 = g_c1ac4;
@@ -1609,7 +1610,7 @@ LAB_40119d24:
     if ((uVar20 == 1) && (uVar20 = (uint)g_c3319, uVar20 == 0)) {
       iVar16 = (g_c30e0 != "");
       if ((iVar16 != 0) && (iVar16 = (g_c30ec == "gn"), iVar16 != 0)) {
-        news_gnews();
+        { FxStatusScope fxs(FXS_NEWS); news_gnews(); }   // нове: стан на табло під час запуску
         g_c3494 = bVar4;
         g_c3490 = uVar20;
         param_2 = g_c30fc;
@@ -1619,7 +1620,7 @@ LAB_40119d24:
       bVar14 = g_c3494;
       if ((iVar16 != 0) &&
          (iVar16 = (g_c30ec == "ndio"), bVar14 = g_c3494, iVar16 != 0)) {
-        news_newsdata();
+        { FxStatusScope fxs(FXS_NEWS); news_newsdata(); }   // нове: стан на табло під час запуску
         g_c3494 = 1;
         g_c3490 = 0;
         param_2 = g_c30fc;
@@ -1655,7 +1656,7 @@ LAB_40119d24:
     if (uVar19 == 1) {
       iVar16 = (g_c2f0c != "");
       if ((iVar16 != 0) && (iVar16 = (g_c2f00 != ""), iVar16 != 0)) {
-        youtube_fetch();
+        { FxStatusScope fxs(FXS_DATA); youtube_fetch(); }   // нове: стан на табло під час запуску
         g_c3494 = bVar1;
         g_c3490 = uVar20;
         param_2 = g_c1c80;
@@ -1672,7 +1673,7 @@ LAB_40119d24:
       if (uVar19 != 2) break;
       iVar16 = (g_c2f0c != "");
       if ((iVar16 != 0) && (iVar16 = (g_c2f00 != ""), iVar16 != 0)) {
-        youtube_fetch();
+        { FxStatusScope fxs(FXS_DATA); youtube_fetch(); }   // нове: стан на табло під час запуску
         g_c3494 = bVar13;
         g_c3490 = 0x5dc;
         t_30 = "\x0e" "\x0f";
@@ -1697,7 +1698,7 @@ LAB_40116864:
       if (uVar20 == 2) {
         iVar16 = (g_c2f0c != "");
         if ((iVar16 != 0) && (iVar16 = (g_c2f00 != ""), iVar16 != 0)) {
-          youtube_fetch();
+          { FxStatusScope fxs(FXS_DATA); youtube_fetch(); }   // нове: стан на табло під час запуску
           g_c3494 = bVar13;
           g_c3490 = 0x5dc;
           t_30 = String(g_c1c7c, 10);
@@ -1720,7 +1721,7 @@ LAB_40116864:
       if (uVar20 == 2) {
         iVar16 = (g_c2f0c != "");
         if ((iVar16 != 0) && (iVar16 = (g_c2f00 != ""), iVar16 != 0)) {
-          youtube_fetch();
+          { FxStatusScope fxs(FXS_DATA); youtube_fetch(); }   // нове: стан на табло під час запуску
           g_c3494 = bVar13;
           g_c3490 = 0x5dc;
           t_30 = "\x0e" "\x10";
@@ -1743,7 +1744,7 @@ LAB_40116864:
       if (uVar20 == 2) {
         iVar16 = (g_c2f0c != "");
         if ((iVar16 != 0) && (iVar16 = (g_c2f00 != ""), iVar16 != 0)) {
-          youtube_fetch();
+          { FxStatusScope fxs(FXS_DATA); youtube_fetch(); }   // нове: стан на табло під час запуску
           g_c3494 = bVar13;
           g_c3490 = 0x5dc;
           t_30 = String(g_c1c78, 10);

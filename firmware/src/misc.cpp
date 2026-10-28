@@ -1,4 +1,5 @@
 // Періодичні службові такти: налагоджувальні рядки часу й пам'яті, MQTT/narodmon/будильник (раз на 7 с),
+// EN: Periodic service ticks: debug lines (time, memory), MQTT/narodmon/alarm, low-memory night reboot (from 2.7.1).
 // нічний перезапуск при браку пам'яті, завантаження конфігурації файлом. Перенесено з 2.7.1 (адреси в коментарях).
 #include "fw.h"
 
@@ -75,7 +76,7 @@ void dbg_ram_print(uint32_t ms) {
   dbg_ws_sep(2);
   dbg_ws_print(String("RAM         : ") + String(ESP.getFreeHeap(), 10));
   dbg_ws_sep(2);
-  photo_brightness_read();
+  fx_photo_print();                                   // виправлено: замір і рівень — щоразу в bright.cpp, тут лише рядок
   f_400e4c90();
   if (g_c30c4 == 1 || g_c3090 == 1) {
     if (g_c3319 != 0) goto alarm;
@@ -110,7 +111,7 @@ void dbg_ram_print(uint32_t ms) {
       g_c15ec = g_c3090;
     }
   }
-  if (g_c3319 == 0) narodmon_tick();
+  if (g_c3319 == 0) { FxStatusScope fxs(FXS_DATA); narodmon_tick(); }   // нове: стан на табло під час запуску
 alarm:
   if (g_c2fc8 == 1 && g_c2fb8 != "") f_400e1480();
   g_c2f20 = 1;

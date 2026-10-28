@@ -1,4 +1,5 @@
 // Шрифти MAX7219 з прошивки Clock Informer 2.7.1 (ESP32), формат MD_MAX72XX v2: [ширина][стовпці…] на символ.
+// EN: MAX7219 fonts from Clock Informer 2.7.1 (ESP32), MD_MAX72XX format.
 // Витягнуто tools-скриптом з app0 (адреси rodata). Не редагувати вручну.
 #pragma once
 #include <stdint.h>

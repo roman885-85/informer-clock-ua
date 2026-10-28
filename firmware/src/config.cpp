@@ -1,4 +1,5 @@
 // Конфігурація: застосування ключів до змінних, заводські значення, міграція (перенесено з 2.7.1)
+// EN: Configuration: applies config.json keys to variables, factory defaults, migration (from 2.7.1).
 #include "fw.h"
 
 // strings: "Cwi" "chds" "chdh" "chbm" "chO" "chZ" "adw" "al1" "host" "port" "user" "mpass"
@@ -137,6 +138,7 @@ void config_apply_all()  // @4011c684
     g_c19b0 = 0;
   }
   else if ((g_c3154 == 1) && (g_c2d29 != '\0')) {
+    FxStatusScope fxs(FXS_DATA);                 // нове: стан на табло під час запуску
     geolocate_ip();
   }
   t_4ec = t_7fc["tempds"].as<String>();
@@ -311,6 +313,8 @@ void config_apply_all()  // @4011c684
   g_c3461 = t_15c.toInt();
   t_150 = t_7fc["sumT"].as<String>();
   g_c32e4 = t_150.toInt();
+  fx_time_offset_apply();                            // нове: зміна пояса/літнього часу — одразу (timefix.cpp)
+  fx_wdbg_set(t_7fc["wdbg"].as<String>().toInt() == 1);   // нове: налагодження по Wi-Fi (wdbg.cpp)
   t_138 = t_7fc["M1"].as<String>();
   g_c307f = t_138.toInt();
   t_fc = t_7fc["M2"].as<String>();
@@ -382,6 +386,7 @@ void config_apply_all()  // @4011c684
   g_c2e72 = time_in_range(g_c2e6c,g_c2e68);
   g_c2e71 = time_in_range(g_c2e64,g_c2e60);
   g_c2e70 = time_in_range(g_c2e5c,g_c2e58);
+  if (!fx_time_known()) { g_c2e72 = 1; g_c2e71 = 1; }   // виправлено: час невідомий (1970) — табло як удень
   if (g_c2c00 == g_c34ab) goto LAB_4011fc46;
   if (g_c34ba == '\x04') {
     uVar4 = 0;

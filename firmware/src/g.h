@@ -1,4 +1,5 @@
 // Згенеровано автоматично під час реконструкції прошивки — не редагувати вручну
+// EN: Global variables of the original firmware: declarations.
 #pragma once
 #include "libs.h"
 

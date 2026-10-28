@@ -1,4 +1,5 @@
 // Wi-Fi: запуск (STA/AP), збережені мережі /networks.json, перевірка інтернету, перепідключення, події.
+// EN: Wi-Fi: STA/AP start, saved networks, internet check, reconnection (from 2.7.1; network fixes marked "Виправлено").
 // Перенесено з 2.7.1 (адреси оригіналу в коментарях).
 #include "fw.h"
 
@@ -48,7 +49,14 @@ void wifi_event(system_event_id_t ev, system_event_info_t info) {
     dbg_ws_print(String("[WIFI] Disconnected  reason=") + String(r, 10) + String(" (") + rt + String(")"));
     g_c2d29 = 0;
     g_c3319 = 1;
-    if (g_c33f8 == 2) g_c3381 = 1;
+    if (g_c33f8 == 2) {
+      // Виправлено: GOT_IP ставить лічильник спроб g_c3388 = 10 (значок «з'єднано» в анімації), і в автора
+      // перша ж спроба після обриву йшла гілкою «цикл вичерпано» — WIFI_OFF і точка доступу за 8 с після
+      // обриву (журнал годинника 08.10: reason=200 о 09:36:23, «AP restored» о 09:36:31). Новий обрив —
+      // лічба з нуля, перша власна спроба — за 5 с (до того перепідключається саме ядро).
+      if (g_c3381 == 0) { g_c3388 = 0; g_c15d8 = millis(); }
+      g_c3381 = 1;
+    }
   } else if (ev == SYSTEM_EVENT_STA_GOT_IP) {
     String p; led_phrase(p, g_c34b0, 0xad);
     dbg_ws_print(p + WiFi.localIP().toString());
@@ -100,6 +108,7 @@ void wifi_force_reassoc() {
 void captive_dns_start() {
   dnsServer.stop();
   bool ok = dnsServer.start(0x35, String("*"), WiFi.softAPIP());
+  g_fx_dns_on = ok;
   evlog_write(String("[CAPTIVE] dns start ") + (ok ? "ok" : "FAIL") + " apip=" + WiFi.softAPIP().toString());
 }
 
@@ -799,6 +808,7 @@ void wifi_start() {
   uint32_t ok = wifi_try(0);
   wifi_attempt_inc();
   while (WiFi.status() != WL_CONNECTED) {
+    loop_guard_feed();
     P.displayAnimate();
     if (millis() - g_c3384 > 39999 || g_c33ec == "" || 9 < g_c3388) {
       WiFi.mode(WIFI_AP);
@@ -886,8 +896,10 @@ void wifi_start() {
   g_c34a4 = 0x37;
   g_c34a3 = 0x37;
   g_c34af = 0;
+  fx_status_begin(FXS_TIME, true);               // нове: «Синхронізація часу» замість порожнього табло
   sys_sync_ntp();
   rtc_detect_sync();
+  fx_status_end();
   P.displayZoneText(1, "@@@@", PA_LEFT, 0, 0, PA_PRINT, PA_NO_EFFECT);
   P.displayZoneText(0, "        ", PA_LEFT, 0, 0, PA_PRINT, PA_NO_EFFECT);
   sys_font_apply();
@@ -917,46 +929,43 @@ void wifi_start_wrapper() {
 // @400d619c
 void button_pin_init() { pinMode(0, INPUT_PULLUP); }
 
-// @401213b4: перевірка інтернету (HTTP до msftconnecttest, запасна — TCP 8.8.8.8:53)
+// @401213b4: перевірка інтернету.
+// Виправлено: в автора спершу HTTP до msftconnecttest (DNS + з'єднання до 5 с), а запасна TCP-проба до
+// 8.8.8.8:53 — без тайм-ауту: без інтернету цикл стояв до ~3 хв, поки lwIP вичерпає повтори SYN (саме тут
+// оригінал ловив сторожа: «loop was stalled in: wifi/internet check»). Тепер спершу TCP до 8.8.8.8:53 і
+// 1.1.1.1:53 по 1,5 с (без DNS), потім HTTP з тайм-аутом з'єднання 3 с. «Офлайн» — лише після двох невдач
+// поспіль: в автора лічильник g_c1748 не давав другої спроби, і перша ж невдала проба вимикала погоду,
+// новини й NTP (скарги користувачів «нет интернета» при робочому Wi-Fi); повтор — через 15 с (net_check_periodic).
 void net_probe_internet() {
+  FxStatusScope fxs(FXS_NET);                    // нове: стан на табло під час запуску
   dbg_ws_print(String("[NET ] Probing internet..."));
-  dbg_ws_print(String("Wifi - connected, checking internet (primary HTTP+body)"));
-  bool ok;
-  {
+  bool ok = net_tcp_probe(IPAddress(8, 8, 8, 8), 0x35, 1500) == 1 || net_tcp_probe(IPAddress(1, 1, 1, 1), 0x35, 1500) == 1;
+  dbg_ws_print(String(ok ? "TCP probe (8.8.8.8 / 1.1.1.1:53): OK" : "TCP probe (8.8.8.8 / 1.1.1.1:53): FAIL"));
+  if (!ok) {
+    dbg_ws_print(String("Trying HTTP probe (msftconnecttest)..."));
     String url("http://www.msftconnecttest.com/connecttest.txt");
     WiFiClient c;
     HTTPClient h;
-    c.setTimeout(2000);
+    h.setConnectTimeout(3000);
     h.setTimeout(2000);
     h.useHTTP10(true);
-    if (!h.begin(c, url)) ok = false;
-    else if (h.GET() != 200) { h.end(); c.stop(); ok = false; }
-    else {
-      char b[0x18]; memset(b, 0, 0x18);
-      h.getStream().readBytes(b, 0x17);
+    if (h.begin(c, url)) {
+      if (h.GET() == 200) {
+        char b[0x18]; memset(b, 0, 0x18);
+        h.getStream().readBytes(b, 0x17);
+        ok = strncmp(b, "Microsoft Connect Test", 0x16) == 0;
+      }
       h.end();
-      ok = strncmp(b, "Microsoft Connect Test", 0x16) == 0;
     }
+    dbg_ws_print(String(ok ? "HTTP probe: OK" : "HTTP probe: FAIL"));
   }
-  dbg_ws_print(String(ok ? "Primary probe: OK" : "Primary probe: FAIL"));
   if (!ok) {
-    dbg_ws_print(String("Trying backup TCP probe to 8.8.8.8:53..."));
-    int r;
-    {
-      WiFiClient c;
-      c.setTimeout(0x5dc);
-      r = c.connect(IPAddress(8, 8, 8, 8), 0x35);
-      if (r != 0) c.stop();
-    }
-    dbg_ws_print(String(r == 0 ? "Backup probe: FAIL" : "Backup probe: OK"));
-    if (r == 0) {
-      g_bf04c = 0;
-      if (g_c1748 == 0) g_c1748 = 1;
-      dbg_ws_print(String("Internet probe failed (count=") + String(g_c1748, 10) + String(")"));
-      if (g_c1748 == 0) g_c3318 = 1;
-      else { dbg_ws_print(String("No internet - going OFFLINE")); g_c3319 = 1; }
-      return;
-    }
+    g_bf04c = 0;
+    if (g_c1748 != 0xff) g_c1748 = g_c1748 + 1;
+    dbg_ws_print(String("Internet probe failed (count=") + String(g_c1748, 10) + String(")"));
+    if (g_c3319 == 0 && g_c1748 < 2) dbg_ws_print(String("Internet probe: one failure — re-check before going offline"));
+    else { dbg_ws_print(String("No internet - going OFFLINE")); g_c3319 = 1; }
+    return;
   }
   g_c1748 = 0;
   g_bf04c = 1;
@@ -1015,19 +1024,28 @@ L8ed:
     dbg_ws_print(String("[NET ] OFFLINE — ping failed"));
   }
   g_c3381 = 0;
-  fw_version_check();
-  if (g_c2d29 != 0 && g_c3319 == 0) led_lang_fetch(g_c34b0);
+  if (!g_fx_quiet) {                             // нове: уночі (табло погашене) — без перевірки версії й мовного пакета
+    fw_version_check();
+    if (g_c2d29 != 0 && g_c3319 == 0) led_lang_fetch(g_c34b0);
+  }
   if (g_c3319 != 0) {
     if (g_c15e1 != 0xff) g_c15e1 = g_c15e1 + 1;
     dbg_ws_print(String("Wifi        : link up but no internet"));
     if (g_c33f8 == 2 && 5 < g_c15e1) {
-      evlog_write(String("[NET ] Forced re-association (no internet >6 min)"));
-      dbg_ws_print(String("[NET ] Forced re-association"));
-      dbg_ws_print(String("Wifi        : no internet too long — forcing re-association"));
       g_c15e1 = 0;
-      wifi_force_reassoc();
-      g_c3381 = 1;
-      g_c3388 = 0;
+      // Виправлено: в автора — перепідключення Wi-Fi (з WIFI_OFF) кожні ~6 хв без інтернету, навіть коли
+      // роутер у порядку й інтернету немає лише в провайдера. Це не допомагає, а рве веб-з'єднання; у журналі
+      // годинника після такого — падіння по колу. Тепер — лише коли не відповідає й сам роутер.
+      if (net_gateway_alive()) {
+        dbg_ws_print(String("Wifi        : router answers — no internet at provider, keeping Wi-Fi link"));
+      } else {
+        evlog_write(String("[NET ] Forced re-association (no internet >6 min, router silent)"));
+        dbg_ws_print(String("[NET ] Forced re-association"));
+        dbg_ws_print(String("Wifi        : no internet too long — forcing re-association"));
+        wifi_force_reassoc();
+        g_c3381 = 1;
+        g_c3388 = 0;
+      }
     }
   }
 }

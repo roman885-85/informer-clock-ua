@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Informer Clock UA</title>
+<meta name="description" content="Informer Clock UA — незалежна прошивка годинника-інформера на ESP32 і MAX7219 / independent firmware for the ESP32 + MAX7219 information clock">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<main>
+<header class="top">
+  <div class="brand">Informer Clock UA <small>v<span id="ver">…</span></small></div>
+  <div class="lang"><button data-set="uk">Українська</button><button data-set="en">English</button></div>
+</header>
+
+<!-- ============================== УКРАЇНСЬКА ============================== -->
+<div data-l="uk">
+<h1>Годинник-інформер на ESP32</h1>
+<p class="lead">Незалежна прошивка для саморобного годинника на ESP32 і світлодіодних матрицях MAX7219: час, погода, новини, курси валют, датчики, підсвітка WS2812B, голос щогодини, MQTT і Home Assistant. Заснована на прошивці <b>Clock Informer 2.7.1</b> автора <b>Semen_p</b>: помилки виправлено, додано нові функції, оновлення приходять лише з цього проєкту.</p>
+
+<p><a class="btn" href="flasher/">Прошити з браузера</a> <a class="btn secondary" href="manual/">Інструкція користувача</a> <a class="btn secondary" href="https://github.com/roman885-85/informer-clock-ua/blob/main/docs/uk/README.md">Документація</a> <a class="btn secondary" href="https://github.com/roman885-85/informer-clock-ua/releases">Завантаження</a> <a class="btn secondary" href="https://github.com/roman885-85/informer-clock-ua">Вихідний код</a></p>
+
+<div class="card note"><b>Попередній випуск.</b> Версію 1.0.0 зібрано й перевірено на імітаторах та в браузері, але ще не на годиннику. Про помилки пишіть у <a href="https://github.com/roman885-85/informer-clock-ua/issues">Issues</a>, додавши журнал подій (сторінка System).</div>
+
+<h2>Чим відрізняється від оригіналу</h2>
+<ul>
+  <li><b>Окремий проєкт.</b> Власна назва й нумерація версій (1.x); перевірка оновлень, файли оновлення, мовні пакети, історія змін, звуки й корпуси — з цього репозиторію, а не з сервера автора. Прошивки цього проєкту не з'являються в оригінальному проєкті, а оригінальні — тут.</li>
+  <li><b>Виправлено:</b> зависання без інтернету й «годинник не видно в мережі», обриви Wi-Fi, голос щогодини, що не називав час, кнопку, що не вимикала будильник, табло, що світило вночі після повідомлення, літній час, що не перемикався, старий інтерфейс із кешу браузера, зайві точки при зміні години, паролі Wi-Fi у консолі та інше — <a href="https://github.com/roman885-85/informer-clock-ua/blob/main/docs/uk/architecture.md">повний перелік</a>.</li>
+  <li><b>Нове:</b> стан запуску на табло (значок і напис, і на двох поверхах), плавна яскравість за датчиком світла, нічна тиша (без завантажень, поки табло погашене), літній час «Авто» за правилами ЄС, час після перезапуску без інтернету, налагодження по Wi-Fi, запис причин аварій у журнал, сторож головного циклу.</li>
+  <li>Той самий годинник і та сама схема: перехід із прошивки автора зберігає всі налаштування.</li>
+</ul>
+
+<h2>Підключення</h2>
+<p><img src="images/wiring-esp32-uk.svg" alt="Схема підключення до ESP32"></p>
+<p>Таблиця виводів, живлення, два поверхи матриць, датчики — <a href="https://github.com/roman885-85/informer-clock-ua/blob/main/docs/uk/wiring.md">докладно про підключення</a>.</p>
+
+<h2>Автор оригіналу</h2>
+<p>Годинник Clock Informer створив <b>Semen_p</b>: <a href="https://www.thingiverse.com/thing:3924947">сторінка проєкту на Thingiverse</a> (корпуси, схема, опис), <a href="https://www.goldart.ee/">goldart.ee</a>, підтримати автора — <a href="https://ko-fi.com/clockinformer">ko-fi.com/clockinformer</a>. Informer Clock UA — незалежне продовження, не пов'язане з автором і не підтримуване ним; з питаннями щодо цієї прошивки звертайтеся сюди, а не до автора.</p>
+<p>Ліцензія — <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.uk">CC BY-NC 4.0</a>, як в оригіналу: можна копіювати й змінювати із зазначенням автора, але не з комерційною метою.</p>
+</div>
+
+<!-- ============================== ENGLISH ============================== -->
+<div data-l="en">
+<h1>An information clock on ESP32</h1>
+<p class="lead">Independent firmware for the DIY clock on ESP32 and MAX7219 LED matrices: time, weather, news, exchange rates, sensors, WS2812B backlight, hourly voice, MQTT and Home Assistant. Based on the <b>Clock Informer 2.7.1</b> firmware by <b>Semen_p</b>: bugs fixed, new features added, and updates come only from this project.</p>
+
+<p><a class="btn" href="flasher/">Flash from the browser</a> <a class="btn secondary" href="manual/">User manual</a> <a class="btn secondary" href="https://github.com/roman885-85/informer-clock-ua/blob/main/docs/en/README.md">Documentation</a> <a class="btn secondary" href="https://github.com/roman885-85/informer-clock-ua/releases">Downloads</a> <a class="btn secondary" href="https://github.com/roman885-85/informer-clock-ua">Source code</a></p>
+
+<div class="card note"><b>Pre-release.</b> Version 1.0.0 has been built and tested in simulators and in the browser, but not yet on a clock. Please report problems in <a href="https://github.com/roman885-85/informer-clock-ua/issues">Issues</a> with the event log (System page) attached.</div>
+
+<h2>How it differs from the original</h2>
+<ul>
+  <li><b>A separate project.</b> Its own name and version numbers (1.x); update checks, update files, language packs, change history, sounds and cases come from this repository, not from the author's server. Firmware from this project never shows up in the original project, and the original firmware never shows up here.</li>
+  <li><b>Fixed:</b> hangs without internet and “the clock is not visible on the network”, Wi-Fi drops, the hourly voice not saying the time, the button not stopping the alarm, the display staying on at night after a message, summer time not switching, an old interface from the browser cache, stray dots when the hour changes, Wi-Fi passwords in the console and more — <a href="https://github.com/roman885-85/informer-clock-ua/blob/main/docs/en/architecture.md">full list</a>.</li>
+  <li><b>New:</b> start-up status on the display (icon and text, also on two floors), smooth light-sensor brightness, night quiet (no downloads while the display is off), “Auto” summer time by EU rules, time after a restart without internet, Wi-Fi debugging, crash causes in the event log, a main-loop watchdog.</li>
+  <li>Same clock, same wiring: switching from the original firmware keeps all settings.</li>
+</ul>
+
+<h2>Wiring</h2>
+<p><img src="images/wiring-esp32-en.svg" alt="ESP32 wiring diagram"></p>
+<p>Pin table, power, two floors of matrices, sensors — <a href="https://github.com/roman885-85/informer-clock-ua/blob/main/docs/en/wiring.md">wiring in detail</a>.</p>
+
+<h2>Original author</h2>
+<p>Clock Informer was created by <b>Semen_p</b>: <a href="https://www.thingiverse.com/thing:3924947">project page on Thingiverse</a> (cases, schematic, description), <a href="https://www.goldart.ee/">goldart.ee</a>, support the author at <a href="https://ko-fi.com/clockinformer">ko-fi.com/clockinformer</a>. Informer Clock UA is an independent continuation, not affiliated with or supported by the author; please ask about this firmware here, not the author.</p>
+<p>License: <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>, same as the original: you may copy and modify it with attribution, but not for commercial purposes.</p>
+</div>
+
+<footer>
+  <span data-l="uk">Informer Clock UA · на основі Clock Informer автора Semen_p · CC BY-NC 4.0</span>
+  <span data-l="en">Informer Clock UA · based on Clock Informer by Semen_p · CC BY-NC 4.0</span>
+</footer>
+</main>
+<script src="assets/lang.js"></script>
+<script>
+fetch('flasher/manifest.json').then(function (r) { return r.json(); }).then(function (m) { document.getElementById('ver').textContent = m.version; }).catch(function () {});
+</script>
+</body>
+</html>

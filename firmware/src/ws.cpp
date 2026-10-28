@@ -1,10 +1,32 @@
 // WebSocket /ws: налагоджувальна консоль, стан кожні 5 с, «зайнято» для другого клієнта (перенесено з 2.7.1)
+// EN: WebSocket /ws: debug console, state every 5 s, "busy" for a second client (from 2.7.1; Wi-Fi passwords masked).
 #include "fw.h"
 
 static String two(uint8_t v) { return v < 10 ? String("0") + String(v, 10) : String(v, 10); }
 
 // @400d6878: рядок налагодження {"dbg":"…"} усім клієнтам
-void dbg_ws_print(const String &s) {
+// Виправлено: автор друкує в живу консоль вміст /networks.json — разом із паролями Wi-Fi («Saved Networks Config File:»,
+// «Config networks loaded:»). Значення "password" тепер приховано (і в консолі веб-інтерфейсу, і в сетевому журналі).
+static String mask_passwords(const String &s) {
+  int i = s.indexOf("\"password\":\"");
+  if (i < 0) return s;
+  String o("");
+  int from = 0;
+  while (i >= 0) {
+    int v = i + 12, n = s.length(), e = v;
+    while (e < n && (s[e] != '"' || s[e - 1] == '\\')) e++;   // кінець значення — лапка без зворотної риски
+    if (e >= n) break;
+    o += s.substring(from, v);
+    o += "***";
+    from = e;
+    i = s.indexOf("\"password\":\"", e);
+  }
+  o += s.substring(from);
+  return o;
+}
+void dbg_ws_print(const String &s0) {
+  const String &s = s0.indexOf("\"password\"") < 0 ? s0 : mask_passwords(s0);
+  fx_wdbg_line(s.c_str(), s.length());   // нове: сетевий журнал (wdbg.cpp), якщо ввімкнено
 #ifdef COPY_DIAG
   Serial.println(s);   // лише діагностична збірка (env:diag), не частина копії
 #endif

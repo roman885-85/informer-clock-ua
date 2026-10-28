@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Прошивальник · Informer Clock UA</title>
+<link rel="stylesheet" href="../assets/site.css">
+<script type="module" src="https://unpkg.com/esp-web-tools@10.4.0/dist/web/install-button.js?module"></script>
+</head>
+<body>
+<main>
+<header class="top">
+  <div class="brand">Informer Clock UA <small>v<span id="ver">…</span></small></div>
+  <div class="lang"><button data-set="uk">Українська</button><button data-set="en">English</button></div>
+</header>
+
+<div data-l="uk">
+<h1>Прошивка годинника з браузера</h1>
+<p class="lead">Без встановлення програм: потрібні лише Chrome, Edge або Opera на комп'ютері (Windows, macOS, Linux) і USB-кабель із передачею даних.</p>
+</div>
+<div data-l="en">
+<h1>Flash the clock from your browser</h1>
+<p class="lead">No software to install: you only need Chrome, Edge or Opera on a computer (Windows, macOS, Linux) and a USB data cable.</p>
+</div>
+
+<div class="card">
+  <esp-web-install-button manifest="manifest.json">
+    <button slot="activate" class="btn"><span data-l="uk">Під'єднати й прошити</span><span data-l="en">Connect and flash</span></button>
+    <span slot="unsupported"><span data-l="uk">Цей браузер не вміє працювати з USB-портом. Відкрийте сторінку в Chrome, Edge або Opera на комп'ютері.</span><span data-l="en">This browser cannot use USB serial ports. Open this page in Chrome, Edge or Opera on a computer.</span></span>
+    <span slot="not-allowed"><span data-l="uk">Сторінку треба відкривати через https:// (як тут, на GitHub Pages).</span><span data-l="en">The page must be opened over https:// (as here on GitHub Pages).</span></span>
+  </esp-web-install-button>
+</div>
+
+<div data-l="uk">
+<h2>Як прошити</h2>
+<ol>
+  <li>Під'єднайте годинник (плату ESP32) до комп'ютера USB-кабелем.</li>
+  <li>Натисніть <b>«Під'єднати й прошити»</b> і виберіть порт: <code>CP2102</code>/<code>CP210x</code>, <code>CH340</code> або <code>USB Serial</code>.</li>
+  <li>На запитання <b>«Erase device?»</b>:
+    <ul>
+      <li><b>не ставте позначку</b> (не стирати) — оновлення або перехід із прошивки автора Clock Informer: Wi-Fi і всі налаштування зберігаються;</li>
+      <li><b>поставте позначку</b> (стерти) — чиста установка на новий годинник, налаштування скинуться.</li>
+    </ul>
+  </li>
+  <li>Натисніть <b>Install</b> і зачекайте 1–2 хвилини до «Installation complete». Годинник перезапуститься сам.</li>
+  <li>Новий годинник: під'єднайтеся до Wi-Fi <b>«Clock ESP»</b> (без пароля) і відкрийте <code>http://192.168.4.1</code> — далі майстер налаштування.</li>
+</ol>
+<div class="card note">
+  <b>Не під'єднується?</b> Під час «Connecting…» натисніть і тримайте кнопку <kbd>BOOT</kbd> на платі 2–3 секунди. Якщо порт не видно зовсім — встановіть драйвер
+  <a href="https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers">CP210x</a> або <a href="https://www.wch-ic.com/downloads/CH341SER_EXE.html">CH340</a> і перевірте, що кабель не «лише для заряджання».
+</div>
+<h2>Інші способи</h2>
+<ul>
+  <li>Оновлення по мережі — у веб-інтерфейсі годинника: «Оновлення» → «Оновити» (коли на годиннику вже Informer Clock UA).</li>
+  <li>Скрипт для Windows (<code>flash.bat</code>), macOS і Linux (<code>flash.sh</code>) разом із файлами прошивки — архів <code>informer-clock-ua-…-flash.zip</code> на сторінці <a href="https://github.com/roman885-85/informer-clock-ua/releases">випусків</a>.</li>
+  <li>Flash Download Tool від Espressif, PlatformIO — <a href="https://github.com/roman885-85/informer-clock-ua/blob/main/docs/uk/flashing.md">повна інструкція</a>.</li>
+</ul>
+</div>
+
+<div data-l="en">
+<h2>How to flash</h2>
+<ol>
+  <li>Connect the clock (ESP32 board) to the computer with a USB cable.</li>
+  <li>Press <b>“Connect and flash”</b> and choose the port: <code>CP2102</code>/<code>CP210x</code>, <code>CH340</code> or <code>USB Serial</code>.</li>
+  <li>When asked <b>“Erase device?”</b>:
+    <ul>
+      <li><b>leave it unticked</b> (no erase) — update, or switching from the original Clock Informer firmware: Wi-Fi and all settings are kept;</li>
+      <li><b>tick it</b> (erase) — clean install on a new clock, settings are reset.</li>
+    </ul>
+  </li>
+  <li>Press <b>Install</b> and wait 1–2 minutes for “Installation complete”. The clock restarts by itself.</li>
+  <li>New clock: join the Wi-Fi network <b>“Clock ESP”</b> (no password) and open <code>http://192.168.4.1</code> — the setup wizard starts.</li>
+</ol>
+<div class="card note">
+  <b>Cannot connect?</b> While “Connecting…” is shown, press and hold the <kbd>BOOT</kbd> button on the board for 2–3 seconds. If no port appears at all, install the
+  <a href="https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers">CP210x</a> or <a href="https://www.wch-ic.com/downloads/CH341SER_EXE.html">CH340</a> driver and make sure the cable is not charge-only.
+</div>
+<h2>Other ways</h2>
+<ul>
+  <li>Over-the-air update — in the clock's web interface: “Update” → “Update” (once Informer Clock UA is installed).</li>
+  <li>A script for Windows (<code>flash.bat</code>), macOS and Linux (<code>flash.sh</code>) together with the firmware files — the <code>informer-clock-ua-…-flash.zip</code> archive on the <a href="https://github.com/roman885-85/informer-clock-ua/releases">releases</a> page.</li>
+  <li>Espressif Flash Download Tool, PlatformIO — <a href="https://github.com/roman885-85/informer-clock-ua/blob/main/docs/en/flashing.md">full guide</a>.</li>
+</ul>
+</div>
+
+<footer>
+  <span data-l="uk">Informer Clock UA — незалежний проєкт на основі <a href="https://www.thingiverse.com/thing:3924947">Clock Informer</a> автора Semen_p (ліцензія <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>). Прошивальник — <a href="https://esphome.github.io/esp-web-tools/">ESP Web Tools</a>.</span>
+  <span data-l="en">Informer Clock UA is an independent project based on <a href="https://www.thingiverse.com/thing:3924947">Clock Informer</a> by Semen_p (<a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>). Flasher: <a href="https://esphome.github.io/esp-web-tools/">ESP Web Tools</a>.</span>
+  · <a href="../">informer-clock-ua</a>
+</footer>
+</main>
+<script src="../assets/lang.js"></script>
+<script>
+fetch('manifest.json').then(function (r) { return r.json(); }).then(function (m) { document.getElementById('ver').textContent = m.version; }).catch(function () {});
+</script>
+</body>
+</html>

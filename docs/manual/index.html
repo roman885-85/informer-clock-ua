@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Інструкція · Informer Clock UA</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<main>
+<header class="top">
+  <div class="brand">Informer Clock UA</div>
+  <div class="lang"><button data-set="uk">Українська</button><button data-set="en">English</button></div>
+</header>
+
+<!-- ============================== УКРАЇНСЬКА ============================== -->
+<div data-l="uk">
+<h1>Інструкція користувача</h1>
+<p class="lead">Годинник-інформер на ESP32 і матрицях MAX7219: час, погода, новини, курси, датчики, підсвітка, голос щогодини. Налаштовується з будь-якого браузера у вашій мережі.</p>
+
+<h2>Перший запуск</h2>
+<ol>
+  <li>Увімкніть годинник. Поки він не знає вашої мережі, він працює власною точкою Wi-Fi <b>«Clock ESP»</b> (без пароля).</li>
+  <li>Під'єднайтеся до неї з телефона чи комп'ютера й відкрийте <code>http://192.168.4.1</code>.</li>
+  <li>Майстер запитає мову, кількість поверхів і матриць та вашу мережу Wi-Fi. Під'єднавшись, годинник показує на табло свою адресу в мережі — відкривайте її в браузері.</li>
+</ol>
+<p>Поки годинник під час запуску чекає мережу, табло показує, що відбувається: <b>«Синхронізація часу»</b>, <b>«Перевірка інтернету»</b>, <b>«Перевірка оновлень»</b>, <b>«Завантаження погоди»</b> тощо. На двох поверхах зверху — значок із рухом, знизу — напис; на одному — напис.</p>
+<p><img src="../images/status_1.gif" width="340" height="186" alt="Табло під час запуску: значок годинника й напис «Синхронізація часу»"> <img src="../images/status_2.gif" width="340" height="186" alt="Табло під час запуску: глобус і напис «Перевірка інтернету»"></p>
+
+<h2>Сторінки веб-інтерфейсу</h2>
+<p>Меню сторінок — рядок значків угорі (наведіть курсор — з'явиться назва); на телефоні — кнопка ☰ угорі праворуч. Назви — як в інтерфейсі українською:</p>
+<table>
+<tr><th>Сторінка</th><th>Що там</th></tr>
+<tr><td>Налаштування</td><td>текст для табло, ім'я й пароль доступу до веб-інтерфейсу, мова інтерфейсу</td></tr>
+<tr><td>Дисплей</td><td>кількість матриць і поверхів, шрифти, швидкість, <b>яскравість</b> (ручна, за датчиком світла, поріг), <b>відключення дисплея на ніч</b></td></tr>
+<tr><td>Циферблат</td><td>вигляд годинника, ефекти зміни цифр, час показу</td></tr>
+<tr><td>Час</td><td>сервер NTP, часовий пояс, синхронізація, <b>літній час: Вимк / Увімк / Авто</b>, ручне встановлення</td></tr>
+<tr><td>Будильник і нагадування</td><td>будильники й нагадування</td></tr>
+<tr><td>Звук</td><td>голос щогодини (DFPlayer) або зумер, гучність</td></tr>
+<tr><td>Датчики</td><td>температура, вологість, тиск, CO₂, історія</td></tr>
+<tr><td>LED підсвічування</td><td>стрічка WS2812B: ефекти, яскравість</td></tr>
+<tr><td>MQTT + Сервіси</td><td>MQTT і Home Assistant, narodmon</td></tr>
+<tr><td>Погода, Валюта, Новини, Розваги</td><td>джерела даних і ключі доступу (OpenWeatherMap, Weatherbit, GNews, NewsData…)</td></tr>
+<tr><td>Wi-Fi</td><td>мережі, точка доступу</td></tr>
+<tr><td>Оновлення</td><td>вкладки «Оновити» (версія й оновлення по мережі), «Файл конфігурації» (збереження, відновлення, скидання налаштувань), «Завантажити» (звуки для SD-карти, корпуси для 3D-друку)</td></tr>
+</table>
+<p>Сторінка <b>System</b> (журнал подій, пам'ять, <b>налагодження по Wi-Fi</b>) і ця інструкція відкриваються з меню годинника: на комп'ютері — кнопка зі значком годинника внизу ліворуч, пункт «System info &amp; logs»; на телефоні — кнопка <b>⋮</b> внизу праворуч, пункт «System Log».</p>
+
+<h2>Яскравість і ніч</h2>
+<ul>
+  <li><b>За датчиком світла</b> яскравість змінюється плавно, по одному кроку, і не чекає кінця прокрутки новин. Поріг — на сторінці «Дисплей».</li>
+  <li><b>Відключення дисплея на ніч</b> («Дисплей»): поки табло погашене, годинник не завантажує новини, погоду й курси, але лишається в мережі — веб-інтерфейс доступний. Уранці показ продовжується з того місця, де зупинився.</li>
+  <li>Будильник уночі вмикає табло на час дзвінка; повідомлення, надіслане вночі, більше не лишає табло ввімкненим до ранку.</li>
+</ul>
+
+<h2>Час і літній час</h2>
+<ul>
+  <li>Час береться з інтернету (NTP). Після перезапуску годинник одразу показує системний час (він переживає перезапуск), а точний — щойно з'явиться інтернет.</li>
+  <li><b>Літній час «Авто»</b> — перехід за правилами Європи (остання неділя березня й жовтня). «Увімк» — завжди +1 година, «Вимк» — без літнього часу. Зміна пояса чи літнього часу діє одразу, без чекання синхронізації.</li>
+</ul>
+<p><img src="../images/webui-time-dst.jpg" width="400" alt="Сторінка «Час»: перемикач «Літній час» — Вимк, Увімк, Авто"></p>
+
+<h2>Оновлення прошивки</h2>
+<p>«Оновлення» → «Оновити» показує встановлену й найновішу версію та історію змін. Оновлення приходять лише з цього проєкту (Informer Clock UA), а не з сервера автора оригіналу. Перейти на Informer Clock UA з прошивки автора — один раз через USB: <a href="../flasher/">прошивальник у браузері</a>; налаштування при цьому зберігаються, якщо не ставити позначку «стерти».</p>
+
+<h2>Налагодження по Wi-Fi</h2>
+<p>Сторінка System → перемикач «Налагодження по Wi-Fi». Коли ввімкнено:</p>
+<ul>
+  <li>журнал роботи — на порту 23: <code>nc &lt;адреса-годинника&gt; 23</code> (macOS, Linux) або PuTTY (Windows, тип з'єднання Raw, порт 23);</li>
+  <li>прошивка по Wi-Fi для розробників (ArduinoOTA, порт 3232): <code>pio run -e clock -t upload --upload-port &lt;адреса&gt;</code>; якщо в «Налаштуваннях» задано ім'я й пароль — додайте <code>PLATFORMIO_UPLOAD_FLAGS="--auth=&lt;пароль&gt;"</code>.</li>
+</ul>
+<p>Вимкнено — порти закриті. Причина будь-якої аварії записується в журнал подій сторінки System і без цього перемикача.</p>
+
+<h2>Голос і звуки (DFPlayer)</h2>
+<p>Розпакуйте архів «Звуки для SD-карти» («Оновлення» → «Завантажити») у корінь microSD-картки: папки <code>01</code>–<code>06</code> — голоси (вибираються на сторінці «Звук»), <code>15</code> — мелодії перед оголошенням часу, <code>16</code> — звуки будильника. Оголошення звучить на початку кожної години: мелодія, «Зараз», година.</p>
+
+<h2>Кнопка на годиннику</h2>
+<ul>
+  <li><b>Коротке натискання</b>: у мережі — наступний розділ інформації; без мережі — спроба під'єднатися до збереженої мережі.</li>
+  <li><b>Під час дзвінка будильника</b>: коротке натискання — відкласти (дзвінок повториться приблизно за 5 хв), утримання ≥2 с — вимкнути.</li>
+  <li><b>Утримання ≈5 с</b> — перемкнути режим: власна точка доступу «Clock ESP» ↔ під'єднання до вашої мережі; годинник перезапуститься.</li>
+</ul>
+<p class="card note">Підказка в інтерфейсі про скидання кнопкою за ~20 с успадкована від оригіналу: за кодом 2.7.1 годинник уже через 5 с перемикає режим і перезапускається. Скидайте налаштування з веб-інтерфейсу (нижче) або прошивальником з позначкою «стерти».</p>
+
+<h2>Якщо щось не так</h2>
+<ul>
+  <li><b>Годинник не з'являється в мережі.</b> Видно точку «Clock ESP» — значить, він не під'єднався до вашої мережі: зайдіть на <code>192.168.4.1</code> і виберіть мережу знову.</li>
+  <li><b>«Нема інтернету».</b> Годинник перевіряє зв'язок із 8.8.8.8 і 1.1.1.1, далі — http://www.msftconnecttest.com. Без інтернету погода й новини не оновлюються, але час іде; Wi-Fi перепідключається, лише коли не відповідає сам роутер.</li>
+  <li><b>Скидання налаштувань</b>: «Оновлення» → «Файл конфігурації» → «Повернення до заводських установок». Після перезапуску — знову точка «Clock ESP».</li>
+  <li>Журнал подій (сторінка System) показує перезапуски, аварії та їх причини — додайте його до повідомлення про помилку.</li>
+</ul>
+<div class="card">Повна документація, схеми підключення й вихідний код: <a href="https://github.com/roman885-85/informer-clock-ua">github.com/roman885-85/informer-clock-ua</a> · повідомити про помилку: <a href="https://github.com/roman885-85/informer-clock-ua/issues">Issues</a></div>
+</div>
+
+<!-- ============================== ENGLISH ============================== -->
+<div data-l="en">
+<h1>User manual</h1>
+<p class="lead">An information clock on ESP32 and MAX7219 matrices: time, weather, news, exchange rates, sensors, backlight, hourly voice. Configured from any browser on your network.</p>
+
+<h2>First start</h2>
+<ol>
+  <li>Power the clock. Until it knows your network, it runs its own Wi-Fi access point <b>“Clock ESP”</b> (no password).</li>
+  <li>Join it from a phone or computer and open <code>http://192.168.4.1</code>.</li>
+  <li>The wizard asks for the language, the number of floors and matrices, and your Wi-Fi network. Once connected, the clock shows its network address on the display — open it in a browser.</li>
+</ol>
+<p>While the clock waits for the network during start-up, the display shows what is going on: <b>“Time sync”</b>, <b>“Checking internet”</b>, <b>“Checking for updates”</b>, <b>“Loading weather”</b> and so on. On two floors there is an animated icon on top and text below; on one floor — the text.</p>
+<p><img src="../images/status_1.gif" width="340" height="186" alt="Display during start-up: clock icon and the text “Time sync” (in Ukrainian)"> <img src="../images/status_2.gif" width="340" height="186" alt="Display during start-up: globe and the text “Checking internet” (in Ukrainian)"></p>
+
+<h2>Web interface pages</h2>
+<p>The page menu is the row of icons at the top (hover to see the name); on a phone — the ☰ button at the top right. Names as they appear in the English interface:</p>
+<table>
+<tr><th>Page</th><th>What is there</th></tr>
+<tr><td>Settings</td><td>display text, web interface user name and password, interface language</td></tr>
+<tr><td>Display</td><td>matrix and floor count, fonts, speed, <b>brightness</b> (manual, light sensor, threshold), <b>shut down the display at night</b></td></tr>
+<tr><td>ClockFace</td><td>clock look, digit transition effects, display time</td></tr>
+<tr><td>Time</td><td>NTP server, time zone, sync, <b>summer time: Off / On / Auto</b>, manual setting</td></tr>
+<tr><td>Alarm &amp; Reminders</td><td>alarms and reminders</td></tr>
+<tr><td>Sound</td><td>hourly voice (DFPlayer) or buzzer, volume</td></tr>
+<tr><td>Sensors</td><td>temperature, humidity, pressure, CO₂, history</td></tr>
+<tr><td>LED Light</td><td>WS2812B strip: effects, brightness</td></tr>
+<tr><td>MQTT + Services</td><td>MQTT and Home Assistant, narodmon</td></tr>
+<tr><td>Weather, Currency, News, Entertainment</td><td>data sources and API keys (OpenWeatherMap, Weatherbit, GNews, NewsData…)</td></tr>
+<tr><td>Wi-Fi</td><td>networks, access point</td></tr>
+<tr><td>Update</td><td>tabs “Update” (version and over-the-air update), “Config File” (backup, restore, factory reset), “Download” (sounds for the SD card, cases for 3D printing)</td></tr>
+</table>
+<p>The <b>System</b> page (event log, memory, <b>Wi-Fi debug</b>) and this manual open from the clock menu: on a computer — the button with the clock icon at the bottom left, item “System info &amp; logs”; on a phone — the <b>⋮</b> button at the bottom right, item “System Log”.</p>
+
+<h2>Brightness and night</h2>
+<ul>
+  <li><b>Light sensor</b> brightness changes smoothly, one step at a time, and no longer waits for news scrolling to finish. The threshold is on the “Display” page.</li>
+  <li><b>Shut down the display at night</b> (“Display”): while the display is off, the clock does not download news, weather or rates but stays on the network — the web interface is available. In the morning the content continues from where it stopped.</li>
+  <li>An alarm at night turns the display on while ringing; a message sent at night no longer leaves the display on until morning.</li>
+</ul>
+
+<h2>Time and summer time</h2>
+<ul>
+  <li>Time comes from the internet (NTP). After a restart the clock immediately shows the system time (it survives a restart), and the exact time as soon as the internet is available.</li>
+  <li><b>Summer time “Auto”</b> follows the European rules (last Sunday of March and October). “On” is always +1 hour, “Off” — no summer time. Time zone and summer time changes apply immediately, without waiting for a sync.</li>
+</ul>
+<p><img src="../images/webui-time-dst.jpg" width="400" alt="“Time” page: the “Summer time” switch — Off, On, Auto (Ukrainian interface)"></p>
+
+<h2>Firmware updates</h2>
+<p>“Update” → “Update” shows the installed and the latest version and the change history. Updates come only from this project (Informer Clock UA), never from the original author's server. Switching from the original firmware to Informer Clock UA is done once over USB: <a href="../flasher/">browser flasher</a>; settings are kept unless you tick “erase”.</p>
+
+<h2>Wi-Fi debugging</h2>
+<p>System page → “Wi-Fi debug” switch. When enabled:</p>
+<ul>
+  <li>the running log is on port 23: <code>nc &lt;clock-address&gt; 23</code> (macOS, Linux) or PuTTY (Windows, connection type Raw, port 23);</li>
+  <li>firmware upload over Wi-Fi for developers (ArduinoOTA, port 3232): <code>pio run -e clock -t upload --upload-port &lt;address&gt;</code>; if a user name and password are set in “Settings”, add <code>PLATFORMIO_UPLOAD_FLAGS="--auth=&lt;password&gt;"</code>.</li>
+</ul>
+<p>When disabled, the ports are closed. The cause of any crash is written to the System page event log even without this switch.</p>
+
+<h2>Voice and sounds (DFPlayer)</h2>
+<p>Unpack the “Sounds for SD card” archive (“Update” → “Download”) to the root of a microSD card: folders <code>01</code>–<code>06</code> are voices (chosen on the “Sound” page), <code>15</code> — melodies before the time announcement, <code>16</code> — alarm sounds. The announcement plays at the start of every hour: melody, “Now”, the hour.</p>
+
+<h2>The button on the clock</h2>
+<ul>
+  <li><b>Short press</b>: on the network — next information section; offline — try to join the saved network.</li>
+  <li><b>While an alarm rings</b>: short press — snooze (it rings again in about 5 minutes), hold ≥2 s — stop.</li>
+  <li><b>Hold ≈5 s</b> — switch the mode: own access point “Clock ESP” ↔ joining your network; the clock restarts.</li>
+</ul>
+<p class="card note">The interface hint about a factory reset by holding the button ~20 s is inherited from the original: in the 2.7.1 code the clock already switches the mode and restarts after 5 s. Reset the settings from the web interface (below) or with the flasher's “erase” option.</p>
+
+<h2>Troubleshooting</h2>
+<ul>
+  <li><b>The clock does not appear on the network.</b> If the “Clock ESP” access point is visible, it could not join your network: open <code>192.168.4.1</code> and choose the network again.</li>
+  <li><b>“No internet”.</b> The clock checks 8.8.8.8 and 1.1.1.1, then http://www.msftconnecttest.com. Without internet, weather and news are not updated but the time keeps running; Wi-Fi reconnects only when the router itself does not answer.</li>
+  <li><b>Factory reset</b>: “Update” → “Config File” → “Reset configuration to factory default settings”. After the restart — the “Clock ESP” access point again.</li>
+  <li>The event log (System page) shows restarts, crashes and their causes — attach it to a bug report.</li>
+</ul>
+<div class="card">Full documentation, wiring diagrams and source code: <a href="https://github.com/roman885-85/informer-clock-ua">github.com/roman885-85/informer-clock-ua</a> · report a problem: <a href="https://github.com/roman885-85/informer-clock-ua/issues">Issues</a></div>
+</div>
+
+<footer>
+  <span data-l="uk">Informer Clock UA — незалежний проєкт на основі <a href="https://www.thingiverse.com/thing:3924947">Clock Informer</a> автора Semen_p, ліцензія <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>.</span>
+  <span data-l="en">Informer Clock UA is an independent project based on <a href="https://www.thingiverse.com/thing:3924947">Clock Informer</a> by Semen_p, licensed <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>.</span>
+</footer>
+</main>
+<script src="../assets/lang.js"></script>
+</body>
+</html>

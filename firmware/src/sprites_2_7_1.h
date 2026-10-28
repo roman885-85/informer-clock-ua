@@ -1,4 +1,5 @@
 // Спрайти анімації циферблата (cl_sprite 0–17, +5 для випадкового вибору) з прошивки 2.7.1: формат MD_Parola (кадри × ширина, стовпці, біт0 — верх).
+// EN: Clock-face animation sprites from 2.7.1.
 #pragma once
 #include <stdint.h>
 
