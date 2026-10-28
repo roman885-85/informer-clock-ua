@@ -8,6 +8,7 @@
 # файли прошивки — з теки firmware поруч (архів випуску), з docs\firmware репозиторію або з GitHub.
 param([string]$Mode = "", [string]$Port = "", [int]$Baud = 230400)
 $ErrorActionPreference = "Stop"
+$ProgressPreference = "SilentlyContinue"   # PowerShell 5.1: смуга прогресу Invoke-WebRequest у десятки разів сповільнює завантаження
 $Raw = "https://raw.githubusercontent.com/roman885-85/informer-clock-ua/main/docs/firmware"
 $EsptoolZip = "https://github.com/espressif/esptool/releases/download/v4.12.0/esptool-v4.12.0-windows-amd64.zip"
 $Here = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -52,7 +53,7 @@ foreach ($f in $Files) { if (-not (Test-Path (Join-Path $Fw $f))) { Die "нем�
 
 # --- порт
 if ($Port -eq "") {
-  $Ports = [System.IO.Ports.SerialPort]::GetPortNames() | Sort-Object
+  $Ports = @([System.IO.Ports.SerialPort]::GetPortNames() | Sort-Object)   # @() — масив і для одного порту ($Ports[0] — «COM3», не «C»)
   if ($Ports.Count -eq 0) { Die "годинник не знайдено: під'єднайте USB-кабель і встановіть драйвер CP210x/CH340 / clock not found" }
   if ($Ports.Count -eq 1) { $Port = $Ports[0] }
   else {

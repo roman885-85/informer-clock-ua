@@ -101,8 +101,9 @@ Small programs that build the **real** firmware code on a computer with core stu
 | `status_icons.py` | `python3 tools/sim/status_icons.py --png icons.png` | frames of the start-up status icons |
 | `mockclock.py` | see above | the web interface without a clock |
 
-Documentation tools: `tools/docs/wiring_svg.py` (wiring diagram), `tools/build-release.sh` (release),
-`tools/flash/` (flashing scripts).
+Documentation tools: `tools/docs/wiring_svg.py` (wiring diagram), `tools/docs/build-pdf.mjs` (documentation as PDF:
+`npm install --prefix tools/docs markdown-it@14`, then `node tools/docs/build-pdf.mjs` — a book per language and the
+separate parts in `release/docs-pdf/`, needs Chrome), `tools/build-release.sh` (release), `tools/flash/` (flashing scripts).
 
 ## Repository layout
 

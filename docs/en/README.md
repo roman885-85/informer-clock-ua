@@ -15,5 +15,8 @@ Clock Informer 2.7.1 firmware by [Semen_p](https://www.thingiverse.com/thing:392
 | [Wi-Fi debugging](wifi-debug.md) | network log, firmware upload over Wi-Fi, event log and crashes |
 | [Troubleshooting](troubleshooting.md) | common problems and what to do, how to report a bug |
 
+All documentation as one PDF (with a cover and contents) and every part separately — among the
+[release](https://github.com/roman885-85/informer-clock-ua/releases) files: `informer-clock-ua-<version>-docs-en.pdf`.
+
 The 1.0.0 pre-release has not been tested on a clock yet — please report problems in
 [Issues](https://github.com/roman885-85/informer-clock-ua/issues).

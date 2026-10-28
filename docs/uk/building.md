@@ -101,8 +101,9 @@ python3 tools/sim/mockclock.py --port 8791      # http://localhost:8791
 | `status_icons.py` | `python3 tools/sim/status_icons.py --png icons.png` | кадри значків стану запуску |
 | `mockclock.py` | див. вище | веб-інтерфейс без годинника |
 
-Інструменти документації: `tools/docs/wiring_svg.py` (схема підключення), `tools/build-release.sh` (випуск),
-`tools/flash/` (скрипти прошивки).
+Інструменти документації: `tools/docs/wiring_svg.py` (схема підключення), `tools/docs/build-pdf.mjs` (документація
+в PDF: `npm install --prefix tools/docs markdown-it@14`, потім `node tools/docs/build-pdf.mjs` — книга на кожну мову й
+окремі частини в `release/docs-pdf/`, потрібен Chrome), `tools/build-release.sh` (випуск), `tools/flash/` (скрипти прошивки).
 
 ## Структура репозиторію
 

@@ -5,3 +5,7 @@ release/
 __pycache__/
 *.pyc
 .DS_Store
+# залежності генератора PDF / PDF builder dependencies
+tools/docs/node_modules/
+tools/docs/package.json
+tools/docs/package-lock.json
