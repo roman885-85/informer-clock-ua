@@ -3,7 +3,10 @@
 [Українською](../uk/README.md) · [Project home](../../README.en.md)
 
 Informer Clock UA is independent firmware for the ESP32 + MAX7219 LED-matrix information clock, based on the
-Clock Informer 2.7.1 firmware by [Semen_p](https://www.thingiverse.com/thing:3924947).
+Clock Informer 2.7.1 firmware by [Semen_p](https://www.thingiverse.com/thing:3924947). The main reason for the
+project: the source code of the author's firmware is not published, so nobody else can change it or fix a bug the
+author does not fix. Here that code has been reconstructed and published in full, with explanations
+([details](../../README.en.md#why-this-project-exists)).
 
 | Document | Contents |
 |---|---|

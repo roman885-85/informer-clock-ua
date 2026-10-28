@@ -67,16 +67,18 @@ const LANGS = {
 
 const slug = (t) => t.trim().toLowerCase().replace(/[^\p{L}\p{N}\s_-]/gu, '').replace(/\s/g, '-');
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+// markdown-it кодує кирилицю в адресі (#%D0%B7…), а якорі заголовків — кирилицею: для посилань усередині PDF розкодовуємо.
+const dec = (s) => { try { return decodeURIComponent(s); } catch { return s; } };
 
 // Посилання з тексту частини: на іншу частину — всередину книги (у книзі) або на GitHub (окремий PDF);
 // на файл репозиторію — на GitHub; картинки — локальні файли. env: { from, lang, prefix, book }
 function linkTarget(href, env) {
   if (/^(https?:|mailto:)/.test(href)) return { href };
-  if (href.startsWith('#')) return { href: `#${env.prefix}${href.slice(1)}` };
+  if (href.startsWith('#')) return { href: `#${env.prefix}${dec(href.slice(1))}` };
   const [file, anchor] = href.split('#');
   const rel = path.relative(ROOT, path.resolve(path.dirname(path.join(ROOT, env.from)), file.split('?')[0]));
   const part = LANGS[env.lang].parts.find((p) => p[2] === rel);
-  if (part && env.book) return { href: `#${part[0]}--${anchor || 'top'}` };
+  if (part && env.book) return { href: `#${part[0]}--${anchor ? dec(anchor) : 'top'}` };
   if (rel.startsWith('docs/') && !rel.endsWith('.md')) {           // сторінки сайту (прошивальник, інструкція)
     const web = rel.slice(5).replace(/index\.html$/, '');
     return { href: `${PAGES}/${web}${href.includes('?') ? '?' + href.split('?')[1].split('#')[0] : ''}` };

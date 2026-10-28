@@ -5,13 +5,24 @@
 [Manual](https://roman885-85.github.io/informer-clock-ua/manual/?lang=en) ·
 [Documentation](docs/en/README.md) · [Releases](https://github.com/roman885-85/informer-clock-ua/releases)
 
-**Independent firmware for the ESP32 + MAX7219 LED-matrix information clock**, based on the **Clock Informer 2.7.1**
-firmware by **Semen_p**.
+**Independent firmware for the ESP32 + MAX7219 LED-matrix information clock — with full source code**, based on the
+**Clock Informer 2.7.1** firmware by **Semen_p**.
 
 > **Pre-release 1.0.0.** Built and tested in simulators and in the browser, but not yet on a clock. Please report
 > problems in [Issues](https://github.com/roman885-85/informer-clock-ua/issues).
 
-## What it is and what it is for
+## Why this project exists
+
+**The main reason: the source code of the Clock Informer firmware is not published.** The author distributes the
+firmware for free, but only as ready-made files (`.bin`). Without the source code, a clock owner cannot change the
+firmware or fix a bug in it: they have to wait for the author to fix it, and if the author doesn't, put up with it.
+
+Informer Clock UA removes this dependence. The source code of firmware 2.7.1 was reconstructed from its machine code
+(how — see [architecture.md](docs/en/architecture.md#where-the-code-comes-from)) and is published here in full, with
+explanations. Now you can build the firmware yourself, adapt it and fix it without waiting for anyone; what has already
+been fixed is listed [below](#how-it-differs-from-the-original).
+
+## What it is
 
 A DIY desk clock: time (NTP, RTC), weather, news, currency and Bitcoin rates, sensor readings (temperature, humidity,
 pressure, CO₂), WS2812B backlight, an hourly voice time announcement (DFPlayer), alarms, MQTT and Home Assistant.

@@ -1,6 +1,8 @@
 # firmware — прошивка / firmware source
 
-**UA.** Вихідний код прошивки Informer Clock UA для ESP32 (PlatformIO, Arduino-ESP32 1.0.4).
+**UA.** Вихідний код прошивки Informer Clock UA для ESP32 (PlatformIO, Arduino-ESP32 1.0.4). Автор Clock Informer
+вихідного коду не публікує, тому код відтворено з машинного коду прошивки 2.7.1 — щоб її можна було самому змінювати й
+виправляти ([як відтворено](../docs/uk/architecture.md#звідки-код)).
 
 ```sh
 pio run -e clock                 # зібрати
@@ -16,7 +18,9 @@ pio run -e clock -t upload       # записати через USB (налашт
 
 Збирання, випуск, перевірки — [docs/uk/building.md](../docs/uk/building.md).
 
-**EN.** Informer Clock UA firmware source for ESP32 (PlatformIO, Arduino-ESP32 1.0.4). `pio run -e clock` builds,
+**EN.** Informer Clock UA firmware source for ESP32 (PlatformIO, Arduino-ESP32 1.0.4). The Clock Informer author does
+not publish the source code, so it was reconstructed from the 2.7.1 firmware's machine code — so that anyone can change
+and fix the firmware ([how](../docs/en/architecture.md#where-the-code-comes-from)). `pio run -e clock` builds,
 `pio run -e clock -t upload` writes over USB (settings are kept). `src/` — code (each file starts with a Ukrainian
 description and an `// EN:` line; new modules are marked “нове, не з оригіналу”, fixes in ported code “Виправлено:”);
 `lib/` — modified or unregistered libraries; `partitions_clock.csv` — the author's partition table; `platformio.ini` —

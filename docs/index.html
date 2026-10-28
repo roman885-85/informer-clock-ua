@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Informer Clock UA</title>
-<meta name="description" content="Informer Clock UA — незалежна прошивка годинника-інформера на ESP32 і MAX7219 / independent firmware for the ESP32 + MAX7219 information clock">
+<meta name="description" content="Informer Clock UA — незалежна прошивка з повним вихідним кодом для годинника-інформера на ESP32 і MAX7219 / independent firmware with full source code for the ESP32 + MAX7219 information clock">
 <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
@@ -17,11 +17,15 @@
 <!-- ============================== УКРАЇНСЬКА ============================== -->
 <div data-l="uk">
 <h1>Годинник-інформер на ESP32</h1>
-<p class="lead">Незалежна прошивка для саморобного годинника на ESP32 і світлодіодних матрицях MAX7219: час, погода, новини, курси валют, датчики, підсвітка WS2812B, голос щогодини, MQTT і Home Assistant. Заснована на прошивці <b>Clock Informer 2.7.1</b> автора <b>Semen_p</b>: помилки виправлено, додано нові функції, оновлення приходять лише з цього проєкту.</p>
+<p class="lead">Незалежна прошивка для саморобного годинника на ESP32 і світлодіодних матрицях MAX7219: час, погода, новини, курси валют, датчики, підсвітка WS2812B, голос щогодини, MQTT і Home Assistant. Заснована на прошивці <b>Clock Informer 2.7.1</b> автора <b>Semen_p</b>: вихідний код опубліковано повністю, помилки виправлено, додано нові функції, оновлення приходять лише з цього проєкту.</p>
 
 <p><a class="btn" href="flasher/">Прошити з браузера</a> <a class="btn secondary" href="manual/">Інструкція користувача</a> <a class="btn secondary" href="https://github.com/roman885-85/informer-clock-ua/blob/main/docs/uk/README.md">Документація</a> <a class="btn secondary" href="https://github.com/roman885-85/informer-clock-ua/releases">Завантаження</a> <a class="btn secondary" href="https://github.com/roman885-85/informer-clock-ua">Вихідний код</a></p>
 
 <div class="card note"><b>Попередній випуск.</b> Версію 1.0.0 зібрано й перевірено на імітаторах та в браузері, але ще не на годиннику. Про помилки пишіть у <a href="https://github.com/roman885-85/informer-clock-ua/issues">Issues</a>, додавши журнал подій (сторінка System).</div>
+
+<h2>Навіщо цей проєкт</h2>
+<p><b>Головна причина — вихідний код прошивки Clock Informer не опублікований.</b> Автор поширює прошивку безкоштовно, але лише готовими файлами (.bin), тож власник годинника не може сам змінити її чи виправити помилку: доводиться чекати, поки її виправить автор, а якщо автор її не виправляє — миритися з нею.</p>
+<p>Тут вихідний код прошивки 2.7.1 відтворено з її машинного коду й опубліковано повністю, з поясненнями (<a href="https://github.com/roman885-85/informer-clock-ua/blob/main/docs/uk/architecture.md#звідки-код">як саме</a>). Тепер прошивку можна самому зібрати, змінити й виправити, не чекаючи нікого.</p>
 
 <h2>Чим відрізняється від оригіналу</h2>
 <ul>
@@ -43,11 +47,15 @@
 <!-- ============================== ENGLISH ============================== -->
 <div data-l="en">
 <h1>An information clock on ESP32</h1>
-<p class="lead">Independent firmware for the DIY clock on ESP32 and MAX7219 LED matrices: time, weather, news, exchange rates, sensors, WS2812B backlight, hourly voice, MQTT and Home Assistant. Based on the <b>Clock Informer 2.7.1</b> firmware by <b>Semen_p</b>: bugs fixed, new features added, and updates come only from this project.</p>
+<p class="lead">Independent firmware for the DIY clock on ESP32 and MAX7219 LED matrices: time, weather, news, exchange rates, sensors, WS2812B backlight, hourly voice, MQTT and Home Assistant. Based on the <b>Clock Informer 2.7.1</b> firmware by <b>Semen_p</b>: full source code published, bugs fixed, new features added, and updates come only from this project.</p>
 
 <p><a class="btn" href="flasher/">Flash from the browser</a> <a class="btn secondary" href="manual/">User manual</a> <a class="btn secondary" href="https://github.com/roman885-85/informer-clock-ua/blob/main/docs/en/README.md">Documentation</a> <a class="btn secondary" href="https://github.com/roman885-85/informer-clock-ua/releases">Downloads</a> <a class="btn secondary" href="https://github.com/roman885-85/informer-clock-ua">Source code</a></p>
 
 <div class="card note"><b>Pre-release.</b> Version 1.0.0 has been built and tested in simulators and in the browser, but not yet on a clock. Please report problems in <a href="https://github.com/roman885-85/informer-clock-ua/issues">Issues</a> with the event log (System page) attached.</div>
+
+<h2>Why this project exists</h2>
+<p><b>The main reason: the source code of the Clock Informer firmware is not published.</b> The author distributes the firmware for free, but only as ready-made files (.bin), so a clock owner cannot change it or fix a bug themselves: they have to wait for the author to fix it, and if the author doesn't, put up with it.</p>
+<p>Here the source code of firmware 2.7.1 has been reconstructed from its machine code and published in full, with explanations (<a href="https://github.com/roman885-85/informer-clock-ua/blob/main/docs/en/architecture.md#where-the-code-comes-from">how</a>). Now you can build, change and fix the firmware yourself without waiting for anyone.</p>
 
 <h2>How it differs from the original</h2>
 <ul>

@@ -5,8 +5,9 @@
 ## Where the code comes from
 
 The **Clock Informer 2.7.1** firmware for ESP32 (by [Semen_p](https://www.thingiverse.com/thing:3924947), licensed
-CC BY-NC 4.0) is distributed as ready-made firmware files; the author does not publish the source of the ESP32 version.
-The code in this repository was reconstructed from the 2.7.1 machine code:
+CC BY-NC 4.0) is distributed as ready-made firmware files; the author does not publish its source code (for ESP32 or
+for any other board). So without the author nobody can change the firmware or fix a bug in it — this is the main reason
+for this project. The code in this repository was reconstructed from the 2.7.1 machine code:
 
 - functions were decompiled (Ghidra) and rewritten in C++ for the same Arduino-ESP32 1.0.4 core and the same libraries;
 - all 376 of the author's functions were compared with the original at machine-code level (calls, globals, strings,
