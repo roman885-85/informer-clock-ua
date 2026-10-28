@@ -186,12 +186,15 @@ void display_clear_all() {
 
 // @400d89d0: оновлення часу на двох поверхах (великий циферблат)
 void clock_tick_2zones() {
+  if (fx_bigslide_tick()) return;                // нове: триває перелистування цифр (bigslide.cpp)
   P.displayAnimate();
   if (!P.getZoneStatus(0)) return;
   if (!P.getZoneStatus(1)) return;
   colon_timing(g_c34ae);
   if ((uint32_t)g_c349e <= millis() - g_c18c0) {
     g_c18c0 = millis();
+    char prev[sizeof g_c347d];                   // нове: рядок, що зараз на табло
+    memcpy(prev, g_c347d, sizeof prev);
     time_string_format(g_c347d, g_c34ae);
     strcpy80(g_c3472, g_c347d);
     g_c34ae = g_c34ae + 1;
@@ -202,6 +205,7 @@ void clock_tick_2zones() {
       g_c349d = 0;
       g_c2f1f = 1;
     }
+    if (fx_bigslide_begin(prev, g_c347d)) return;   // нове: цифри змінились — перелистування замість друку (An=1)
     P.displayReset(0);
     P.displayReset(1);
   }
@@ -425,6 +429,7 @@ L2d8e:
 
 // @400e28e4: старт великого циферблата
 void bigclock_start() {
+  fx_bigslide_reset();                           // нове: перелистування цифр (bigslide.cpp) — з нуля
   P.displayClear(0); P.displayClear(1);
   P.displayReset(0); P.displayReset(1);
   P.setCharSpacing(1);

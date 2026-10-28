@@ -4,11 +4,11 @@
 // Перенесено з 2.7.1 (адреси оригіналу в коментарях).
 #include "fw.h"
 
-// надіслати JSON у веб-інтерфейс (автор — через printfAll)
+// надіслати JSON у веб-інтерфейс (автор — через printfAll; тепер через чергу ws.cpp)
 static void ws_send_doc(JsonDocument &doc) {
   String s("");
   serializeJson(doc, s);
-  ws.printfAll(String(s).c_str());
+  ws_send(s);
 }
 // @400ec79c: DS18B20 (раз на 20 с; поправка g_c32d8)
 void sensor_ds18b20() {

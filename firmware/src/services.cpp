@@ -22,13 +22,15 @@ void ota_progress(size_t done, size_t total) {
   if (pct != g_bebe8 && (99 < pct || 1 < pct - g_bebe8 || 249 < now - g_c1734)) {
     g_bebe8 = pct;
     g_c1734 = now;
-    ws.printfAll("{\"ota_pct\":\"%d\",\"ota_phase\":\"%d\"}", pct, g_c2e98);
+    char b[48];
+    ws_send(b, snprintf(b, sizeof b, "{\"ota_pct\":\"%d\",\"ota_phase\":\"%d\"}", pct, g_c2e98));
   }
 }
 // @400d312c: етап OTA у веб-інтерфейс
 void ota_phase(uint8_t phase) {
   g_c2e98 = phase;
-  ws.printfAll("{\"ota_pct\":\"0\",\"ota_phase\":\"%d\"}", phase);
+  char b[48];
+  ws_send(b, snprintf(b, sizeof b, "{\"ota_pct\":\"0\",\"ota_phase\":\"%d\"}", phase));
 }
 // @4011629c: перевірка нової версії (раз на 6 год; помилка — 3 год). Змінено: опис версії — FX_UPDATE_URL (HTTPS,
 // GitHub) у форматі {"ver":"1.0.1","bin":"https://…/informer-clock-ua-esp32.bin",…}; g_c2ea8 — остання версія,

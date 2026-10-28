@@ -50,7 +50,7 @@ void currency_fetch() {
   }
   float rate = doc[0]["rate"].as<float>();
   g_bf048 = rate;
-  ws.printfAll(String(String("{\"valuta_rate\": \"") + String(g_bf048, 2) + String("\"}")).c_str());
+  ws_send(String("{\"valuta_rate\": \"") + String(g_bf048, 2) + String("\"}"));
   led_phrase(p, g_c34b0, 0x31);
   g_c1aec = String(p) + g_c312c;
   int ph = -1;
@@ -123,7 +123,7 @@ void bitcoin_fetch() {
   }
   float rate = doc["bitcoin"][cur].as<float>();
   g_bf044 = rate;
-  ws.printfAll(String(String("{\"btc_rate\": \"") + String(g_bf044, 2) + String("\"}")).c_str());
+  ws_send(String("{\"btc_rate\": \"") + String(g_bf044, 2) + String("\"}"));
   led_phrase(p, g_c34b0, 0x31);
   g_c1ad8 = String("    ") + p + String("Bitcoin");
   if (g_c3114.equals(String("EUR"))) {

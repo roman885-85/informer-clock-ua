@@ -50,6 +50,9 @@ void smallclock_8m();
 void clock_enter();
 void clockface_effect_select();
 void bigclock_start();
+bool fx_bigslide_begin(const char *prev, const char *next);   // нове: bigslide.cpp
+bool fx_bigslide_tick();
+void fx_bigslide_reset();
 void display_restart_content();
 void to_bigclock();
 void to_bigclock_mark();
@@ -397,6 +400,10 @@ void net_probe_internet();
 void net_check_periodic(uint32_t);
 void wifi_reconnect_cycle(uint32_t per);
 void dbg_ws_print(const String &s);
+bool ws_send(const char *p, size_t n);   // нове: черга повідомлень веб-інтерфейсу (надсилає потік AsyncTCP)
+bool ws_send(const String &s);
+bool ws_send_room(size_t n);
+extern volatile uint8_t g_fx_ws_n;
 void ws_on_event(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len);
 void ws_state_tick_5s(uint32_t ms);
 void ws_state_json_build();

@@ -117,7 +117,7 @@ void on_mqtt_connect(bool sessionPresent) {
   String s("");
   doc["mq_stat"] = String("1");
   serializeJson(doc, s);
-  ws.printfAll(String(s).c_str());
+  ws_send(s);
   dbg_ws_print(String("Connected to MQTT.  session=") + String(sessionPresent, 10));
   g_bed1c = 0;
   mqtt_publish_online();
@@ -129,7 +129,7 @@ void on_mqtt_disconnect(AsyncMqttClientDisconnectReason reason) {
   String s("");
   doc["mq_stat"] = String("0");
   serializeJson(doc, s);
-  ws.printfAll(String(s).c_str());
+  ws_send(s);
   for (int i = 0; i < 12; i++) {
     g_c2464[i] = 0;
     mqttClient.unsubscribe(g_c2500[i].c_str());
@@ -159,7 +159,7 @@ void on_mqtt_message(char *topic, char *payload, AsyncMqttClientMessagePropertie
     mqtt_text(t, 0x21); doc[String("mqt3")] = t;
     mqtt_text(t, 0x22); doc[String("mqt4")] = t;
     serializeJson(doc, s);
-    ws.printfAll(String(s).c_str());
+    ws_send(s);
   }
 }
 // @400d8fb8
@@ -430,12 +430,12 @@ uint32_t mqtt_on_message(const String &topic, const String &payload) {
 }
 // @400da380: повідомити веб-інтерфейс {"ключ":"значення"}
 void ws_notify_kv(const char *key, const String &value) {
-  if (ws.availableForWriteAll()) {
+  if (ws_send_room(value.length() + 0x40)) {
     String v = value;
     v.replace(String("\\"), String("\\\\"));
     v.replace(String("\""), String("\\\""));
     String s = String("{\"") + key + "\":\"" + v + "\"}";
-    ws.textAll(s.c_str());
+    ws_send(s);
   }
 }
 // @400da50c: прибрати всі сутності Home Assistant (порожні збережені config) і оголосити offline

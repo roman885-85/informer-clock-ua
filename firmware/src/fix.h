@@ -51,7 +51,13 @@ struct FxStatusScope {
 #define FX_MAP_MS 500                   // перерахунок рівня за таблицею автора
 #define FX_HOLD_MS 3000                 // різниця в один рівень має протриматись стільки, щоб стати новою ціллю
 #define FX_ADC_MARGIN 20                // запас АЦП біля межі рівнів: у межах ±запасу ціль не міняється
-#define FX_RAMP_MS 200                  // крок яскравості табло (MAX7219: 16 рівнів)
+#define FX_DIM_FULL_MS 2000             // плавна яскравість (dim.cpp): весь діапазон MAX7219 (1/32 → 31/32) за стільки мс
+#define FX_DIM_DQ (3.4339872f / FX_DIM_FULL_MS)   // крок за 1 мс у ln шпаруватості (ln 31 — весь діапазон)
+void fx_dim_begin();                    // потік плавної яскравості (setup, після P.begin)
+void fx_dim_follow(bool on, uint8_t tgt);   // on — веде фоторезистор; tgt — ціль 0..15
+void fx_dim_jump(uint8_t lvl);          // поставити рівень одразу (старт, пробудження)
+uint8_t fx_dim_level();                 // найближчий цілий рівень зараз
+uint8_t fx_dim_step_ms();               // один крок потоку (1 мс) — для імітатора tools/sim/dimsim
 uint16_t fx_photo_adc();                // згладжене значення фоторезистора
 void fx_bright_tick();
 void fx_photo_print();                  // рядок налагодження автора «Display INFO: Photoresistor data …»
