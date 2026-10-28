@@ -1,0 +1,54 @@
+// Шрифти й спрайти автора (витягнуті з 2.7.1 байт у байт): зовнішні оголошення
+#pragma once
+#include <Arduino.h>
+extern const uint8_t font_clock12_sorcery[];
+extern const uint8_t font_clock11_stars_square[];
+extern const uint8_t font_clock10_stars[];
+extern const uint8_t font_clock9_street_doc[];
+extern const uint8_t font_clock8_ink_stamp[];
+extern const uint8_t font_clock7_ink_script[];
+extern const uint8_t font_clock6_phase_shifter[];
+extern const uint8_t font_icons_status[];
+extern const uint8_t font_font_3f43c1d4[];
+extern const uint8_t font_font_3f43c28d[];
+extern const uint8_t font_clock5_diamond_sec[];
+extern const uint8_t font_clock2_digi_small[];
+extern const uint8_t font_clock0_default[];
+extern const uint8_t font_clock4_cubic[];
+extern const uint8_t font_clock3_digi_big[];
+extern const uint8_t font_small3px[];
+extern const uint8_t font_sys_lang_pl[];
+extern const uint8_t font_sys_lang_ro[];
+extern const uint8_t font_clock1_fat[];
+extern const uint8_t font_font_3f43d822[];
+extern const uint8_t font_font_3f43d8c3[];
+extern const uint8_t font_font_3f43d964[];
+extern const uint8_t font_font_3f43da05[];
+extern const uint8_t font_font_3f43daa6[];
+extern const uint8_t font_font_3f43db47[];
+extern const uint8_t font_sys1_small[];
+extern const uint8_t font_sys2_fat[];
+extern const uint8_t font_sys0_default[];
+extern const uint8_t font_font_3f484848[];
+extern const uint8_t sprite_rain_cloud[];
+extern const uint8_t sprite_sun[];
+extern const uint8_t sprite_small_cloud[];
+extern const uint8_t sprite_car[];
+extern const uint8_t sprite_clock1[];
+extern const uint8_t sprite_clock2[];
+extern const uint8_t sprite_rocket[];
+extern const uint8_t sprite_space_invader[];
+extern const uint8_t sprite_double_arrow[];
+extern const uint8_t sprite_rocket_arrow[];
+extern const uint8_t sprite_rocket_arrow2[];
+extern const uint8_t sprite_ship[];
+extern const uint8_t sprite_sailboat[];
+extern const uint8_t sprite_fireball[];
+extern const uint8_t sprite_ball_roll[];
+extern const uint8_t sprite_pacman1[];
+extern const uint8_t sprite_pacman2[];
+extern const uint8_t sprite_medusa[];
+extern const uint8_t sprite_extra18[];
+extern const uint8_t sprite_extra19[];
+struct SpriteDef { const uint8_t *data; uint16_t w, frames; };
+extern SpriteDef g_bed20[23];   // @3ffbed20 — таблиця спрайтів (RAM)

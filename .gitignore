@@ -1,0 +1,7 @@
+# збірка / build output
+firmware/.pio/
+web/build/
+release/
+__pycache__/
+*.pyc
+.DS_Store
