@@ -76,7 +76,7 @@ static void dim_task(void *) {
 void fx_dim_begin() {
   if (s_spi) return;
   s_spi = xSemaphoreCreateMutex();
-  xTaskCreatePinnedToCore(dim_task, "fx_dim", 2560, nullptr, 2, nullptr, 1);
+  xTaskCreatePinnedToCore(dim_task, "fx_dim", 4096, nullptr, 2, nullptr, 1);   // стек із запасом: переповнення = перезапуск по колу
 }
 void fx_dim_follow(bool on, uint8_t tgt) { s_tgt = tgt > 15 ? 15 : tgt; s_on = on; }
 void fx_dim_jump(uint8_t l) { s_jump = l > 15 ? 15 : l; }
