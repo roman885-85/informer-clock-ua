@@ -2,6 +2,7 @@
 // EN: Wi-Fi: STA/AP start, saved networks, internet check, reconnection (from 2.7.1; network fixes marked "Виправлено").
 // Перенесено з 2.7.1 (адреси оригіналу в коментарях).
 #include "fw.h"
+#include <esp_wifi.h>
 
 // @400d6c00
 void wifi_attempt_inc() { if (g_c3388 < 10) g_c3388 = g_c3388 + 1; }
@@ -58,9 +59,10 @@ void wifi_event(system_event_id_t ev, system_event_info_t info) {
       g_c3381 = 1;
     }
   } else if (ev == SYSTEM_EVENT_STA_GOT_IP) {
+    esp_wifi_set_ps(WIFI_PS_NONE);               // нове: без енергозбереження (див. STA_START)
     String p; led_phrase(p, g_c34b0, 0xad);
     dbg_ws_print(p + WiFi.localIP().toString());
-    if (g_c2d29 == 0) evlog_write(String("[WIFI] Connected  IP=") + WiFi.localIP().toString());
+    if (g_c2d29 == 0) evlog_write(String("[WIFI] Connected  IP=") + WiFi.localIP().toString() + String("  RSSI=") + String((int)WiFi.RSSI()) + String(" dBm"));
     dbg_ws_print(String("[WIFI] Connected  IP=") + WiFi.localIP().toString());
     g_c2d29 = 1;
     g_c3374 = F("connected");
@@ -70,6 +72,10 @@ void wifi_event(system_event_id_t ev, system_event_info_t info) {
     g_c3388 = 10;
     g_c2c14 = 0;
   } else if (ev == SYSTEM_EVENT_STA_START) {
+    // Нове (29.10.2026): без енергозбереження Wi-Fi. Ядро вмикає modem sleep — радіо дрімає між маяками роутера; на
+    // місці годинника власника зі слабким сигналом це давало 33–67 % втрат і відповіді до 1,8 с (оновлення не проходили,
+    // веб гальмував, годинник випадав з мережі). Живлення від мережі — економити нічого.
+    esp_wifi_set_ps(WIFI_PS_NONE);
     dbg_ws_print(String("Station mode started"));
   }
 }

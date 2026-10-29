@@ -42,6 +42,8 @@ void content_json_build(String &out, const String &key) {
     return;
   }
   if (key.equals("flash_mb")) { out = String(ESP.getFlashChipSize() >> 0x14, 10); return; }
+  // нове: сила сигналу роутера, дБм (0 — не підключено) — щоб міряти Wi-Fi на місці годинника
+  if (key.equals("wifi_rssi")) { out = String((int)(WiFi.status() == WL_CONNECTED ? WiFi.RSSI() : 0)); return; }
   if (key.equals("bme280_t")) { fv = g_c3314; dec = 1; goto fl; }
   if (key.equals("bme280_h")) { out = String(round((double)g_c3310), 0); return; }
   if (key.equals("bme280_pr")) { fv = g_c330c; dec = 0; goto fl; }
@@ -105,12 +107,13 @@ sets:
   out = *ps;
 }
 
-// перелік «живих» ключів (масив String на стеку оригіналу, 47 шт.)
-static const char *const LIVE[47] = { "scanIPdev", "scanedIPdev", "bme280_t", "bme280_h", "bme280_pr", "tds", "dht_t", "dht_hum", "SeS_t", "SeS_h",
+// перелік «живих» ключів (масив String на стеку оригіналу, 47 шт.; нове — 48-й wifi_rssi)
+#define LIVE_N 48
+static const char *const LIVE[LIVE_N] = { "scanIPdev", "scanedIPdev", "bme280_t", "bme280_h", "bme280_pr", "tds", "dht_t", "dht_hum", "SeS_t", "SeS_h",
   "mass_temp_bme", "weather_now", "weather_now_wb", "weather_tom", "time_line", "current_controller_version", "latest_version_fw", "devmac",
   "rtc_detect", "sys_time", "rtc_time", "lsynRtcSys", "lsynRtcNet", "lsynNtpSys", "lsynNtpNet", "networks", "saved_networks", "CPU", "chip",
   "get_ip", "TVOCs", "eCO2s", "test", "mq_stat", "mqt1", "mqt2", "mqt3", "mqt4", "narodData", "local_ip", "connected_ssid",
-  "wifi_connect_status", "heap_diag", "flash_mb", "valuta_rate", "btc_rate", "news_now" };
+  "wifi_connect_status", "heap_diag", "flash_mb", "valuta_rate", "btc_rate", "news_now", "wifi_rssi" };
 
 // @400d2c44
 bool is_secret_key(const String &k) { return k.equals("pass") || k.equals("secwp"); }
@@ -119,8 +122,8 @@ bool is_secret_key(const String &k) { return k.equals("pass") || k.equals("secwp
 void h_content(AsyncWebServerRequest *r) {
   g_c34c0 = millis();
   int n = r->params();
-  String live[47];
-  for (int i = 0; i < 47; i++) live[i] = LIVE[i];
+  String live[LIVE_N];
+  for (int i = 0; i < LIVE_N; i++) live[i] = LIVE[i];
   String cur("");
   JsonDocument out, cfg, filter;
   for (int i = 0; i < n; i++) {
@@ -128,7 +131,7 @@ void h_content(AsyncWebServerRequest *r) {
     bool skip = nm.equals("hist") ? true : is_secret_key(nm);
     if (!skip) {
       bool isLive = false;
-      for (int j = 0; j < 47; j++) if (nm.equals(live[j])) { isLive = true; break; }
+      for (int j = 0; j < LIVE_N; j++) if (nm.equals(live[j])) { isLive = true; break; }
       if (!isLive) filter[nm] = true;
     }
   }
@@ -139,7 +142,7 @@ void h_content(AsyncWebServerRequest *r) {
     if (cur.equals("networks") && p->value().equals("force")) g_c34c5 = 1;
     if (!cur.equals("hist")) {
       bool isLive = false;
-      for (int j = 0; j < 47; j++) {
+      for (int j = 0; j < LIVE_N; j++) {
         if (cur.equals(live[j])) {
           String v; content_json_build(v, cur);
           out[cur] = v;

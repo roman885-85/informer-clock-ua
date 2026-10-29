@@ -8,7 +8,7 @@
 #pragma once
 
 #define FX_NAME "Informer Clock UA"
-#define FX_VERSION "1.1.0-rc2"
+#define FX_VERSION "1.1.0-rc3"
 #define FX_REPO_URL "https://github.com/roman885-85/informer-clock-ua"
 #define FX_RAW_URL "https://raw.githubusercontent.com/roman885-85/informer-clock-ua/main"
 #define FX_UPDATE_URL FX_RAW_URL "/update/esp32.json"   // опис останньої версії: {"ver","bin","size","md5",…}

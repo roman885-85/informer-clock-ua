@@ -281,6 +281,7 @@ void ota_progress(size_t done, size_t total);
 void ota_phase(uint8_t phase);
 void fw_version_check();
 void ota_update();
+void ota_quiesce();                     // нове: зупинити служби на час оновлення (services.cpp)
 void geo_error();
 void geolocate_ip();
 void f_400e3500();

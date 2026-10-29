@@ -2,6 +2,9 @@
 // EN: Firmware update check and OTA from this project's repository (version.h), IP geolocation.
 #include "fw.h"
 
+static int s_ota_err;                 // помилка останньої спроби оновлення (ota_fetch)
+static String s_ota_errs;
+
 // Оновлення — з репозиторію цього проєкту (version.h), не з сервера автора (http://goldart.ee/api/esp32/). Перевірку
 // «адреса оновлень має бути незмінною» (@400e3990 — інакше 25 повідомлень у Serial і перезапуск) прибрано разом з адресою.
 
@@ -103,8 +106,8 @@ static void ota_result(t_httpUpdate_return r) {
   if (r == HTTP_UPDATE_NO_UPDATES) {
     dbg_ws_print(String("HTTP_UPDATE_NO_UPDATES"));
   } else if (r == HTTP_UPDATE_FAILED) {
-    Serial.printf("HTTP_UPDATE_FAILED Error (%d): %s\n", httpUpdate.getLastError(), httpUpdate.getLastErrorString().c_str());
-    evlog_write(String("[OTA] fail ") + httpUpdate.getLastError() + " " + httpUpdate.getLastErrorString());
+    Serial.printf("HTTP_UPDATE_FAILED Error (%d): %s\n", s_ota_err, s_ota_errs.c_str());
+    evlog_write(String("[OTA] fail ") + s_ota_err + " " + s_ota_errs);
     ota_phase(4);
   } else if (r == HTTP_UPDATE_OK) {
     dbg_ws_print(String("HTTP_UPDATE_OK"));
@@ -113,6 +116,32 @@ static void ota_result(t_httpUpdate_return r) {
     return;
   }
   display_zones_init();
+}
+// Нове (власник, 29.10.2026: «під час оновлення всі служби годинника мають бути зупинені, щоб не заважали, — крім
+// веб-інтерфейсу»). Головний цикл і так стоїть, поки йде завантаження; тут зупиняється те, що працює поза ним або
+// встигло б почати: MQTT, стрічка, звук, плавна яскравість (табло — екран оновлення). Веб-сервер працює (відсоток).
+void ota_quiesce() {
+  if (g_c2628.connected()) g_c2628.disconnect(true);
+  led_off();
+  myDFPlayer.stop();
+  fx_dim_follow(false, 0);
+  dbg_ws_print(String("OTA: services stopped (MQTT, LED strip, sound, dimming) — web interface stays"));
+}
+// Нове: завантаження стійке до пауз зв'язку — у ядра 1.0.4 HTTPUpdate чекає даних 8 с двічі (16 с) і здається
+// («Stream Read Timeout», 29.10.2026 у власника — п'ять разів поспіль); тут — 30 с і до 3 спроб.
+static t_httpUpdate_return ota_fetch(WiFiClientSecure &client) {
+  HTTPUpdate upd(30000);
+  t_httpUpdate_return r = HTTP_UPDATE_FAILED;
+  for (int a = 1; a <= 3; a++) {
+    r = upd.update(client, g_c2e9c, String(FX_VERSION));
+    if (r != HTTP_UPDATE_FAILED) break;
+    evlog_write(String("[OTA] attempt ") + a + " fail " + upd.getLastError() + " " + upd.getLastErrorString());
+    loop_guard_feed();
+    delay(2000);
+  }
+  s_ota_err = upd.getLastError();
+  s_ota_errs = upd.getLastErrorString();
+  return r;
 }
 // @40108d70: оновлення прошивки (g_c2eec: 1 — з веб-інтерфейсу, 2 — автоматично). Змінено: файл — за адресою з опису
 // версії (g_c2e9c, HTTPS, GitHub), а не goldart.ee/api/esp32/ESP32_<файл>; без адреси (перевірки ще не було) — нічого.
@@ -135,7 +164,8 @@ void ota_update() {
     config_save_atomic();
     digitalWrite(0, 0);
     ota_phase(2);
-    t_httpUpdate_return r = httpUpdate.update(client, g_c2e9c, String(FX_VERSION));
+    ota_quiesce();
+    t_httpUpdate_return r = ota_fetch(client);
     ota_result(r);
   } else if (g_c2eec == 2) {
     ota_screen();
@@ -144,7 +174,8 @@ void ota_update() {
     g_c2d28 = 1;
     config_save_atomic();
     ota_phase(2);
-    t_httpUpdate_return r = httpUpdate.update(client, g_c2e9c, String(FX_VERSION));
+    ota_quiesce();
+    t_httpUpdate_return r = ota_fetch(client);
     ota_result(r);
   }
 }
