@@ -59,7 +59,10 @@ void ws_async_hook(AsyncWebSocket *server) {
   busy = true;
   server->cleanupClients(2);          // у автора — щоциклу з головного циклу
   g_fx_ws_n = server->count();
-  for (int k = 0; k < 24 && server->availableForWriteAll(); k++) {   // черга клієнта — до 32 повідомлень
+  // кожне надсилання тут чекає потік lwIP, а той — місця в черзі цього потоку: коли в ній багато подій, спершу
+  // нехай їх розбере (30.10.2026: сторож задач під навантаженням); за раз — не більше 8 повідомлень
+  if (async_tcp_queue_waiting() > 16) { busy = false; return; }
+  for (int k = 0; k < 8 && server->availableForWriteAll(); k++) {
     uint32_t n = 0;
     portENTER_CRITICAL(&s_box_mux);
     if (s_wr - s_rd >= 2) {

@@ -95,12 +95,20 @@ static uint32_t _closed_index = []() {
 
 static inline bool _init_async_event_queue(){
     if(!_async_queue){
-        _async_queue = xQueueCreate(32, sizeof(lwip_event_packet_t *));
+        // Informer Clock UA (FORK.md): 128 замість 32. Потік lwIP кладе події з portMAX_DELAY; коли черга повна, а потік
+        // AsyncTCP сам чекає lwIP (tcp_output), обидва стоять, і через 5 с спрацьовує сторож задач (30.10.2026,
+        // навантаження: сотні підключень WebSocket за 5 хв). Більша черга робить це практично недосяжним.
+        _async_queue = xQueueCreate(128, sizeof(lwip_event_packet_t *));
         if(!_async_queue){
             return false;
         }
     }
     return true;
+}
+
+// Informer Clock UA (FORK.md): скільки подій чекає в черзі — прошивка не надсилає свою чергу, коли їх багато
+uint32_t async_tcp_queue_waiting(){
+    return _async_queue ? uxQueueMessagesWaiting(_async_queue) : 0;
 }
 
 static inline bool _send_async_event(lwip_event_packet_t ** e){
