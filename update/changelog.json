@@ -1,5 +1,17 @@
 [
   {
+    "v": "1.1.0",
+    "date": "2026-10-30",
+    "items": [
+      { "t": "fixed", "text": "Годинник більше не втрачає інтернет через ~1,5 год роботи: перевірка інтернету закривала з'єднання так, що в ядрі 1.0.4 місце сокета не звільнялось, і за 8–10 перевірок вихідні з'єднання (час, погода, новини, оновлення) переставали відкриватись до перезапуску. / The clock no longer loses internet after ~1.5 h: the internet check closed connections without freeing the socket slot in the 1.0.4 core, so after 8–10 checks no outbound connection (time, weather, news, updates) could be opened until a restart." },
+      { "t": "fixed", "text": "Веб-інтерфейс більше не валить годинник під навантаженням: повідомлення розсилає потік веб-сервера; виправлено падіння й зависання в бібліотеці AsyncTCP. / The web interface no longer crashes the clock under load: messages are sent from the web-server thread; crashes and a stall in AsyncTCP are fixed." },
+      { "t": "improved", "text": "Оновлення по Wi-Fi стійке до пауз зв'язку: служби, крім веб-інтерфейсу, на час оновлення зупиняються; до 30 с очікування й до 3 спроб. Wi-Fi без енергозбереження. / Wi-Fi updates survive link pauses: services except the web interface stop during an update; up to 30 s wait and 3 attempts. Wi-Fi power saving is off." },
+      { "t": "added", "text": "Великий циферблат перелистує цифри, що змінились, вгору — на всю висоту двох поверхів (із «зсувом цифр»). / The big clock face rolls changed digits upward over both floors (with \"sliding digits\")." },
+      { "t": "improved", "text": "Плавна яскравість без сходинок: сусідні рівні MAX7219 змішуються, увесь діапазон — за 2 с. / Smooth brightness without steps: neighbouring MAX7219 levels are blended, the whole range takes 2 s." },
+      { "t": "added", "text": "Діагностика: сила сигналу Wi-Fi у журналі й /content (wifi_rssi), причина невдалої перевірки мережі, перепис сокетів (sock_diag). Порада: не ставте годинник упритул до роутера — на 1,5–2 м зв'язок без втрат. / Diagnostics: Wi-Fi signal strength in the log and /content (wifi_rssi), the reason of failed network checks, a socket census (sock_diag). Tip: keep the clock 1.5–2 m away from the router." }
+    ]
+  },
+  {
     "v": "1.0.0",
     "date": "2026-10-28",
     "items": [
