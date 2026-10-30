@@ -162,6 +162,7 @@ void loop() {
   fx_bright_tick();
   fx_night_tick();
   fx_wdbg_tick();
+  fx_sock_tick();
   if (millis() - g_fx_dst_t > 60000) { g_fx_dst_t = millis(); fx_time_offset_apply(); }   // переходи літнього часу
   night_mode_tick(10000);
   ws_state_tick_5s(5000);

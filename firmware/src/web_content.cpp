@@ -44,6 +44,8 @@ void content_json_build(String &out, const String &key) {
   if (key.equals("flash_mb")) { out = String(ESP.getFlashChipSize() >> 0x14, 10); return; }
   // нове: сила сигналу роутера, дБм (0 — не підключено) — щоб міряти Wi-Fi на місці годинника
   if (key.equals("wifi_rssi")) { out = String((int)(WiFi.status() == WL_CONNECTED ? WiFi.RSSI() : 0)); return; }
+  // нове (діагностика): останній перепис сокетів lwIP (sockdiag.cpp)
+  if (key.equals("sock_diag")) { fx_sock_diag(out); return; }
   if (key.equals("bme280_t")) { fv = g_c3314; dec = 1; goto fl; }
   if (key.equals("bme280_h")) { out = String(round((double)g_c3310), 0); return; }
   if (key.equals("bme280_pr")) { fv = g_c330c; dec = 0; goto fl; }
@@ -107,13 +109,13 @@ sets:
   out = *ps;
 }
 
-// перелік «живих» ключів (масив String на стеку оригіналу, 47 шт.; нове — 48-й wifi_rssi)
-#define LIVE_N 48
+// перелік «живих» ключів (масив String на стеку оригіналу, 47 шт.; нове — 48-й wifi_rssi, 49-й sock_diag)
+#define LIVE_N 49
 static const char *const LIVE[LIVE_N] = { "scanIPdev", "scanedIPdev", "bme280_t", "bme280_h", "bme280_pr", "tds", "dht_t", "dht_hum", "SeS_t", "SeS_h",
   "mass_temp_bme", "weather_now", "weather_now_wb", "weather_tom", "time_line", "current_controller_version", "latest_version_fw", "devmac",
   "rtc_detect", "sys_time", "rtc_time", "lsynRtcSys", "lsynRtcNet", "lsynNtpSys", "lsynNtpNet", "networks", "saved_networks", "CPU", "chip",
   "get_ip", "TVOCs", "eCO2s", "test", "mq_stat", "mqt1", "mqt2", "mqt3", "mqt4", "narodData", "local_ip", "connected_ssid",
-  "wifi_connect_status", "heap_diag", "flash_mb", "valuta_rate", "btc_rate", "news_now", "wifi_rssi" };
+  "wifi_connect_status", "heap_diag", "flash_mb", "valuta_rate", "btc_rate", "news_now", "wifi_rssi", "sock_diag" };
 
 // @400d2c44
 bool is_secret_key(const String &k) { return k.equals("pass") || k.equals("secwp"); }

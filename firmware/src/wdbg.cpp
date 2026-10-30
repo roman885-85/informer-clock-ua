@@ -66,8 +66,9 @@ static int idf_vprintf(const char *fmt, va_list a) {
   return s_prev_vprintf ? s_prev_vprintf(fmt, a) : vprintf(fmt, a);
 }
 
+// закриття — lwip_close_r: lwip_close у цьому ядрі не звільняє місце сокета (netfix.cpp, net_tcp_probe)
 static void client_close(int i) {
-  if (s_cfd[i] >= 0) lwip_close(s_cfd[i]);
+  if (s_cfd[i] >= 0) lwip_close_r(s_cfd[i]);
   s_cfd[i] = -1;
 }
 
@@ -101,7 +102,7 @@ static void start() {
     a.sin_family = AF_INET;
     a.sin_port = htons(23);
     a.sin_addr.s_addr = INADDR_ANY;
-    if (lwip_bind(s_lfd, (struct sockaddr *)&a, sizeof a) != 0 || lwip_listen(s_lfd, 2) != 0) { lwip_close(s_lfd); s_lfd = -1; }
+    if (lwip_bind(s_lfd, (struct sockaddr *)&a, sizeof a) != 0 || lwip_listen(s_lfd, 2) != 0) { lwip_close_r(s_lfd); s_lfd = -1; }
     else lwip_fcntl(s_lfd, F_SETFL, lwip_fcntl(s_lfd, F_GETFL, 0) | O_NONBLOCK);
   }
   ArduinoOTA.setMdnsEnabled(false);
@@ -119,7 +120,7 @@ static void start() {
 
 static void stop() {
   for (int i = 0; i < 2; i++) client_close(i);
-  if (s_lfd >= 0) lwip_close(s_lfd);
+  if (s_lfd >= 0) lwip_close_r(s_lfd);
   s_lfd = -1;
   ArduinoOTA.end();
   if (s_prev_vprintf) esp_log_set_vprintf(s_prev_vprintf);
@@ -145,7 +146,7 @@ void fx_wdbg_tick() {
     int fd = lwip_accept(s_lfd, nullptr, nullptr);
     if (fd >= 0) {
       int i = s_cfd[0] < 0 ? 0 : s_cfd[1] < 0 ? 1 : -1;
-      if (i < 0) { send_str(fd, String("busy: 2 clients already\r\n")); lwip_close(fd); }
+      if (i < 0) { send_str(fd, String("busy: 2 clients already\r\n")); lwip_close_r(fd); }
       else {
         lwip_fcntl(fd, F_SETFL, lwip_fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
         int one = 1;

@@ -68,7 +68,7 @@ static int run(int font, const char *prev, const char *next, bool pics) {
       for (int i = 0; i < 32; i++) {
         uint16_t f = frame(i);
         if (fixed[i] && f != before[i]) bad_static++;                       // символ без змін зрушив
-        if (f != prevf[i] && (uint16_t)(prevf[i] << 1) != (uint16_t)(f & 0xfffe)) bad_shift++;   // не зсув на рядок
+        if (f != prevf[i] && (uint16_t)(prevf[i] >> 1) != (uint16_t)(f & 0x7fff)) bad_shift++;   // не зсув на рядок вгору
         prevf[i] = f;
       }
       if (pics) { char t[16]; snprintf(t, sizeof t, "крок %d", steps); show(t, pgm); }
@@ -77,7 +77,7 @@ static int run(int font, const char *prev, const char *next, bool pics) {
   }
   if (pgm) fclose(pgm);
   int bad_end = 0; for (int i = 0; i < 32; i++) bad_end += frame(i) != want[i];
-  printf("   кроків %d, кінець = друк Parola: %s, символи без змін стояли: %s, кожен крок — зсув на рядок: %s\n", steps,
+  printf("   кроків %d, кінець = друк Parola: %s, символи без змін стояли: %s, кожен крок — зсув на рядок вгору: %s\n", steps,
          bad_end ? "НІ" : "так", bad_static ? "НІ" : "так", bad_shift ? "НІ" : "так");
   return (steps == 16 && !bad_end && !bad_static && !bad_shift) ? 0 : 1;
 }

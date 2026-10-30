@@ -83,6 +83,11 @@ void fx_wdbg_set(bool on);
 void fx_wdbg_tick();
 void fx_wdbg_line(const char *s, size_t n);   // рядок у сетевий журнал (будь-яка задача)
 
+// ---------- облік сокетів lwIP (sockdiag.cpp, діагностика) ----------
+void fx_sock_tick();                    // щохвилини: перепис сокетів у журнал налагодження й для /content
+void fx_sock_diag(String &out);         // останній перепис (ключ /content sock_diag)
+String fx_sock_census_now();            // перепис зараз, без проби вільних місць (для журналу подій)
+
 // ---------- сторож головного циклу (guard.cpp) ----------
 #define LOOP_GUARD_MS 180000UL          // loop() не доходить до кінця довше — перезапуск (запас: дві повільні HTTPS-загрузки за цикл)
 #define LOOP_GUARD_MAGIC 0x600df00dUL   // позначка в RTC-пам'яті: перезапуск зробив сторож циклу

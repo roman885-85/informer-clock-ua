@@ -956,6 +956,7 @@ void net_probe_internet() {
   if (!ok && g_fx_probe_stage == 1) {
     if (++sock_fail_runs >= 3) {
       evlog_write(String("[NET ] Restart: no sockets for outbound connections (") + net_probe_why() + String(")"));
+      evlog_write(String("[SOCK] ") + fx_sock_census_now());
       delay(200);
       ESP.restart();
     }

@@ -105,7 +105,11 @@ int8_t net_tcp_probe(IPAddress ip, uint16_t port, uint32_t ms) {
     g_fx_probe_stage = 2; g_fx_probe_errno = errno;
     if (errno == ECONNREFUSED) r = 0;
   }
-  lwip_close(s);
+  // Виправлено (30.10.2026): lwip_close_r, а не lwip_close. У lwIP ядра 1.0.4 (ESP-IDF 3.3, ESP_THREAD_SAFE) місце
+  // сокета звільняє лише lwip_close_r (через неї йдуть і close()/closesocket() ядра); lwip_close видаляє з'єднання,
+  // а місце з 10 лишається зайнятим. Кожна проба (раз на 10 хв, без інтернету — частіше) забирала одне місце, і за
+  // ~1,5 год (з налагодженням по Wi-Fi — за ~75 хв) годинник лишався без жодного вихідного з'єднання до перезапуску.
+  lwip_close_r(s);
   return r;
 }
 
