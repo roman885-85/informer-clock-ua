@@ -1348,6 +1348,12 @@ void AsyncServer::end(){
 //runs on LwIP thread
 int8_t AsyncServer::_accept(tcp_pcb* pcb, int8_t err){
     //ets_printf("+A: 0x%08x\n", pcb);
+    // Informer Clock UA (FORK.md): коли в lwIP скінчились місця для з'єднань (CONFIG_LWIP_MAX_ACTIVE_TCP = 16), він
+    // кличе нас з pcb == NULL і err == ERR_MEM — далі AsyncClient(NULL) читав з адреси 0x1c (30.10.2026,
+    // LoadProhibited під навантаженням). Нового з'єднання немає — нічого не робити.
+    if(pcb == NULL || err != ERR_OK) {
+        return ERR_OK;
+    }
     if(_connect_cb){
         AsyncClient *c = new AsyncClient(pcb);
         if(c){

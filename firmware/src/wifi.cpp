@@ -946,7 +946,20 @@ void net_probe_internet() {
   FxStatusScope fxs(FXS_NET);                    // нове: стан на табло під час запуску
   dbg_ws_print(String("[NET ] Probing internet..."));
   bool ok = net_tcp_probe(IPAddress(8, 8, 8, 8), 0x35, 1500) == 1 || net_tcp_probe(IPAddress(1, 1, 1, 1), 0x35, 1500) == 1;
-  dbg_ws_print(String(ok ? "TCP probe (8.8.8.8 / 1.1.1.1:53): OK" : "TCP probe (8.8.8.8 / 1.1.1.1:53): FAIL"));
+  dbg_ws_print(ok ? String("TCP probe (8.8.8.8 / 1.1.1.1:53): OK")
+                  : String("TCP probe (8.8.8.8 / 1.1.1.1:53): FAIL (") + net_probe_why() + String(", gw=") +
+                    WiFi.gatewayIP().toString() + String(", RSSI=") + String((int)WiFi.RSSI()) + String(")"));
+  // Нове (30.10.2026): сокет не створюється кілька перевірок поспіль — це не мережа, а вичерпані ресурси всередині
+  // (уночі так годину: усі вихідні з'єднання падали миттєво, перепідключення Wi-Fi не допомагало, рятував лише
+  // перезапуск живлення). Після трьох таких перевірок — програмний перезапуск із записом у журнал.
+  static uint8_t sock_fail_runs;
+  if (!ok && g_fx_probe_stage == 1) {
+    if (++sock_fail_runs >= 3) {
+      evlog_write(String("[NET ] Restart: no sockets for outbound connections (") + net_probe_why() + String(")"));
+      delay(200);
+      ESP.restart();
+    }
+  } else sock_fail_runs = 0;
   if (!ok) {
     dbg_ws_print(String("Trying HTTP probe (msftconnecttest)..."));
     String url("http://www.msftconnecttest.com/connecttest.txt");
@@ -1045,7 +1058,8 @@ L8ed:
       if (net_gateway_alive()) {
         dbg_ws_print(String("Wifi        : router answers — no internet at provider, keeping Wi-Fi link"));
       } else {
-        evlog_write(String("[NET ] Forced re-association (no internet >6 min, router silent)"));
+        evlog_write(String("[NET ] Forced re-association (no internet >6 min, router silent: ") + net_probe_why() +
+                    String(", gw=") + WiFi.gatewayIP().toString() + String(")"));
         dbg_ws_print(String("[NET ] Forced re-association"));
         dbg_ws_print(String("Wifi        : no internet too long — forcing re-association"));
         wifi_force_reassoc();

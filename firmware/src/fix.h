@@ -10,6 +10,8 @@
 int8_t net_tcp_probe(IPAddress ip, uint16_t port, uint32_t ms);
 // Чи відповідає роутер (шлюз): TCP на порт 80, «з'єднались» або «відмова» — так.
 bool net_gateway_alive();
+String net_probe_why();                 // нове: чому не вдалась остання проба (netfix.cpp)
+extern int8_t g_fx_probe_stage;
 
 // ---------- головний цикл (core.cpp) ----------
 extern bool g_fx_dns_on;                // DNS captive-порталу запущено (wifi.cpp, captive_dns_start)
