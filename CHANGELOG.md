@@ -3,7 +3,7 @@
 Формат: нові версії вгорі. Те саме для веб-інтерфейсу годинника — `update/changelog.json`.
 Format: newest first. The clock's web interface reads the same history from `update/changelog.json`.
 
-## 1.1.0 — 2026-10-30
+## 1.1.0 — 2026-10-31
 
 **Виправлено / fixed**
 - Годинник більше не втрачає інтернет через ~1,5 год роботи. Перевірка інтернету (з 1.0.0) і журнал на порту 23

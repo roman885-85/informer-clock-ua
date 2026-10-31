@@ -20,5 +20,5 @@ Informer Clock UA — незалежна прошивка для годинни�
 Уся документація одним PDF (з обкладинкою й змістом) і кожна частина окремо — серед файлів
 [випуску](https://github.com/roman885-85/informer-clock-ua/releases): `informer-clock-ua-<версія>-docs-uk.pdf`.
 
-Попередній випуск 1.0.0 ще не перевірено на годиннику — про помилки пишіть у
-[Issues](https://github.com/roman885-85/informer-clock-ua/issues).
+Версію 1.1.0 перевірено на годиннику; з 1.0.0 варто оновитися (через ~1,5 год роботи вона губить інтернет). Про
+помилки пишіть у [Issues](https://github.com/roman885-85/informer-clock-ua/issues).

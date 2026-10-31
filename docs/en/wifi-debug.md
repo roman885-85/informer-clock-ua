@@ -68,7 +68,7 @@ release files):
 
 ```sh
 ~/.platformio/packages/toolchain-xtensa32/bin/xtensa-esp32-elf-addr2line -pfiaC \
-  -e informer-clock-ua-esp32-1.0.0.elf 0x400d1234 0x400d5678
+  -e informer-clock-ua-esp32-1.1.0.elf 0x400d1234 0x400d5678
 ```
 
 If `loop()` hangs for more than 3 min, the watchdog restarts the clock and writes `[BOOT] loop guard: loop() stuck > 180 s`.

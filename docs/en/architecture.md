@@ -19,7 +19,7 @@ for this project. The code in this repository was reconstructed from the 2.7.1 m
 - the reconstructed copy was tested on a real clock.
 
 The **`reconstructed-2.7.1`** tag is this copy with the original's behaviour (including its bugs). Everything changed
-after it is visible in the git history from that tag: `git diff reconstructed-2.7.1 v1.0.0`.
+after it is visible in the git history from that tag: `git diff reconstructed-2.7.1 v1.1.0`.
 
 ### Reading the code
 
