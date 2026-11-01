@@ -569,6 +569,10 @@ enum zoneEffect_t
  * Zone object for the Parola library.
  * This class contains the text to be displayed and all the attributes for the zone.
  */
+// Informer Clock UA (1.1.3): «слабкий» гачок — кожне встановлення яскравості зони (перший модуль зони, значення); без
+// визначення в прошивці нічого не робить / weak hook called on every zone intensity change; no-op unless defined.
+extern void md_zone_intensity(uint8_t dev0, uint8_t value) __attribute__((weak));
+
 class MD_PZone
 {
 public:
@@ -824,7 +828,8 @@ public:
    * \param intensity the intensity to set the display (0-15).
    * \return No return value.
    */
-  inline void setIntensity(uint8_t intensity) { _intensity = intensity; _MX->control(_zoneStart, _zoneEnd, MD_MAX72XX::INTENSITY, _intensity); }
+  inline void setIntensity(uint8_t intensity) { _intensity = intensity; if (md_zone_intensity) md_zone_intensity(_zoneStart, intensity); _MX->control(_zoneStart, _zoneEnd, MD_MAX72XX::INTENSITY, _intensity); }
+  inline void setIntensityValue(uint8_t intensity) { _intensity = intensity; }   // Informer Clock UA (1.1.3): лише запам'ятати / store only
 
   /**
    * Invert the zone display.
@@ -1694,6 +1699,11 @@ public:
    * \return No return value.
    */
   inline void setIntensity(uint8_t z, uint8_t intensity) { if (z < _numZones) _Z[z].setIntensity(intensity); }
+  inline uint8_t getIntensity(uint8_t z) { return z < _numZones ? _Z[z].getIntensity() : 0; }   // Informer Clock UA (1.1.3)
+  // Informer Clock UA (1.1.3): запам'ятати яскравість у всіх зонах, не пишучи в MAX7219 (нею керує потік прошивки) — її
+  // бере ефект PA_FADE / store the intensity in all zones without writing the MAX7219 (the firmware thread drives it);
+  // PA_FADE reads it
+  inline void setIntensityValue(uint8_t intensity) { for (uint8_t i = 0; i < _numZones; i++) _Z[i].setIntensityValue(intensity); }
 
   /**
    * Invert the display in all the zones.
