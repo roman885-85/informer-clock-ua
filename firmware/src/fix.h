@@ -82,6 +82,7 @@ extern bool g_fx_wdbg;                  // увімкнено у веб-інте
 void fx_wdbg_set(bool on);
 void fx_wdbg_tick();
 void fx_wdbg_line(const char *s, size_t n);   // рядок у сетевий журнал (будь-яка задача)
+extern volatile uint32_t g_fx_wifi_blk_req;   // імітація зникнення роутера на N с (/post?wdbg_wifi_off=N; wifi.cpp)
 
 // ---------- облік сокетів lwIP (sockdiag.cpp, діагностика) ----------
 void fx_sock_tick();                    // щохвилини: перепис сокетів у журнал налагодження й для /content

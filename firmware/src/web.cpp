@@ -437,7 +437,19 @@ void h_post(AsyncWebServerRequest *r) {
   if (n == 0) { r->send(400, String("text/plain"), String("No parameters")); return; }
   JsonDocument d;
   if (!config_doc_load(d)) { r->send(500, String("text/plain"), String("Config error")); return; }
-  for (int i = 0; i < n; i++) { AsyncWebParameter *p = r->getParam(i); d[p->name()] = p->value(); }
+  int k = 0;
+  for (int i = 0; i < n; i++) {
+    AsyncWebParameter *p = r->getParam(i);
+    // Нове (1.1.1): налагодження по Wi-Fi — зімітувати зникнення роутера на N с (до години); у налаштування не пишеться.
+    if (p->name() == "wdbg_wifi_off") {
+      long s = p->value().toInt();
+      if (g_fx_wdbg && s > 0) g_fx_wifi_blk_req = s > 3600 ? 3600 : (uint32_t)s;
+      continue;
+    }
+    d[p->name()] = p->value();
+    k++;
+  }
+  if (k == 0) { r->send(200, String("text/plain"), String("")); return; }
   config_doc_store(d);
   r->send(200, String("text/plain"), String(""));
   g_c2d28 = 1;
