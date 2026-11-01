@@ -41,6 +41,7 @@ void setup() {
     if (g_c34ba == 8) { z = 2; if (g_c34b8 == 8) z = 4; }
     P.begin(z);
     P.begin(g_c34ba != 8 ? 1 : 4);
+    fx_dim_begin();                                   // нове: плавна яскравість (dim.cpp) і замок шини SPI табло
     // нове: «Запуск» на табло, поки ініціалізуються плеєр і стрічка (status.cpp); мова й шрифт — з конфігурації
     g_c2eef = doc["lang"].as<String>().toInt();
     g_c349b = doc["fs"].as<String>().toInt();
@@ -100,7 +101,7 @@ void setup() {
 
 // ---------- loop @40121d5c ----------
 void loop() {
-  ws.cleanupClients(2);
+  // ws.cleanupClients(2) автора — тепер у потоці AsyncTCP (ws.cpp, ws_async_hook): список клієнтів не захищений
   // Виправлено: у автора — щоциклу, навіть коли DNS captive-порталу не запущено (звичайний режим клієнта): тоді
   // WiFiUDP::parsePacket() на неіснуючому сокеті щоразу виділяє й звільняє 1460 Б і пише в Serial «parsePacket():
   // could not receive data: 9» — ~180 рядків/с, цикл упирається в швидкість порту (115200 бод), анімація табло
@@ -161,6 +162,7 @@ void loop() {
   fx_bright_tick();
   fx_night_tick();
   fx_wdbg_tick();
+  fx_sock_tick();
   if (millis() - g_fx_dst_t > 60000) { g_fx_dst_t = millis(); fx_time_offset_apply(); }   // переходи літнього часу
   night_mode_tick(10000);
   ws_state_tick_5s(5000);

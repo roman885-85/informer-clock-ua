@@ -210,7 +210,7 @@ void weather_owm(float lat, float lon, const String &key) {
   weather_now_json(j, g_c3224);
   dbg_ws_print(j);
   weather_now_json(j, g_c3224);
-  ws.printfAll(String(String("{\"weather_now\": ") + j + String("}")).c_str());
+  ws_send(String("{\"weather_now\": ") + j + String("}"));
 }
 
 // @401054a8: Яндекс (час/погода з yandex.com/time/sync.json; раз на 15 хв; помилка — 5 с)
@@ -293,7 +293,7 @@ void weather_yandex(const String &geo) {
   weather_now_json(j, g_c3224);
   dbg_ws_print(String(g_c1a34) + "  | " + j);
   weather_now_json(j, g_c3224);
-  ws.printfAll(String(String("{\"weather_now\": ") + j + String("}")).c_str());
+  ws_send(String("{\"weather_now\": ") + j + String("}"));
   g_c1a2c = 900000;
 }
 
@@ -405,7 +405,7 @@ void weather_weatherbit_now(float lat, float lon, const String &key) {
   weather_now_json(j, g_c31c4);
   dbg_ws_print(j);
   weather_now_json(j, g_c31c4);
-  ws.printfAll(String(String("{\"weather_now_wb\": ") + j + String("}")).c_str());
+  ws_send(String("{\"weather_now_wb\": ") + j + String("}"));
   g_c1a64 = 3600000;
 }
 
@@ -537,6 +537,6 @@ void weather_weatherbit_tomorrow(float lat, float lon, const String &key) {
   weather_tom_json(j, g_c3170);
   dbg_ws_print(j);
   weather_tom_json(j, g_c3170);
-  ws.printfAll(String(String("{\"weather_tom\": ") + j + String("}")).c_str());
+  ws_send(String("{\"weather_tom\": ") + j + String("}"));
   g_c1a40 = 3600000;
 }

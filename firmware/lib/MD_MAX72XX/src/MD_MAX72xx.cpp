@@ -309,9 +309,15 @@ void MD_MAX72XX::spiClearBuffer(void)
   memset(_spiData, OP_NOOP, SPI_DATA_SIZE);
 }
 
+// Informer Clock UA (FORK.md): замок шини SPI — у табло пише ще й потік плавної яскравості прошивки (src/dim.cpp).
+// Без визначення в прошивці — нічого не робить. EN: SPI bus lock hooks (weak); the firmware's dimmer task also writes.
+void md_spi_lock() __attribute__((weak));
+void md_spi_unlock() __attribute__((weak));
+
 void MD_MAX72XX::spiSend()
 {
 #ifndef __MBED__
+  if (md_spi_lock) md_spi_lock();
   // initialize the SPI transaction
   if (_hardwareSPI)
     SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0));
@@ -333,6 +339,7 @@ void MD_MAX72XX::spiSend()
   digitalWrite(_csPin, HIGH);
   if (_hardwareSPI)
     SPI.endTransaction();
+  if (md_spi_unlock) md_spi_unlock();
 #else
   _cs = 0;
   volatile int n = _spi.write((const char*)_spiData, SPI_DATA_SIZE, nullptr, 0);

@@ -11,4 +11,4 @@
 | `src/MD_Parola.h` | коди ефектів `PA_NEON`…`PA_IRIS` (29–38) у `textEffect_t`, оголошення `effectCi*`, `getZoneCount()` / effect codes, declarations, `getZoneCount()` |
 | `src/MD_PZone.cpp` | виклик нових ефектів у `zoneAnimate()` / dispatch of the new effects in `zoneAnimate()` |
 
-Решта файлів — без змін / all other files are unchanged. MD_MAX72XX (`../MD_MAX72XX`) — 3.2.3 без змін / unchanged.
+Решта файлів — без змін / all other files are unchanged. MD_MAX72XX (`../MD_MAX72XX`) — 3.2.3 з гачками замка SPI, див. / with SPI lock hooks, see [../MD_MAX72XX/FORK.md](../MD_MAX72XX/FORK.md).

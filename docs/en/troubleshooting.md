@@ -21,6 +21,8 @@
 | The address is on the display but the page does not open | the phone/computer must be on the same network (not a guest one); type `http://` and the address by hand |
 | “No internet” | the clock checks 8.8.8.8 and 1.1.1.1 (TCP 53), then `http://www.msftconnecttest.com`; if the router blocks external DNS — allow it for the clock |
 | No update is offered | an update appears only for a newer version of this project; internet is required; GitHub cache — up to 5 min after a release |
+| After ~1.5 h of work “no internet”, although the web interface opens | a 1.0.0 bug: the internet check did not free its sockets, and after 8–10 checks no outbound connection could be opened — fixed in 1.1.0; until you update, a restart helps (update right after it) |
+| Updates break off (“Stream Read Timeout”, “Verify Bin Header Failed”), the web interface is slow, the clock drops off the network | the clock stands right next to the router: its receiver is overloaded (up to 67 % lost packets). Move it 1–2 m away — at 1.5–2 m there are no losses; the signal strength is in the event log (“RSSI=… dBm”, −40…−70 is fine) |
 
 ## Display
 
@@ -29,7 +31,7 @@
 | Garbage, mirrored or mixed-up characters | module type — FC16; DIN/CLK/CS on GPIO23/18/5; shorter wires, common GND; number of floors and matrices — “Display” |
 | The display flickers, the clock restarts at high brightness | weak power: a 5 V 2 A supply, a 1000 µF capacitor, the display powered from the supply, not through the board |
 | The display does not turn off at night / on in the morning | “Display” → shut down the display at night, check the hours; time and zone — “Time” page |
-| Brightness “jumps” | photoresistor and 10 kΩ on GPIO34; “Brightness type”, “Brightness threshold” on the “Display” page |
+| Brightness “jumps” | photoresistor and 10 kΩ on GPIO34; “Brightness type”, “Brightness threshold” on the “Display” page; since 1.1.0 changes are smooth — the whole range in 2 s |
 
 ## Time
 

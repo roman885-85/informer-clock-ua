@@ -10,6 +10,8 @@
 int8_t net_tcp_probe(IPAddress ip, uint16_t port, uint32_t ms);
 // Чи відповідає роутер (шлюз): TCP на порт 80, «з'єднались» або «відмова» — так.
 bool net_gateway_alive();
+String net_probe_why();                 // нове: чому не вдалась остання проба (netfix.cpp)
+extern int8_t g_fx_probe_stage;
 
 // ---------- головний цикл (core.cpp) ----------
 extern bool g_fx_dns_on;                // DNS captive-порталу запущено (wifi.cpp, captive_dns_start)
@@ -51,7 +53,13 @@ struct FxStatusScope {
 #define FX_MAP_MS 500                   // перерахунок рівня за таблицею автора
 #define FX_HOLD_MS 3000                 // різниця в один рівень має протриматись стільки, щоб стати новою ціллю
 #define FX_ADC_MARGIN 20                // запас АЦП біля межі рівнів: у межах ±запасу ціль не міняється
-#define FX_RAMP_MS 200                  // крок яскравості табло (MAX7219: 16 рівнів)
+#define FX_DIM_FULL_MS 2000             // плавна яскравість (dim.cpp): весь діапазон MAX7219 (1/32 → 31/32) за стільки мс
+#define FX_DIM_DQ (3.4339872f / FX_DIM_FULL_MS)   // крок за 1 мс у ln шпаруватості (ln 31 — весь діапазон)
+void fx_dim_begin();                    // потік плавної яскравості (setup, після P.begin)
+void fx_dim_follow(bool on, uint8_t tgt);   // on — веде фоторезистор; tgt — ціль 0..15
+void fx_dim_jump(uint8_t lvl);          // поставити рівень одразу (старт, пробудження)
+uint8_t fx_dim_level();                 // найближчий цілий рівень зараз
+uint8_t fx_dim_step_ms();               // один крок потоку (1 мс) — для імітатора tools/sim/dimsim
 uint16_t fx_photo_adc();                // згладжене значення фоторезистора
 void fx_bright_tick();
 void fx_photo_print();                  // рядок налагодження автора «Display INFO: Photoresistor data …»
@@ -74,6 +82,11 @@ extern bool g_fx_wdbg;                  // увімкнено у веб-інте
 void fx_wdbg_set(bool on);
 void fx_wdbg_tick();
 void fx_wdbg_line(const char *s, size_t n);   // рядок у сетевий журнал (будь-яка задача)
+
+// ---------- облік сокетів lwIP (sockdiag.cpp, діагностика) ----------
+void fx_sock_tick();                    // щохвилини: перепис сокетів у журнал налагодження й для /content
+void fx_sock_diag(String &out);         // останній перепис (ключ /content sock_diag)
+String fx_sock_census_now();            // перепис зараз, без проби вільних місць (для журналу подій)
 
 // ---------- сторож головного циклу (guard.cpp) ----------
 #define LOOP_GUARD_MS 180000UL          // loop() не доходить до кінця довше — перезапуск (запас: дві повільні HTTPS-загрузки за цикл)

@@ -48,10 +48,13 @@
 
 <h2>Яскравість і ніч</h2>
 <ul>
-  <li><b>За датчиком світла</b> яскравість змінюється плавно, по одному кроку, і не чекає кінця прокрутки новин. Поріг — на сторінці «Дисплей».</li>
+  <li><b>За датчиком світла</b> яскравість змінюється плавно, без сходинок (увесь діапазон — за 2 с), і не чекає кінця прокрутки новин. Поріг — на сторінці «Дисплей».</li>
   <li><b>Відключення дисплея на ніч</b> («Дисплей»): поки табло погашене, годинник не завантажує новини, погоду й курси, але лишається в мережі — веб-інтерфейс доступний. Уранці показ продовжується з того місця, де зупинився.</li>
   <li>Будильник уночі вмикає табло на час дзвінка; повідомлення, надіслане вночі, більше не лишає табло ввімкненим до ранку.</li>
 </ul>
+
+<h2>Великий циферблат</h2>
+<p>На двоповерховому табло з увімкненим зсувом цифр (як у малому циферблаті) цифри, що змінились, перелистуються вгору на всю висоту обох поверхів — приблизно за пів секунди.</p>
 
 <h2>Час і літній час</h2>
 <ul>
@@ -62,6 +65,7 @@
 
 <h2>Оновлення прошивки</h2>
 <p>«Оновлення» → «Оновити» показує встановлену й найновішу версію та історію змін. Оновлення приходять лише з цього проєкту (Informer Clock UA), а не з сервера автора оригіналу. Перейти на Informer Clock UA з прошивки автора — один раз через USB: <a href="../flasher/">прошивальник у браузері</a>; налаштування при цьому зберігаються, якщо не ставити позначку «стерти».</p>
+<p>Під час оновлення годинник зупиняє свої служби (MQTT, стрічку, звук), веб-інтерфейс працює й показує відсоток. Не ставте годинник упритул до роутера: поруч його приймач перевантажений і оновлення обривається; на відстані 1,5–2 м зв'язок без втрат.</p>
 
 <h2>Налагодження по Wi-Fi</h2>
 <p>Сторінка System → перемикач «Налагодження по Wi-Fi». Коли ввімкнено:</p>
@@ -85,7 +89,7 @@
 <h2>Якщо щось не так</h2>
 <ul>
   <li><b>Годинник не з'являється в мережі.</b> Видно точку «Clock ESP» — значить, він не під'єднався до вашої мережі: зайдіть на <code>192.168.4.1</code> і виберіть мережу знову.</li>
-  <li><b>«Нема інтернету».</b> Годинник перевіряє зв'язок із 8.8.8.8 і 1.1.1.1, далі — http://www.msftconnecttest.com. Без інтернету погода й новини не оновлюються, але час іде; Wi-Fi перепідключається, лише коли не відповідає сам роутер.</li>
+  <li><b>«Нема інтернету».</b> Годинник перевіряє зв'язок із 8.8.8.8 і 1.1.1.1, далі — http://www.msftconnecttest.com. Без інтернету погода й новини не оновлюються, але час іде; Wi-Fi перепідключається, лише коли не відповідає сам роутер. Якщо в 1.0.0 «нема інтернету» з'являється через ~1,5 год роботи — це помилка 1.0.0, виправлена в 1.1.0: оновіться (одразу після перезапуску).</li>
   <li><b>Скидання налаштувань</b>: «Оновлення» → «Файл конфігурації» → «Повернення до заводських установок». Після перезапуску — знову точка «Clock ESP».</li>
   <li>Журнал подій (сторінка System) показує перезапуски, аварії та їх причини — додайте його до повідомлення про помилку.</li>
 </ul>
@@ -127,10 +131,13 @@
 
 <h2>Brightness and night</h2>
 <ul>
-  <li><b>Light sensor</b> brightness changes smoothly, one step at a time, and no longer waits for news scrolling to finish. The threshold is on the “Display” page.</li>
+  <li><b>Light sensor</b> brightness changes smoothly, without steps (the whole range in 2 s), and no longer waits for news scrolling to finish. The threshold is on the “Display” page.</li>
   <li><b>Shut down the display at night</b> (“Display”): while the display is off, the clock does not download news, weather or rates but stays on the network — the web interface is available. In the morning the content continues from where it stopped.</li>
   <li>An alarm at night turns the display on while ringing; a message sent at night no longer leaves the display on until morning.</li>
 </ul>
+
+<h2>Big clock face</h2>
+<p>On a two-floor display with sliding digits on (as in the small clock face), the changed digits roll upward over the full height of both floors — in about half a second.</p>
 
 <h2>Time and summer time</h2>
 <ul>
@@ -141,6 +148,7 @@
 
 <h2>Firmware updates</h2>
 <p>“Update” → “Update” shows the installed and the latest version and the change history. Updates come only from this project (Informer Clock UA), never from the original author's server. Switching from the original firmware to Informer Clock UA is done once over USB: <a href="../flasher/">browser flasher</a>; settings are kept unless you tick “erase”.</p>
+<p>During an update the clock stops its services (MQTT, LED strip, sound); the web interface keeps working and shows the progress. Don't put the clock right next to the router: up close its receiver is overloaded and updates break off; at 1.5–2 m the link has no losses.</p>
 
 <h2>Wi-Fi debugging</h2>
 <p>System page → “Wi-Fi debug” switch. When enabled:</p>
@@ -164,7 +172,7 @@
 <h2>Troubleshooting</h2>
 <ul>
   <li><b>The clock does not appear on the network.</b> If the “Clock ESP” access point is visible, it could not join your network: open <code>192.168.4.1</code> and choose the network again.</li>
-  <li><b>“No internet”.</b> The clock checks 8.8.8.8 and 1.1.1.1, then http://www.msftconnecttest.com. Without internet, weather and news are not updated but the time keeps running; Wi-Fi reconnects only when the router itself does not answer.</li>
+  <li><b>“No internet”.</b> The clock checks 8.8.8.8 and 1.1.1.1, then http://www.msftconnecttest.com. Without internet, weather and news are not updated but the time keeps running; Wi-Fi reconnects only when the router itself does not answer. If on 1.0.0 “no internet” appears after ~1.5 h of work — it is a 1.0.0 bug fixed in 1.1.0: update (right after a restart).</li>
   <li><b>Factory reset</b>: “Update” → “Config File” → “Reset configuration to factory default settings”. After the restart — the “Clock ESP” access point again.</li>
   <li>The event log (System page) shows restarts, crashes and their causes — attach it to a bug report.</li>
 </ul>

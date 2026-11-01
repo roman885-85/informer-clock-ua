@@ -1,16 +1,17 @@
 // Плавна яскравість за фоторезистором (нове, не з оригіналу).
-// EN: Smooth photoresistor brightness (new): filtered sensor, author's level table with hysteresis, one MAX7219 step per 200 ms.
+// EN: Smooth photoresistor brightness (new): filtered sensor, author's level table with hysteresis; the fade itself — dim.cpp.
 // Задача: яскравість за датчиком світла має змінюватись плавно, а не стрибками, і не чекати кінця прокрутки новин.
 // У автора: один замір АЦП раз на 7 с і лише після кінця прокрутки (dbg_ram_print під P.getZoneStatus(0)), рівень
 // табло за таблицею — одразу (стрибок на кілька рівнів), на межі рівнів — перемикання туди-сюди; стрічка — так само
 // стрибком. Тепер: замір щоразу через FX_ADC_MS зі згладжуванням, рівень — за тією ж таблицею автора (поріг prg), нова
-// ціль — з гістерезисом (різниця ≥ 2 рівні — одразу, в 1 рівень — якщо тримається FX_HOLD_MS), табло йде до цілі по
-// одному рівню MAX7219 кожні FX_RAMP_MS, стрічка — дрібними кроками (fx_led_ramp). Не залежить від анімації.
+// ціль — з гістерезисом (різниця ≥ 2 рівні — одразу, в 1 рівень — якщо тримається FX_HOLD_MS), стрічка — дрібними
+// кроками (fx_led_ramp). Не залежить від анімації. Табло до цілі веде потік dim.cpp — з проміжними значеннями між
+// рівнями MAX7219 (у 1.0.0 тут був крок у рівень кожні 200 мс — власник: «ступінчасто, а не плавно»).
 #include "fw.h"
 
 void photo_brightness_read();
 static float s_adc = -1;
-static uint32_t s_t_adc, s_t_map, s_t_ramp, s_t_diff;
+static uint32_t s_t_adc, s_t_map, s_t_diff;
 static uint8_t s_lvl = 0xff;    // рівень, що зараз на табло (0..15); 0xff — невідомо
 static uint8_t s_tgt = 0xff;    // прийнята ціль
 static int s_off;               // зсув значення для перевірки запасу біля межі рівнів
@@ -49,17 +50,13 @@ void fx_bright_tick() {
     } else s_t_diff = 0;
     g_bf041 = s_tgt;
   }
-  if (!photo || g_c3080 != 0 || s_tgt > 15) return;
+  if (!photo || g_c3080 != 0 || s_tgt > 15) { fx_dim_follow(false, 0); return; }   // яскравістю керує інше
   if (g_c34b3 > 15 || s_lvl > 15) {  // невідомо, що на табло (старт, будильник, повідомлення, примусове оновлення автора)
     if (s_lvl > 15) s_lvl = s_tgt;
-    P.setIntensity(s_lvl);
-    g_c34b3 = s_lvl;
-    return;
+    fx_dim_jump(s_lvl);              // записати одразу, далі — плавно
   }
-  if (s_lvl == s_tgt || now - s_t_ramp < FX_RAMP_MS) return;
-  s_t_ramp = now;
-  s_lvl = s_lvl < s_tgt ? s_lvl + 1 : s_lvl - 1;
-  P.setIntensity(s_lvl);
+  fx_dim_follow(true, s_tgt);
+  s_lvl = fx_dim_level();
   g_c34b3 = s_lvl;
 }
 
@@ -67,6 +64,7 @@ void fx_bright_actual(uint8_t lvl) {
   if (s_lvl > 15) return;
   s_lvl = lvl;
   g_c34b3 = lvl;
+  fx_dim_jump(lvl);                  // автор щойно записав lvl (пробудження) — звідси плавно до цілі
 }
 
 // рядок налагодження в тому ж вигляді, що в автора (раз на 7 с з dbg_ram_print)

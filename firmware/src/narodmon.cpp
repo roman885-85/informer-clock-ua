@@ -86,7 +86,7 @@ void narodmon_read(const String &apiKey, String &devId) {
         g_c2fe4 += String(": ") + String(doc["sensors"][i]["value"].as<float>(), 1) + " " + doc["sensors"][i]["unit"].as<String>();
       }
       dbg_ws_print(String(g_c2fe4) + "  | frontend=" + g_c2ff0);
-      ws.textAll(g_c2ff0);
+      ws_send(g_c2ff0);
       g_c1aa8 = 720000;
       return;
     }

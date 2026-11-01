@@ -2,6 +2,7 @@
 // EN: Wi-Fi: STA/AP start, saved networks, internet check, reconnection (from 2.7.1; network fixes marked "Виправлено").
 // Перенесено з 2.7.1 (адреси оригіналу в коментарях).
 #include "fw.h"
+#include <esp_wifi.h>
 
 // @400d6c00
 void wifi_attempt_inc() { if (g_c3388 < 10) g_c3388 = g_c3388 + 1; }
@@ -58,9 +59,10 @@ void wifi_event(system_event_id_t ev, system_event_info_t info) {
       g_c3381 = 1;
     }
   } else if (ev == SYSTEM_EVENT_STA_GOT_IP) {
+    esp_wifi_set_ps(WIFI_PS_NONE);               // нове: без енергозбереження (див. STA_START)
     String p; led_phrase(p, g_c34b0, 0xad);
     dbg_ws_print(p + WiFi.localIP().toString());
-    if (g_c2d29 == 0) evlog_write(String("[WIFI] Connected  IP=") + WiFi.localIP().toString());
+    if (g_c2d29 == 0) evlog_write(String("[WIFI] Connected  IP=") + WiFi.localIP().toString() + String("  RSSI=") + String((int)WiFi.RSSI()) + String(" dBm"));
     dbg_ws_print(String("[WIFI] Connected  IP=") + WiFi.localIP().toString());
     g_c2d29 = 1;
     g_c3374 = F("connected");
@@ -70,6 +72,10 @@ void wifi_event(system_event_id_t ev, system_event_info_t info) {
     g_c3388 = 10;
     g_c2c14 = 0;
   } else if (ev == SYSTEM_EVENT_STA_START) {
+    // Нове (29.10.2026): без енергозбереження Wi-Fi. Ядро вмикає modem sleep — радіо дрімає між маяками роутера; на
+    // місці годинника власника зі слабким сигналом це давало 33–67 % втрат і відповіді до 1,8 с (оновлення не проходили,
+    // веб гальмував, годинник випадав з мережі). Живлення від мережі — економити нічого.
+    esp_wifi_set_ps(WIFI_PS_NONE);
     dbg_ws_print(String("Station mode started"));
   }
 }
@@ -940,7 +946,21 @@ void net_probe_internet() {
   FxStatusScope fxs(FXS_NET);                    // нове: стан на табло під час запуску
   dbg_ws_print(String("[NET ] Probing internet..."));
   bool ok = net_tcp_probe(IPAddress(8, 8, 8, 8), 0x35, 1500) == 1 || net_tcp_probe(IPAddress(1, 1, 1, 1), 0x35, 1500) == 1;
-  dbg_ws_print(String(ok ? "TCP probe (8.8.8.8 / 1.1.1.1:53): OK" : "TCP probe (8.8.8.8 / 1.1.1.1:53): FAIL"));
+  dbg_ws_print(ok ? String("TCP probe (8.8.8.8 / 1.1.1.1:53): OK")
+                  : String("TCP probe (8.8.8.8 / 1.1.1.1:53): FAIL (") + net_probe_why() + String(", gw=") +
+                    WiFi.gatewayIP().toString() + String(", RSSI=") + String((int)WiFi.RSSI()) + String(")"));
+  // Нове (30.10.2026): сокет не створюється кілька перевірок поспіль — це не мережа, а вичерпані ресурси всередині
+  // (уночі так годину: усі вихідні з'єднання падали миттєво, перепідключення Wi-Fi не допомагало, рятував лише
+  // перезапуск живлення). Після трьох таких перевірок — програмний перезапуск із записом у журнал.
+  static uint8_t sock_fail_runs;
+  if (!ok && g_fx_probe_stage == 1) {
+    if (++sock_fail_runs >= 3) {
+      evlog_write(String("[NET ] Restart: no sockets for outbound connections (") + net_probe_why() + String(")"));
+      evlog_write(String("[SOCK] ") + fx_sock_census_now());
+      delay(200);
+      ESP.restart();
+    }
+  } else sock_fail_runs = 0;
   if (!ok) {
     dbg_ws_print(String("Trying HTTP probe (msftconnecttest)..."));
     String url("http://www.msftconnecttest.com/connecttest.txt");
@@ -1039,7 +1059,8 @@ L8ed:
       if (net_gateway_alive()) {
         dbg_ws_print(String("Wifi        : router answers — no internet at provider, keeping Wi-Fi link"));
       } else {
-        evlog_write(String("[NET ] Forced re-association (no internet >6 min, router silent)"));
+        evlog_write(String("[NET ] Forced re-association (no internet >6 min, router silent: ") + net_probe_why() +
+                    String(", gw=") + WiFi.gatewayIP().toString() + String(")"));
         dbg_ws_print(String("[NET ] Forced re-association"));
         dbg_ws_print(String("Wifi        : no internet too long — forcing re-association"));
         wifi_force_reassoc();

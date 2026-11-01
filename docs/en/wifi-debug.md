@@ -48,6 +48,11 @@ Without PlatformIO — `espota.py` from the Arduino-ESP32 core:
 
 While writing, the display shows “Updating firmware”. With the espota protocol the clock connects back to the computer,
 so the computer's firewall must allow incoming connections for Python/PlatformIO.
+On macOS a Python that is not the system one (including PlatformIO's) gets “No response from the ESP” without the
+“Local Network” permission — then run `espota.py` with the system `/usr/bin/python3` and give the computer's address:
+`-I <Mac address>`.
+
+While writing, the clock stops its services (MQTT, LED strip, sound, smooth brightness); the web interface keeps working.
 
 ## Event log and crashes
 
@@ -63,10 +68,22 @@ release files):
 
 ```sh
 ~/.platformio/packages/toolchain-xtensa32/bin/xtensa-esp32-elf-addr2line -pfiaC \
-  -e informer-clock-ua-esp32-1.0.0.elf 0x400d1234 0x400d5678
+  -e informer-clock-ua-esp32-1.1.0.elf 0x400d1234 0x400d5678
 ```
 
 If `loop()` hangs for more than 3 min, the watchdog restarts the clock and writes `[BOOT] loop guard: loop() stuck > 180 s`.
+
+## Sockets and signal strength (since 1.1.0)
+
+- `http://<address>/content?wifi_rssi=` — router signal strength, dBm (−40…−70 is fine; closer than −30 — the clock
+  stands too close to the router). The event log has it in every “Connected” line.
+- `http://<address>/content?sock_diag=` — lwIP socket census (once a minute): `used` — open, `free` — free slots
+  (counted only with Wi-Fi debugging on), `lost` — neither open nor free; then for each open socket — type (`T` TCP,
+  `U` UDP), ports, address, seconds open, task/loop stage and the call chain `@…` (addresses — with the same
+  `addr2line`). With Wi-Fi debugging on, the same `[SOCK] …` line goes to the log — when something changes or every
+  10 min.
+- If sockets ever run out (no socket can be created three checks in a row), the clock writes
+  `[NET ] Restart: no sockets…` and the `[SOCK] …` census to the event log and restarts.
 
 ## Security
 

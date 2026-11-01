@@ -59,9 +59,25 @@ extern "C" int __wrap_settimeofday(const struct timeval *tv, const struct timezo
   return r;
 }
 
+// Нове (30.10.2026): чому не вдалась остання проба — для журналу. Уночі годинник годину не міг відкрити жодного
+// вихідного з'єднання (навіть до роутера), хоч вхідні (веб, ping) працювали; перепідключення Wi-Fi не допомагало.
+// 1 — не створився сокет (errno), 2 — з'єднання відхилено одразу (errno), 3 — тайм-аут, 4 — помилка після (SO_ERROR).
+int8_t g_fx_probe_stage;
+int g_fx_probe_errno;
+String net_probe_why() {
+  switch (g_fx_probe_stage) {
+    case 1: return String("socket errno=") + g_fx_probe_errno;
+    case 2: return String("connect errno=") + g_fx_probe_errno;
+    case 3: return String("timeout");
+    case 4: return String("so_error=") + g_fx_probe_errno;
+    default: return String("ok");
+  }
+}
+
 int8_t net_tcp_probe(IPAddress ip, uint16_t port, uint32_t ms) {
   int s = lwip_socket(AF_INET, SOCK_STREAM, 0);
-  if (s < 0) return -1;
+  if (s < 0) { g_fx_probe_stage = 1; g_fx_probe_errno = errno; return -1; }
+  g_fx_probe_stage = 0;
   lwip_fcntl(s, F_SETFL, lwip_fcntl(s, F_GETFL, 0) | O_NONBLOCK);
   struct sockaddr_in a;
   memset(&a, 0, sizeof a);
@@ -71,6 +87,7 @@ int8_t net_tcp_probe(IPAddress ip, uint16_t port, uint32_t ms) {
   int8_t r = -1;
   if (lwip_connect(s, (struct sockaddr *)&a, sizeof a) == 0) r = 1;
   else if (errno == EINPROGRESS) {
+    g_fx_probe_stage = 3;
     fd_set w;
     FD_ZERO(&w);
     FD_SET(s, &w);
@@ -81,11 +98,18 @@ int8_t net_tcp_probe(IPAddress ip, uint16_t port, uint32_t ms) {
       int e = 0;
       socklen_t l = sizeof e;
       lwip_getsockopt(s, SOL_SOCKET, SO_ERROR, &e, &l);
-      if (e == 0) r = 1;
-      else if (e == ECONNREFUSED || e == ECONNRESET) r = 0;
+      if (e == 0) { r = 1; g_fx_probe_stage = 0; }
+      else { g_fx_probe_stage = 4; g_fx_probe_errno = e; if (e == ECONNREFUSED || e == ECONNRESET) r = 0; }
     }
-  } else if (errno == ECONNREFUSED) r = 0;
-  lwip_close(s);
+  } else {
+    g_fx_probe_stage = 2; g_fx_probe_errno = errno;
+    if (errno == ECONNREFUSED) r = 0;
+  }
+  // Виправлено (30.10.2026): lwip_close_r, а не lwip_close. У lwIP ядра 1.0.4 (ESP-IDF 3.3, ESP_THREAD_SAFE) місце
+  // сокета звільняє лише lwip_close_r (через неї йдуть і close()/closesocket() ядра); lwip_close видаляє з'єднання,
+  // а місце з 10 лишається зайнятим. Кожна проба (раз на 10 хв, без інтернету — частіше) забирала одне місце, і за
+  // ~1,5 год (з налагодженням по Wi-Fi — за ~75 хв) годинник лишався без жодного вихідного з'єднання до перезапуску.
+  lwip_close_r(s);
   return r;
 }
 
