@@ -110,7 +110,7 @@ static void start() {
   if (g_c33a4 != "" && g_c3398 != "") ArduinoOTA.setPassword(g_c3398.c_str());
   ArduinoOTA.onStart([]() { fx_wdbg_line("OTA: start", 10); ota_quiesce(); fx_status_begin(FXS_FLASH, true); });
   ArduinoOTA.onProgress([](unsigned int, unsigned int) { loop_guard_feed(); });
-  ArduinoOTA.onEnd([]() { fx_wdbg_line("OTA: done, restart", 18); fx_status_end(); });
+  ArduinoOTA.onEnd([]() { fx_wdbg_line("OTA: done, restart", 18); fx_status_end(); rtc_stage = 0; });   // 1.1.2: плановий
   ArduinoOTA.onError([](ota_error_t e) { char b[32]; fx_wdbg_line(b, snprintf(b, sizeof b, "OTA: error %d", (int)e)); fx_status_end(); });
   ArduinoOTA.begin();
   s_prev_vprintf = esp_log_set_vprintf(idf_vprintf);

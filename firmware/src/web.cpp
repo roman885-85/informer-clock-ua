@@ -100,7 +100,7 @@ void h_reboot(AsyncWebServerRequest *r) {
   df_silence();
   WiFi.disconnect(false);
   delay(2000);
-  ESP.restart();
+  fx_restart_planned();
 }
 // @400d4bd0
 void h_factory(AsyncWebServerRequest *r) {
@@ -109,7 +109,7 @@ void h_factory(AsyncWebServerRequest *r) {
   WiFi.disconnect(false);
   delay(1000);
   df_silence();
-  ESP.restart();
+  fx_restart_planned();
 }
 // @400d37b0
 void h_ntpsync(AsyncWebServerRequest *r) {
@@ -444,6 +444,12 @@ void h_post(AsyncWebServerRequest *r) {
     if (p->name() == "wdbg_wifi_off") {
       long s = p->value().toInt();
       if (g_fx_wdbg && s > 0) g_fx_wifi_blk_req = s > 3600 ? 3600 : (uint32_t)s;
+      continue;
+    }
+    // Нове (1.1.2): налагодження — «стала» обробка подій Wi-Fi на N с і обрив зв'язку (перевірка вартового подій).
+    if (p->name() == "wdbg_evt_block") {
+      long s = p->value().toInt();
+      if (g_fx_wdbg && s > 0) g_fx_evt_blk_req = s > 3600 ? 3600 : (uint32_t)s;
       continue;
     }
     d[p->name()] = p->value();

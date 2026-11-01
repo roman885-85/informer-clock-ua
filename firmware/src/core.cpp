@@ -125,7 +125,7 @@ void loop() {
     config_save_atomic();
     delay(200);
     df_silence();
-    ESP.restart();
+    fx_restart_planned();
   }
   if (g_c3380) {
     g_c3384 = millis();
@@ -163,6 +163,7 @@ void loop() {
   fx_night_tick();
   fx_wdbg_tick();
   fx_sock_tick();
+  fx_wifi_evt_tick();                            // нове (1.1.2): вартовий подій Wi-Fi (wifi.cpp)
   if (millis() - g_fx_dst_t > 60000) { g_fx_dst_t = millis(); fx_time_offset_apply(); }   // переходи літнього часу
   night_mode_tick(10000);
   ws_state_tick_5s(5000);
@@ -323,6 +324,13 @@ void evlog_boot_reason() {
   if (f) { f.println(); f.close(); }
   evlog_write(String("[BOOT] ") + s);
 }
+// Нове (1.1.2): плановий перезапуск. Запис «loop was stalled in: …» після запуску бере етап циклу з RTC-пам'яті — в
+// автора його отримував будь-який програмний перезапуск (оновлення, /reboot, «router unreachable»), і журнал показував
+// зависання, якого не було. Перед плановим перезапуском етап — 0; запис лишається для сторожа циклу й аварій.
+void fx_restart_planned() {
+  rtc_stage = 0;
+  ESP.restart();
+}
 
 // ---------- конфігурація: рядок JSON g_c2ef0 ↔ /config.json ----------
 // @400ffe18
@@ -399,7 +407,7 @@ void config_upload_apply() {
   WiFi.disconnect(false);
   delay(2000);
   df_silence();
-  ESP.restart();
+  fx_restart_planned();
 }
 
 // ---------- кнопка GPIO0 ----------
@@ -419,7 +427,7 @@ void button_check() {
       WiFi.disconnect(false);
       delay(1000);
       df_silence();
-      ESP.restart();
+      fx_restart_planned();
     }
     if (millis() - t0 > 99 && g_c34b5 == 0) {
       if (g_c2d29 == 0) {
@@ -442,7 +450,7 @@ void config_save_and_restart() {
   WiFi.disconnect(false);
   delay(1000);
   df_silence();
-  ESP.restart();
+  fx_restart_planned();
 }
 // @4011afdc: коротке натискання — перейти до наступного розділу інформаційного циклу
 void button_next_section() {

@@ -82,6 +82,10 @@ extern bool g_fx_wdbg;                  // увімкнено у веб-інте
 void fx_wdbg_set(bool on);
 void fx_wdbg_tick();
 void fx_wdbg_line(const char *s, size_t n);   // рядок у сетевий журнал (будь-яка задача)
+extern volatile uint32_t g_fx_evt_blk_req;    // «стала» обробка подій Wi-Fi на N с (/post?wdbg_evt_block=N; wifi.cpp)
+void fx_wifi_evt_tick();                         // вартовий подій Wi-Fi, щоциклу (wifi.cpp)
+String wifi_evt_why();                           // стан обробки подій Wi-Fi — для журналу (wifi.cpp)
+void fx_restart_planned();                       // плановий перезапуск — без «loop was stalled in» (core.cpp)
 extern volatile uint32_t g_fx_wifi_blk_req;   // імітація зникнення роутера на N с (/post?wdbg_wifi_off=N; wifi.cpp)
 
 // ---------- облік сокетів lwIP (sockdiag.cpp, діагностика) ----------

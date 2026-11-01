@@ -133,6 +133,7 @@ static t_httpUpdate_return ota_fetch(WiFiClientSecure &client) {
   HTTPUpdate upd(30000);
   t_httpUpdate_return r = HTTP_UPDATE_FAILED;
   for (int a = 1; a <= 3; a++) {
+    rtc_stage = 0;                               // нове (1.1.2): вдале оновлення одразу перезапускає — це плановий перезапуск
     r = upd.update(client, g_c2e9c, String(FX_VERSION));
     if (r != HTTP_UPDATE_FAILED) break;
     evlog_write(String("[OTA] attempt ") + a + " fail " + upd.getLastError() + " " + upd.getLastErrorString());

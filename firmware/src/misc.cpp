@@ -41,7 +41,7 @@ void night_lowmem_reboot_tick(uint32_t ms) {
     dbg_ws_print(String("Night low-memory reboot. maxFreeBlock=") + String(heap_max_block(), 10));
     delay(100);
     df_silence();
-    ESP.restart();
+    fx_restart_planned();
   }
 }
 // @400f6714: час системи / NTP / RTC у налагодження
