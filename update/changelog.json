@@ -1,5 +1,14 @@
 [
   {
+    "v": "1.1.2",
+    "date": "2026-11-01",
+    "items": [
+      { "t": "fixed", "text": "Годинник більше не «зависає в мережі»: коли він утрачав роутер, а обробка подій Wi-Fi стала, він і далі вважав себе підключеним і лишався поза мережею до вимкнення живлення. Тепер помічає це й сам перезапускається — за секунди після невдалого перепідключення або за хвилину. / The clock no longer “hangs on the network”: when it lost the router while Wi-Fi event handling had stopped, it still believed it was connected and stayed off the network until a power cycle. Now it notices and restarts by itself — seconds after a failed re-association or within a minute." },
+      { "t": "fixed", "text": "Перезапуск більше не може зависнути в очікуванні Wi-Fi (апаратний сторож RTC); після планового перезапуску журнал подій більше не пише хибне «loop was stalled in». / A restart can no longer hang waiting for Wi-Fi (hardware RTC watchdog); after a planned restart the event log no longer shows a false “loop was stalled in”." },
+      { "t": "added", "text": "Діагностика: у записах «Internet offline» і «Forced re-association» — стан обробки подій Wi-Fi і драйвера; налагодження: /post?wdbg_evt_reassoc=N і /post?wdbg_evt_block=N. / Diagnostics: the “Internet offline” and “Forced re-association” records carry the Wi-Fi event handling and driver state; debugging: /post?wdbg_evt_reassoc=N and /post?wdbg_evt_block=N." }
+    ]
+  },
+  {
     "v": "1.1.1",
     "date": "2026-11-01",
     "items": [

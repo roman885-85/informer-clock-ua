@@ -66,7 +66,7 @@ PLATFORMIO_UPLOAD_FLAGS="--auth=<пароль>" pio run -e clock -t upload --upl
 
 ```sh
 ~/.platformio/packages/toolchain-xtensa32/bin/xtensa-esp32-elf-addr2line -pfiaC \
-  -e informer-clock-ua-esp32-1.1.1.elf 0x400d1234 0x400d5678
+  -e informer-clock-ua-esp32-1.1.2.elf 0x400d1234 0x400d5678
 ```
 
 Якщо `loop()` завис довше 3 хв, сторож перезапускає годинник і пише `[BOOT] loop guard: loop() stuck > 180 s`.
@@ -91,6 +91,24 @@ PLATFORMIO_UPLOAD_FLAGS="--auth=<пароль>" pio run -e clock -t upload --upl
   `[WIFI] Test: simulated outage over`.
 - Коротка імітація (2 хв): годинник має повернутися сам за секунди після її кінця, без перезапуску. Довга (30 хв):
   через ~10 хв — `[WIFI] Restart: router unreachable (cycle 3, …)`, перезапуск і одразу `Connected`.
+
+## Стан обробки подій Wi-Fi (з 1.1.2)
+
+- Записи `[NET ] Internet offline — ping failed (…)` і `[NET ] Forced re-association (…)` закінчуються станом Wi-Fi:
+  `events N` — скільки подій Wi-Fi обробила задача подій ядра (`network_event`); `last E X s ago` — остання подія
+  (номер `system_event_id_t`: 1 — кінець пошуку мереж, 2/3 — старт/стоп станції, 5 — від'єднання, 7 — отримано
+  адресу) і коли; `handler busy: event E step S for X s` — обробник стоїть на події E, кроці S (1–2 — від'єднання,
+  3–5 — отримання адреси, 6 — старт станції, 99 — імітація) уже X с; `task …` — стан задачі подій і запас її стека;
+  `driver: associated / not associated` — чи драйвер Wi-Fi асоційований з роутером; `status N` — `WiFi.status()`
+  (3 — «підключено», 6 — «від'єднано», 255 — Wi-Fi вимкнено); `heap` — вільна пам'ять.
+- Годинник перезапускається сам, коли бачить, що обробка подій стала: `[WIFI] Restart: Wi-Fi events not delivered
+  after re-association (…)` (після примусового перепідключення подій немає 8 с), `[WIFI] Restart: status says
+  connected, driver is not (…)` (хвилину поспіль), `[NET ] Restart: router silent, no reconnect since last
+  re-association (…)` (запасне правило). Такий журнал варто надіслати в Issues — він показує, на чому стала обробка.
+- Імітація (лише з увімкненим налагодженням по Wi-Fi; у налаштування не пишеться): `http://<адреса>/post?wdbg_evt_reassoc=N`
+  — обробка подій стає на N с (до 3600), годинник примусово перепідключається; за ~8 с має бути `Restart: Wi-Fi
+  events not delivered…` і одразу `Connected`. `http://<адреса>/post?wdbg_evt_block=N` — те саме з обривом зв'язку;
+  за ~1 хв — `Restart: status says connected, driver is not…`.
 
 ## Безпека
 

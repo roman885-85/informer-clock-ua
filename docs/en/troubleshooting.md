@@ -23,6 +23,7 @@
 | No update is offered | an update appears only for a newer version of this project; internet is required; GitHub cache — up to 5 min after a release |
 | After ~1.5 h of work “no internet”, although the web interface opens | a 1.0.0 bug: the internet check did not free its sockets, and after 8–10 checks no outbound connection could be opened — fixed in 1.1.0; until you update, a restart helps (update right after it) |
 | After a router or power outage the clock stays off the network for hours (the event log shows “AP restored” every ~3.5 min) | before 1.1.1: power the clock off and on; since 1.1.1 it restarts by itself — after ~10 min, and less often (up to once an hour) while the router is gone |
+| The clock is off the network, and every 6 min the event log shows “Forced re-association (… router silent …)” | before 1.1.2: power the clock off and on; since 1.1.2 it restarts by itself (the log shows “Restart: Wi-Fi events not delivered…” or “Restart: status says connected, driver is not…”); if it keeps happening, please send the event log to Issues: the records show where event handling got stuck |
 | Updates break off (“Stream Read Timeout”, “Verify Bin Header Failed”), the web interface is slow, the clock drops off the network | the clock stands right next to the router: its receiver is overloaded (up to 67 % lost packets). Move it 1–2 m away — at 1.5–2 m there are no losses; the signal strength is in the event log (“RSSI=… dBm”, −40…−70 is fine) |
 
 ## Display

@@ -3,6 +3,39 @@
 Формат: нові версії вгорі. Те саме для веб-інтерфейсу годинника — `update/changelog.json`.
 Format: newest first. The clock's web interface reads the same history from `update/changelog.json`.
 
+## 1.1.2 — 2026-11-01
+
+**Виправлено / fixed**
+- Годинник більше не «зависає в мережі». Буває, що він утрачає роутер, а ядро Wi-Fi про це не дізнається (обробка
+  подій Wi-Fi стала): годинник і далі вважає себе підключеним, кожні 6 хв даремно перепідключається й лишається поза
+  мережею до вимкнення живлення (у власника — 1,5 год; у журналі подій — «Forced re-association … router silent» по
+  колу). Тепер він це помічає й перезапускається сам: за 8 с після такого перепідключення, коли події Wi-Fi не
+  прийшли, або за хвилину, коли ядро каже «підключено», а драйвер — ні; запасне правило — роутер мовчить, а з
+  попереднього перепідключення годинник жодного разу не підключився. / The clock no longer “hangs on the network”.
+  Sometimes it loses the router while the Wi-Fi core never learns about it (Wi-Fi event handling stops): the clock
+  still believes it is connected, re-associates every 6 min to no avail and stays off the network until a power cycle
+  (1.5 h at the owner's; the event log shows “Forced re-association … router silent” over and over). Now it notices
+  and restarts by itself: 8 s after such a re-association if no Wi-Fi events arrive, or after a minute if the core
+  says “connected” while the driver does not; the fallback rule — the router is silent and the clock has not
+  connected even once since the previous re-association.
+- Перезапуск більше не може «зависнути» в очікуванні Wi-Fi: плановий перезапуск і сторож циклу страхує апаратний
+  сторож RTC (3 с). / A restart can no longer hang waiting for Wi-Fi: planned restarts and the loop guard are backed
+  by the hardware RTC watchdog (3 s).
+- Після планового перезапуску (оновлення, кнопка, /reboot, збереження налаштувань, «router unreachable») журнал подій
+  більше не пише хибне «loop was stalled in: …» — воно лишилося для справжніх зависань і аварій. / After a planned
+  restart (update, button, /reboot, saving settings, “router unreachable”) the event log no longer shows a false
+  “loop was stalled in: …” — it stays for real hangs and crashes.
+
+**Діагностика / diagnostics**
+- Записи «Internet offline» і «Forced re-association» — зі станом Wi-Fi: скільки подій оброблено, яка й коли остання,
+  на якій події й на якому кроці стоїть обробка, стан задачі подій, чи асоційований драйвер, стан ядра, вільна
+  пам'ять. / The “Internet offline” and “Forced re-association” records carry the Wi-Fi state: events handled, the
+  last one and when, which event and step the handling is stuck on, the event task state, whether the driver is
+  associated, the core status, free memory.
+- Налагодження по Wi-Fi: `/post?wdbg_evt_reassoc=N` і `/post?wdbg_evt_block=N` — імітація «застиглої» обробки подій
+  (з примусовим перепідключенням або з обривом зв'язку). / Wi-Fi debugging: `/post?wdbg_evt_reassoc=N` and
+  `/post?wdbg_evt_block=N` simulate stuck event handling (with a forced re-association or a link drop).
+
 ## 1.1.1 — 2026-11-01
 
 **Виправлено / fixed**

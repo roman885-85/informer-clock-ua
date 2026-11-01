@@ -68,7 +68,7 @@ release files):
 
 ```sh
 ~/.platformio/packages/toolchain-xtensa32/bin/xtensa-esp32-elf-addr2line -pfiaC \
-  -e informer-clock-ua-esp32-1.1.1.elf 0x400d1234 0x400d5678
+  -e informer-clock-ua-esp32-1.1.2.elf 0x400d1234 0x400d5678
 ```
 
 If `loop()` hangs for more than 3 min, the watchdog restarts the clock and writes `[BOOT] loop guard: loop() stuck > 180 s`.
@@ -94,6 +94,24 @@ If `loop()` hangs for more than 3 min, the watchdog restarts the clock and write
 - A short simulation (2 min): the clock must come back by itself within seconds after it ends, without a restart. A
   long one (30 min): after ~10 min — `[WIFI] Restart: router unreachable (cycle 3, …)`, a restart and `Connected`
   right away.
+
+## Wi-Fi event handling state (since 1.1.2)
+
+- The `[NET ] Internet offline — ping failed (…)` and `[NET ] Forced re-association (…)` records end with the Wi-Fi
+  state: `events N` — how many Wi-Fi events the core's event task (`network_event`) has handled; `last E X s ago` —
+  the last event (a `system_event_id_t` number: 1 — scan done, 2/3 — station start/stop, 5 — disconnected, 7 — got an
+  address) and when; `handler busy: event E step S for X s` — the handler is stuck on event E, step S (1–2 —
+  disconnect, 3–5 — got address, 6 — station start, 99 — simulation) for X s; `task …` — the event task state and its
+  stack headroom; `driver: associated / not associated` — whether the Wi-Fi driver is associated with the router;
+  `status N` — `WiFi.status()` (3 — “connected”, 6 — “disconnected”, 255 — Wi-Fi off); `heap` — free memory.
+- The clock restarts by itself when it sees that event handling has stopped: `[WIFI] Restart: Wi-Fi events not
+  delivered after re-association (…)` (no events for 8 s after a forced re-association), `[WIFI] Restart: status says
+  connected, driver is not (…)` (for a minute in a row), `[NET ] Restart: router silent, no reconnect since last
+  re-association (…)` (the fallback rule). Please send such a log to Issues — it shows where the handling got stuck.
+- Simulation (only with Wi-Fi debugging on; not saved to the settings): `http://<address>/post?wdbg_evt_reassoc=N` —
+  event handling stops for N s (up to 3600) and the clock re-associates; within ~8 s you should see `Restart: Wi-Fi
+  events not delivered…` and `Connected` right away. `http://<address>/post?wdbg_evt_block=N` — the same with a link
+  drop; within ~1 min — `Restart: status says connected, driver is not…`.
 
 ## Security
 

@@ -19,7 +19,7 @@ for this project. The code in this repository was reconstructed from the 2.7.1 m
 - the reconstructed copy was tested on a real clock.
 
 The **`reconstructed-2.7.1`** tag is this copy with the original's behaviour (including its bugs). Everything changed
-after it is visible in the git history from that tag: `git diff reconstructed-2.7.1 v1.1.1`.
+after it is visible in the git history from that tag: `git diff reconstructed-2.7.1 v1.1.2`.
 
 ### Reading the code
 
@@ -109,6 +109,14 @@ not in the PlatformIO registry). The rest are `lib_deps` in `platformio.ini` wit
 | What it was | What it is now | Where |
 |---|---|---|
 | After the router disappeared, the clock could stay away from it for hours: the reconnect cycle (10 attempts, then an access point on channel 1) ran out again and again, while a fresh start connected within seconds; the failure reason never reached the event log | after 3 exhausted cycles in a row (~10 min), with nobody connected to the access point, a software restart; the threshold grows with every such restart in a row (6, 12, then 18 cycles; the counter lives in RTC memory and is cleared on connecting); the “AP restored” record carries the cycle number, the last failure reason and the network scan result; `/post?wdbg_wifi_off=N` simulates it for testing | `wifi.cpp`, `web.cpp` |
+
+## Fixed in 1.1.2
+
+| What it was | What it is now | Where |
+|---|---|---|
+| The clock lost the router while the core's Wi-Fi event handling (the `network_event` task) had stopped — `WiFi.status()` still said “connected”: a forced re-association every 6 min did not help, the 1.1.1 restart (the “cycle exhausted” branch) never fired, and the clock stayed off the network until a power cycle | an event watchdog: after a forced re-association (WIFI_OFF → STA) events must arrive within 8 s; “connected” while the driver is not associated — for no longer than a minute; the router is silent and there has been no GOT_IP since the previous re-association — in all three cases an event-log record with the event handling state and a restart. Only the event task is counted: the 1.0.4 core calls WIFI_READY synchronously from the main loop. `/post?wdbg_evt_reassoc=N`, `/post?wdbg_evt_block=N` simulate it for testing | `wifi.cpp`, `web.cpp` |
+| `ESP.restart()` stops Wi-Fi first and, with event handling stopped, waited forever — the loop guard could not restart the clock for 3 min | before a planned restart and in the loop guard — the hardware RTC watchdog for 3 s (system reset, RTC memory survives) | `core.cpp`, `guard.cpp` |
+| After any software restart (update, button, /reboot, settings) the event log showed “loop was stalled in: …” — a hang that never happened (the loop stage in RTC memory was not cleared) | a planned restart clears the stage (`fx_restart_planned()`; ArduinoOTA and network updates too); the record stays for the loop guard and crashes | `core.cpp`, `wdbg.cpp`, `services.cpp` |
 
 ## New features
 

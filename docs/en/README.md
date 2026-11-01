@@ -21,5 +21,5 @@ author does not fix. Here that code has been reconstructed and published in full
 All documentation as one PDF (with a cover and contents) and every part separately — among the
 [release](https://github.com/roman885-85/informer-clock-ua/releases) files: `informer-clock-ua-<version>-docs-en.pdf`.
 
-Version 1.1.1 is tested on a clock; please update from 1.0.0 (it loses internet after ~1.5 h of work). Please
+Version 1.1.2 is tested on a clock; please update from 1.0.0 (it loses internet after ~1.5 h of work). Please
 report problems in [Issues](https://github.com/roman885-85/informer-clock-ua/issues).
