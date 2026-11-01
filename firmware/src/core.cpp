@@ -3,6 +3,31 @@
 #include "fw.h"
 #include "soc/rtc_wdt.h"
 
+// Діагностика (1.1.3-rc1, лише з налагодженням по Wi-Fi): тривалість ділянок головного циклу. Прохід, довший за 80 мс
+// (табло й бігучий рядок у цей час стоять), — рядок у сетевий журнал: «SLOW loop N ms: ділянка:мс …» (ділянки ≥ 3 мс;
+// 9 — початок циклу, 6 — яскравість/ніч/стан для веб, 1 — мережа, 3 — пошук мереж/журнал подій, 2 — запуск пошуку,
+// 4 — NTP, 5 — вміст табло).
+static uint32_t s_lt0, s_lt_mark;
+static uint8_t s_lt_seg;
+static char s_lt_buf[120];
+static uint8_t s_lt_len;
+static void fx_lt(uint8_t seg) {
+  uint32_t t = millis(), d = t - s_lt_mark;
+  if (d >= 3 && s_lt_len < sizeof s_lt_buf - 14)
+    s_lt_len += snprintf(s_lt_buf + s_lt_len, sizeof s_lt_buf - s_lt_len, " %u:%u", (unsigned)s_lt_seg, (unsigned)d);
+  s_lt_seg = seg;
+  s_lt_mark = t;
+}
+static void fx_lt_end() {
+  fx_lt(0);
+  uint32_t total = s_lt_mark - s_lt0;
+  if (total > 80 && g_fx_wdbg) {
+    char b[160];
+    int n = snprintf(b, sizeof b, "SLOW loop %u ms:%s", (unsigned)total, s_lt_buf);
+    fx_wdbg_line(b, n < (int)sizeof b ? n : sizeof b - 1);
+  }
+}
+
 // ---------- setup @40120794 ----------
 void setup() {
 #ifdef COPY_DIAG
@@ -102,6 +127,7 @@ void setup() {
 
 // ---------- loop @40121d5c ----------
 void loop() {
+  s_lt0 = s_lt_mark = millis(); s_lt_seg = 9; s_lt_len = 0; s_lt_buf[0] = 0;   // діагностика 1.1.3-rc1
   // ws.cleanupClients(2) автора — тепер у потоці AsyncTCP (ws.cpp, ws_async_hook): список клієнтів не захищений
   // Виправлено: у автора — щоциклу, навіть коли DNS captive-порталу не запущено (звичайний режим клієнта): тоді
   // WiFiUDP::parsePacket() на неіснуючому сокеті щоразу виділяє й звільняє 1460 Б і пише в Serial «parsePacket():
@@ -158,7 +184,7 @@ void loop() {
   // новина (2–4,5 хв), стояли яскравість, нічний режим, ранкове ввімкнення табло, стан для веб-інтерфейсу,
   // а за анімації, що не закінчується, — і відновлення мережі (годинник «не видно в мережі» до перезапуску).
   // Швидкі задачі (без мережі й без зміни зон табло) — щоциклу:
-  rtc_magic = 0xc10c0fe5; rtc_stage = 6;
+  rtc_magic = 0xc10c0fe5; rtc_stage = 6; fx_lt(6);
   display_brightness_tick(1000);
   fx_bright_tick();
   fx_night_tick();
@@ -173,7 +199,7 @@ void loop() {
   // але не рідше ніж раз на NET_DEFER_MAX_MS.
   if (g_fx_quiet || P.getZoneStatus(0) || millis() - g_fx_gate > NET_DEFER_MAX_MS) {
     g_fx_gate = millis();
-    rtc_magic = 0xc10c0fe5; rtc_stage = 1;
+    rtc_magic = 0xc10c0fe5; rtc_stage = 1; fx_lt(1);
     net_check_periodic(90000);
     wifi_reconnect_cycle(5000);
     dbg_ram_print(7000);
@@ -199,7 +225,7 @@ void loop() {
     String s = g_c331c; g_c331c = "";
     networks_set_auto(s, g_c331a);
   }
-  rtc_magic = 0xc10c0fe5; rtc_stage = 3;
+  rtc_magic = 0xc10c0fe5; rtc_stage = 3; fx_lt(3);
   wifi_scan_harvest_json();
   if (g_c2e89) {
     g_c2e89 = 0;
@@ -226,7 +252,7 @@ void loop() {
     g_c34c4 = 0;
     if ((WiFi.getMode() & WIFI_STA) && WiFi.scanComplete() != -1) {
       if (g_c34c5 || g_c1624 == 0 || millis() - g_c1624 > 8000) {
-        rtc_magic = 0xc10c0fe5; rtc_stage = 2;
+        rtc_magic = 0xc10c0fe5; rtc_stage = 2; fx_lt(2);
         WiFi.scanDelete();
         WiFi.scanNetworks(true, false, false, 300);
         g_c1624 = millis();
@@ -237,7 +263,7 @@ void loop() {
   if (g_c3424 && (g_c3424 = 0, g_c2d29) && g_c3319 == 0) {
     dbg_ws_print(String("NTP        : forced sync requested from UI"));
     g_c22b4 = 0; g_c22b5 = 0;
-    rtc_magic = 0xc10c0fe5; rtc_stage = 4;
+    rtc_magic = 0xc10c0fe5; rtc_stage = 4; fx_lt(4);
     sys_sync_ntp();
   }
   alarm_tick(1000);                                   // @400e4bec
@@ -247,7 +273,7 @@ void loop() {
   if (g_c2eec == 1 || g_c2eec == 2) ota_update();
   if (g_c2fc9 == 1) voice_hourly();
   else if (g_c2fc9 == 2) buzzer_hourly();
-  rtc_magic = 0xc10c0fe5; rtc_stage = 5;
+  rtc_magic = 0xc10c0fe5; rtc_stage = 5; fx_lt(5);
   if (g_fx_quiet) sensors_read_all();                 // нове: табло погашене — вміст стоїть, датчики читаємо (night.cpp)
   else if (g_c34ba == 4) {
     if (g_c3470 == 1) content_cycle_4m();
@@ -259,6 +285,7 @@ void loop() {
     else if (g_c3471 == 2) content_cycle_8m();
   } else content_cycle_default();
   rtc_magic = 0xc10c0fe5; rtc_stage = 0;
+  fx_lt_end();                                   // діагностика 1.1.3-rc1
   loop_guard_feed();
 }
 
