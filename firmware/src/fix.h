@@ -86,6 +86,8 @@ extern volatile uint32_t g_fx_evt_blk_req;    // «стала» обробка �
 void fx_wifi_evt_tick();                         // вартовий подій Wi-Fi, щоциклу (wifi.cpp)
 String wifi_evt_why();                           // стан обробки подій Wi-Fi — для журналу (wifi.cpp)
 void fx_restart_planned();                       // плановий перезапуск — без «loop was stalled in» (core.cpp)
+void fx_rtc_wdt_arm(uint32_t ms);                // апаратна страховка перезапуску (core.cpp)
+extern volatile uint8_t g_fx_evt_blk_mode;       // 1 — обрив, 2 — примусове перепідключення (wifi.cpp)
 extern volatile uint32_t g_fx_wifi_blk_req;   // імітація зникнення роутера на N с (/post?wdbg_wifi_off=N; wifi.cpp)
 
 // ---------- облік сокетів lwIP (sockdiag.cpp, діагностика) ----------

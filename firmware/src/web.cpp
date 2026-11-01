@@ -447,9 +447,12 @@ void h_post(AsyncWebServerRequest *r) {
       continue;
     }
     // Нове (1.1.2): налагодження — «стала» обробка подій Wi-Fi на N с і обрив зв'язку (перевірка вартового подій).
-    if (p->name() == "wdbg_evt_block") {
+    if (p->name() == "wdbg_evt_block" || p->name() == "wdbg_evt_reassoc") {
       long s = p->value().toInt();
-      if (g_fx_wdbg && s > 0) g_fx_evt_blk_req = s > 3600 ? 3600 : (uint32_t)s;
+      if (g_fx_wdbg && s > 0) {
+        g_fx_evt_blk_mode = p->name() == "wdbg_evt_reassoc" ? 2 : 1;
+        g_fx_evt_blk_req = s > 3600 ? 3600 : (uint32_t)s;
+      }
       continue;
     }
     d[p->name()] = p->value();

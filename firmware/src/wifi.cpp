@@ -74,13 +74,18 @@ static volatile uint8_t s_evt_last = 0xff;       // остання обробл�
 static volatile uint32_t s_evt_last_t;           // ...і коли
 static TaskHandle_t s_evt_task;                  // задача подій ядра (network_event), запам'ятована з обробника
 static uint32_t s_reassoc_t, s_reassoc_n;        // примусове перепідключення з WIFI_OFF: коли; скільки подій було до нього
-static uint8_t s_silent_n;                       // примусових перепідключень поспіль, після яких роутер мовчить
-// налагодження (/post?wdbg_evt_block=N, лише з wdbg): «стала» обробка подій — наступна подія (кінець пошуку мереж)
-// тримає задачу подій N с, а зв'язок рветься; годинник опиняється в стані 01.11 20:28 («підключено», роутера немає)
+static uint8_t s_silent_n;                       // було примусове перепідключення, після якого роутер мовчить
+static uint32_t s_gotip_n, s_silent_gotip;       // підключень (GOT_IP) усього; скільки було на час того перепідключення
+static uint8_t s_mismatch_n;                     // перевірок поспіль: статус «підключено», а драйвер не асоційований
+static uint32_t s_mismatch_t;                    // остання така перевірка
+// налагодження (лише з wdbg): «стала» обробка подій — наступна подія в задачі подій (кінець пошуку мереж) тримає її
+// N с, після чого /post?wdbg_evt_block=N обриває зв'язок (годинник у стані 01.11 20:28: «підключено», роутера немає),
+// а /post?wdbg_evt_reassoc=N — примусово перепідключається (перевірка вартового подій)
 volatile uint32_t g_fx_evt_blk_req;              // запит із web.cpp
+volatile uint8_t g_fx_evt_blk_mode;              // 1 — обірвати зв'язок, 2 — примусово перепідключитися
 static volatile uint32_t s_evt_blk_until;        // до коли тримати (millis); 0 — не тримати
 static volatile uint8_t s_evt_blk_on;            // задача подій уже тримається
-static uint8_t s_evt_blk_drop;                   // ...тоді обірвати зв'язок
+static uint8_t s_evt_blk_drop;                   // ...тоді зробити те, що в g_fx_evt_blk_mode
 
 // стан обробки подій Wi-Fi — для журналу
 String wifi_evt_why() {
@@ -143,6 +148,7 @@ static void wifi_event_do(system_event_id_t ev, system_event_info_t info) {
     g_c2c14 = 0;
     s_cycles = 0;                                // нове (1.1.1): лічба вичерпаних циклів і поріг перезапуску — з нуля
     rtc_wifi_rst = 0;
+    s_gotip_n++;                                 // нове (1.1.2): для запасного правила в net_check_periodic
   } else if (ev == SYSTEM_EVENT_STA_START) {
     // Нове (29.10.2026): без енергозбереження Wi-Fi. Ядро вмикає modem sleep — радіо дрімає між маяками роутера; на
     // місці годинника власника зі слабким сигналом це давало 33–67 % втрат і відповіді до 1,8 с (оновлення не проходили,
@@ -152,9 +158,14 @@ static void wifi_event_do(system_event_id_t ev, system_event_info_t info) {
     dbg_ws_print(String("Station mode started"));
   }
 }
-// нове (1.1.2): облік подій для вартового (див. вище); сам обробник — wifi_event_do
+// нове (1.1.2): облік подій для вартового (див. вище); сам обробник — wifi_event_do. Облік — лише в задачі подій ядра
+// (network_event): WIFI_READY ядро 1.0.4 викликає синхронно з тієї задачі, що вмикає Wi-Fi (espWiFiStart), — у
+// примусовому перепідключенні це головний цикл, і така «подія» не свідчить, що обробка подій жива (перевірка rc1:
+// цей виклик затримав і головний цикл).
 void wifi_event(system_event_id_t ev, system_event_info_t info) {
-  if (s_evt_task == nullptr) s_evt_task = xTaskGetCurrentTaskHandle();
+  TaskHandle_t me = xTaskGetCurrentTaskHandle();
+  if (s_evt_task == nullptr && ev != SYSTEM_EVENT_WIFI_READY) s_evt_task = me;
+  if (me != s_evt_task) { wifi_event_do(ev, info); return; }
   s_evt_step = 0;
   s_evt_t0 = millis();
   s_evt_cur = (uint8_t)ev;
@@ -1162,15 +1173,19 @@ L8ed:
         s_silent_n = 0;
         dbg_ws_print(String("Wifi        : router answers — no internet at provider, keeping Wi-Fi link"));
       } else {
-        // нове (1.1.2): роутер мовчить і після попереднього примусового перепідключення — воно не допомагає
-        // (01.11: 15 разів поспіль за 1,5 год, до вимкнення живлення) — перезапуск
+        // нове (1.1.2): запасне правило до вартового подій. Роутер мовчить, а після попереднього примусового
+        // перепідключення годинник жодного разу не підключився наново (немає події GOT_IP) — «підключено» в ядрі лише
+        // застаріле значення (01.11: 15 перепідключень поспіль за 1,5 год, до вимкнення живлення) — перезапуск. Якщо ж
+        // годинник справді перепідключався, а роутер усе одно мовчить (провайдер без інтернету й роутер не відповідає
+        // на порт 80), — як і раніше, лише перепідключення: без перезапусків кожні 12 хв.
         String why = net_probe_why() + String(", gw=") + WiFi.gatewayIP().toString() + String("; ") + wifi_evt_why();
-        if (s_silent_n != 0) {
-          evlog_write(String("[NET ] Restart: router silent after re-association (") + why + String(")"));
+        if (s_silent_n != 0 && s_gotip_n == s_silent_gotip) {
+          evlog_write(String("[NET ] Restart: router silent, no reconnect since last re-association (") + why + String(")"));
           delay(200);
           fx_restart_planned();
         }
         s_silent_n = 1;
+        s_silent_gotip = s_gotip_n;
         evlog_write(String("[NET ] Forced re-association (no internet >6 min, router silent: ") + why + String(")"));
         dbg_ws_print(String("[NET ] Forced re-association"));
         dbg_ws_print(String("Wifi        : no internet too long — forcing re-association"));
@@ -1249,15 +1264,31 @@ void fx_wifi_evt_tick() {
     uint32_t s = g_fx_evt_blk_req;
     g_fx_evt_blk_req = 0;
     s_evt_blk_until = (millis() + s * 1000UL) | 1;
-    s_evt_blk_drop = 1;
-    evlog_write(String("[WIFI] Test: Wi-Fi event handling blocked for ") + s + " s");
+    s_evt_blk_drop = g_fx_evt_blk_mode == 2 ? 2 : 1;
+    evlog_write(String("[WIFI] Test: Wi-Fi event handling blocked for ") + s +
+                (s_evt_blk_drop == 2 ? " s, then forced re-association" : " s, then link drop"));
     WiFi.scanNetworks(true);                     // кінець пошуку — подія, на якій стане обробка
   }
-  if (s_evt_blk_drop && s_evt_blk_on) {          // обробка стоїть — обірвати зв'язок (подія про обрив не дійде)
+  if (s_evt_blk_drop && s_evt_blk_on) {          // обробка стоїть — обрив або перепідключення (події про них не дійдуть)
+    uint8_t m = s_evt_blk_drop;
     s_evt_blk_drop = 0;
-    WiFi.disconnect(false);
+    if (m == 2) wifi_force_reassoc();
+    else WiFi.disconnect(false);
   } else if (s_evt_blk_drop && s_evt_blk_until != 0 && (int32_t)(s_evt_blk_until - millis()) <= 0) {
     s_evt_blk_drop = 0;                          // жодної події за весь час — нічого не обривати
+  }
+  // статус ядра «підключено», а драйвер не асоційований з роутером — хвилину поспіль (перевірка раз на 5 с): подія про
+  // обрив не дійшла, статус застарілий — перезапуск, не чекаючи проби інтернету й 6 хв до примусового перепідключення
+  if (millis() - s_mismatch_t >= 5000) {
+    s_mismatch_t = millis();
+    wifi_ap_record_t ap;
+    if (WiFi.status() == WL_CONNECTED && esp_wifi_sta_get_ap_info(&ap) != ESP_OK) {
+      if (++s_mismatch_n >= 12) {
+        evlog_write(String("[WIFI] Restart: status says connected, driver is not (") + wifi_evt_why() + String(")"));
+        delay(200);
+        fx_restart_planned();
+      }
+    } else s_mismatch_n = 0;
   }
   if (s_reassoc_t != 0 && millis() - s_reassoc_t > 8000) {
     bool none = s_evt_n == s_reassoc_n;

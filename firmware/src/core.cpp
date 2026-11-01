@@ -1,6 +1,7 @@
 // Ядро: setup/loop, журнал подій, конфігурація (файл ↔ рядок JSON), кнопка. Перенесено з 2.7.1 один в один.
 // EN: Core: setup()/loop(), event log, config file <-> JSON string, button (from 2.7.1; loop restructured, see fix.h).
 #include "fw.h"
+#include "soc/rtc_wdt.h"
 
 // ---------- setup @40120794 ----------
 void setup() {
@@ -329,7 +330,20 @@ void evlog_boot_reason() {
 // зависання, якого не було. Перед плановим перезапуском етап — 0; запис лишається для сторожа циклу й аварій.
 void fx_restart_planned() {
   rtc_stage = 0;
+  fx_rtc_wdt_arm(3000);
   ESP.restart();
+}
+// Нове (1.1.2): страховка перезапуску. ESP.restart() спершу зупиняє Wi-Fi (esp_wifi_stop) — коли обробка подій Wi-Fi
+// стала, це може чекати без кінця (перевірка 01.11: сторож циклу 3 хв не міг перезапустити годинник). Апаратний сторож
+// RTC: не відбувся програмний перезапуск за ms — скидання всієї системи (RTC-пам'ять із позначками лишається; після
+// запуску сторожа вмикає загрузчик на 9 с, а програма вимикає — як при кожному запуску).
+void fx_rtc_wdt_arm(uint32_t ms) {
+  rtc_wdt_protect_off();
+  rtc_wdt_disable();
+  rtc_wdt_set_stage(RTC_WDT_STAGE0, RTC_WDT_STAGE_ACTION_RESET_SYSTEM);
+  rtc_wdt_set_time(RTC_WDT_STAGE0, ms);
+  rtc_wdt_enable();
+  rtc_wdt_protect_on();
 }
 
 // ---------- конфігурація: рядок JSON g_c2ef0 ↔ /config.json ----------

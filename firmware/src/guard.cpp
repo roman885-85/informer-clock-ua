@@ -18,6 +18,7 @@ void loop_guard_feed() { s_alive = millis(); }
 static void guard_cb(void *) {
   if (millis() - s_alive <= LOOP_GUARD_MS) return;
   rtc_guard = LOOP_GUARD_MAGIC;
+  fx_rtc_wdt_arm(3000);                          // нове (1.1.2): перезапуск може чекати Wi-Fi (core.cpp)
   esp_restart();
 }
 
