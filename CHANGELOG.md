@@ -3,6 +3,27 @@
 Формат: нові версії вгорі. Те саме для веб-інтерфейсу годинника — `update/changelog.json`.
 Format: newest first. The clock's web interface reads the same history from `update/changelog.json`.
 
+## 1.1.1 — 2026-11-01
+
+**Виправлено / fixed**
+- Годинник більше не «застрягає» без роутера. Якщо після зникнення Wi-Fi (роутер вимикали чи перезапускали, не було
+  світла) він кілька циклів перепідключення поспіль не може повернутися, а до його точки доступу ніхто не під'єднаний,
+  — годинник сам перезапускається: через ~10 хв, а якщо роутера все ще немає — рідше (~20, ~40 хв, далі раз на
+  годину). Раніше він міг годинами (у власника — понад добу) лишатися поза мережею до вимкнення живлення, хоча свіжий
+  запуск підключається за секунди. / The clock no longer gets stuck without the router. If after Wi-Fi disappears
+  (the router was switched off or restarted, a power cut) it fails several reconnect cycles in a row and nobody is
+  connected to its own access point, the clock restarts itself: after ~10 min, and less often while the router is still
+  gone (~20, ~40 min, then once an hour). Before, it could stay off the network for hours (over a day at the owner's)
+  until a power cycle, although a fresh start connects within seconds.
+
+**Діагностика / diagnostics**
+- Запис «AP restored» у журналі подій — з номером циклу, причиною останньої відмови й результатом пошуку мереж (чи
+  видно збережену мережу); перед перезапуском — `[WIFI] Restart: router unreachable (…)`. / The “AP restored” event-log
+  record now has the cycle number, the last failure reason and the network scan result (whether a saved network is
+  visible); before the restart — `[WIFI] Restart: router unreachable (…)`.
+- Налагодження по Wi-Fi: `/post?wdbg_wifi_off=N` — імітація зникнення роутера на N с. / Wi-Fi debugging:
+  `/post?wdbg_wifi_off=N` simulates the router disappearing for N s.
+
 ## 1.1.0 — 2026-10-31
 
 **Виправлено / fixed**

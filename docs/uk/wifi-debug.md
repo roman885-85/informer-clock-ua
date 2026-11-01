@@ -66,7 +66,7 @@ PLATFORMIO_UPLOAD_FLAGS="--auth=<пароль>" pio run -e clock -t upload --upl
 
 ```sh
 ~/.platformio/packages/toolchain-xtensa32/bin/xtensa-esp32-elf-addr2line -pfiaC \
-  -e informer-clock-ua-esp32-1.1.0.elf 0x400d1234 0x400d5678
+  -e informer-clock-ua-esp32-1.1.1.elf 0x400d1234 0x400d5678
 ```
 
 Якщо `loop()` завис довше 3 хв, сторож перезапускає годинник і пише `[BOOT] loop guard: loop() stuck > 180 s`.
@@ -82,6 +82,15 @@ PLATFORMIO_UPLOAD_FLAGS="--auth=<пароль>" pio run -e clock -t upload --upl
   змінилось або раз на 10 хв.
 - Якщо сокети все ж закінчились (три перевірки поспіль не створюється жоден), годинник пише в журнал подій
   `[NET ] Restart: no sockets…` і перепис `[SOCK] …` і перезапускається.
+
+## Імітація зникнення роутера (з 1.1.1)
+
+- `http://<адреса>/post?wdbg_wifi_off=N` — годинник N секунд (до 3600) «не бачить» роутера: від'єднується й
+  перепідключається до неіснуючої мережі. Діє лише з увімкненим налагодженням по Wi-Fi; у налаштування не пишеться,
+  перезапуск імітацію знімає. У журналі подій — `[WIFI] Test: router outage simulated for N s` і
+  `[WIFI] Test: simulated outage over`.
+- Коротка імітація (2 хв): годинник має повернутися сам за секунди після її кінця, без перезапуску. Довга (30 хв):
+  через ~10 хв — `[WIFI] Restart: router unreachable (cycle 3, …)`, перезапуск і одразу `Connected`.
 
 ## Безпека
 

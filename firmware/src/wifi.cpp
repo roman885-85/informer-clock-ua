@@ -34,6 +34,31 @@ void wifi_fail_status(int r) {
   }
   g_c3374 = p;
 }
+// Нове (01.11.2026, 1.1.1): годинник власника понад добу не повертався до роутера — цикл перепідключення
+// (10 спроб, далі точка доступу «…ESP») вичерпувався кожні ~3,5 хв, хоча роутер працював, а свіжий запуск
+// підключився за 4 с. Тепер у запис «AP restored» — номер циклу, причина останньої відмови й що знайшов пошук мереж,
+// а після кількох вичерпаних циклів поспіль, коли до точки доступу годинника ніхто не підключений, — програмний
+// перезапуск. Щоб довгий простій роутера не перезапускав годинник щодесять хвилин, поріг росте з кожним таким
+// перезапуском поспіль (лічильник у RTC-пам'яті переживає програмний перезапуск): 3 цикли (~10 хв), 6, 12, далі 18 (~1 год).
+#define FX_WIFI_RST_TAG 0x57f10000UL
+RTC_NOINIT_ATTR uint32_t rtc_wifi_rst;          // старші 16 біт — позначка, молодші — перезапусків через Wi-Fi поспіль
+static const uint8_t k_wifi_rst_need[] = {3, 6, 12, 18};
+static uint8_t s_cycles;                         // вичерпаних циклів поспіль
+static int16_t s_scan_n = -1;                    // останній пошук мереж (networks_pick): скільки знайдено; < 0 — не було
+static bool s_scan_saved;                        // ...і чи була серед них збережена мережа
+volatile uint32_t g_fx_wifi_blk_req;             // налагодження: запит «роутера немає N с» (web.cpp, ключ wdbg_wifi_off)
+static uint32_t s_blk_until;                     // до цього часу wifi_begin бере неіснуючу мережу
+
+static uint8_t wifi_rst_n() { return (rtc_wifi_rst & 0xffff0000UL) == FX_WIFI_RST_TAG ? (uint8_t)rtc_wifi_rst : 0; }
+static bool wifi_blackout() { return s_blk_until != 0 && (int32_t)(s_blk_until - millis()) > 0; }
+static String wifi_cycle_why() {
+  String rt;
+  wifi_reason_text(rt, g_c2c14);
+  String s = String(" (cycle ") + s_cycles + ", last reason=" + g_c2c14 + " " + rt + ", scan: ";
+  if (s_scan_n < 0) s += "none";
+  else s += String(s_scan_n) + (s_scan_saved ? " networks, saved one seen" : " networks, no saved one");
+  return s + ")";
+}
 // @400fbac0: обробник подій Wi-Fi (зареєстрований на всі події)
 void wifi_event(system_event_id_t ev, system_event_info_t info) {
   if (ev == SYSTEM_EVENT_STA_DISCONNECTED) {
@@ -71,6 +96,8 @@ void wifi_event(system_event_id_t ev, system_event_info_t info) {
     g_c3318 = 1;
     g_c3388 = 10;
     g_c2c14 = 0;
+    s_cycles = 0;                                // нове (1.1.1): лічба вичерпаних циклів і поріг перезапуску — з нуля
+    rtc_wifi_rst = 0;
   } else if (ev == SYSTEM_EVENT_STA_START) {
     // Нове (29.10.2026): без енергозбереження Wi-Fi. Ядро вмикає modem sleep — радіо дрімає між маяками роутера; на
     // місці годинника власника зі слабким сигналом це давало 33–67 % втрат і відповіді до 1,8 с (оновлення не проходили,
@@ -88,6 +115,7 @@ void wifi_events_register() {
 }
 // @400d6bc8: підключитися до мережі
 void wifi_begin(const char *ssid, const char *pass) {
+  if (wifi_blackout()) { ssid = "fx-test-no-router"; pass = "fx-test-no-router"; }   // нове (1.1.1): налагодження
   if (WiFi.status() == WL_CONNECTED) { WiFi.disconnect(false); delay(1000); }
   if (WiFi.status() != WL_CONNECTED) { WiFi.begin(ssid, pass, 0, nullptr, true); delay(500); }
 }
@@ -291,6 +319,8 @@ uint32_t networks_pick() {
   }
 done:
   WiFi.scanDelete();
+  s_scan_n = n;                                  // нове (1.1.1): для запису «AP restored»
+  s_scan_saved = r != 0;
   return r;
 }
 // @400ff2a0: забути мережу
@@ -1072,6 +1102,19 @@ L8ed:
 }
 // @40121b3c: цикл перепідключення
 void wifi_reconnect_cycle(uint32_t per) {
+  // Нове (1.1.1): налагодження по Wi-Fi — зімітувати зникнення роутера (wifi_begin бере неіснуючу мережу). Перезапуск
+  // знімає імітацію: так перевіряється й вихід із циклу перезапуском, і звичайне повернення роутера.
+  if (g_fx_wifi_blk_req != 0) {
+    uint32_t s = g_fx_wifi_blk_req;
+    g_fx_wifi_blk_req = 0;
+    s_blk_until = millis() + s * 1000UL;
+    if (s_blk_until == 0) s_blk_until = 1;
+    evlog_write(String("[WIFI] Test: router outage simulated for ") + s + " s");
+    WiFi.disconnect(false);
+  } else if (s_blk_until != 0 && !wifi_blackout()) {
+    s_blk_until = 0;
+    evlog_write(String("[WIFI] Test: simulated outage over"));
+  }
   uint32_t t = g_c15d8;
   if (g_c3388 < 6) { if (2 < g_c3388) per = 15000; }
   else per = 30000;
@@ -1094,6 +1137,15 @@ void wifi_reconnect_cycle(uint32_t per) {
       g_c2e73 = 0;
       g_c3388 = a;
     } else {
+      // Нове (1.1.1): цикл вичерпано — кілька разів поспіль і точкою доступу ніхто не користується → перезапуск.
+      if (s_cycles < 255) s_cycles++;
+      uint8_t rn = wifi_rst_n();
+      if (s_cycles >= k_wifi_rst_need[rn < 3 ? rn : 3] && WiFi.softAPgetStationNum() == 0) {
+        evlog_write(String("[WIFI] Restart: router unreachable") + wifi_cycle_why());
+        rtc_wifi_rst = FX_WIFI_RST_TAG | (uint32_t)(rn < 250 ? rn + 1 : rn);
+        delay(200);
+        ESP.restart();
+      }
       g_c2e73 = 0;
       wifi_force_reassoc();
       wifi_try(1);
@@ -1102,7 +1154,7 @@ void wifi_reconnect_cycle(uint32_t per) {
         WiFi.mode(WIFI_AP_STA);
         WiFi.softAP(g_c33bc.c_str(), g_c33b0.c_str(), 1, 0, 4);
         captive_dns_start();
-        evlog_write(String("[WIFI] AP restored — router reconnect cycle exhausted"));
+        evlog_write(String("[WIFI] AP restored — router reconnect cycle exhausted") + wifi_cycle_why());
         dbg_ws_print(String("Wifi        : AP restored after full reconnect cycle"));
       }
     }
