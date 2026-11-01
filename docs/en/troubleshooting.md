@@ -22,6 +22,7 @@
 | “No internet” | the clock checks 8.8.8.8 and 1.1.1.1 (TCP 53), then `http://www.msftconnecttest.com`; if the router blocks external DNS — allow it for the clock |
 | No update is offered | an update appears only for a newer version of this project; internet is required; GitHub cache — up to 5 min after a release |
 | After ~1.5 h of work “no internet”, although the web interface opens | a 1.0.0 bug: the internet check did not free its sockets, and after 8–10 checks no outbound connection could be opened — fixed in 1.1.0; until you update, a restart helps (update right after it) |
+| After a router or power outage the clock stays off the network for hours (the event log shows “AP restored” every ~3.5 min) | before 1.1.1: power the clock off and on; since 1.1.1 it restarts by itself — after ~10 min, and less often (up to once an hour) while the router is gone |
 | Updates break off (“Stream Read Timeout”, “Verify Bin Header Failed”), the web interface is slow, the clock drops off the network | the clock stands right next to the router: its receiver is overloaded (up to 67 % lost packets). Move it 1–2 m away — at 1.5–2 m there are no losses; the signal strength is in the event log (“RSSI=… dBm”, −40…−70 is fine) |
 
 ## Display

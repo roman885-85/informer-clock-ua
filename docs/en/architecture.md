@@ -19,7 +19,7 @@ for this project. The code in this repository was reconstructed from the 2.7.1 m
 - the reconstructed copy was tested on a real clock.
 
 The **`reconstructed-2.7.1`** tag is this copy with the original's behaviour (including its bugs). Everything changed
-after it is visible in the git history from that tag: `git diff reconstructed-2.7.1 v1.1.0`.
+after it is visible in the git history from that tag: `git diff reconstructed-2.7.1 v1.1.1`.
 
 ### Reading the code
 
@@ -103,6 +103,12 @@ not in the PlatformIO registry). The rest are `lib_deps` in `platformio.ini` wit
 | Crashes in AsyncTCP: FIN while closing (`arg == NULL`), `_accept` with `pcb == NULL` (ERR_MEM); the 32-event queue with `portMAX_DELAY` stalled the lwIP thread — task watchdog | checks in the fork; a 128-event queue and sending held back while the queue fills up | `lib/AsyncTCP-esphome`, `ws.cpp` |
 | Wi-Fi power saving (modem sleep) — slow replies and lost packets | `WIFI_PS_NONE` | `wifi.cpp` |
 | Updates broke off (“Stream Read Timeout”: the core waits 2×8 s for data) | all services except the web interface stop during an update; 30 s wait, up to 3 attempts | `services.cpp`, `wdbg.cpp` |
+
+## Fixed in 1.1.1
+
+| What it was | What it is now | Where |
+|---|---|---|
+| After the router disappeared, the clock could stay away from it for hours: the reconnect cycle (10 attempts, then an access point on channel 1) ran out again and again, while a fresh start connected within seconds; the failure reason never reached the event log | after 3 exhausted cycles in a row (~10 min), with nobody connected to the access point, a software restart; the threshold grows with every such restart in a row (6, 12, then 18 cycles; the counter lives in RTC memory and is cleared on connecting); the “AP restored” record carries the cycle number, the last failure reason and the network scan result; `/post?wdbg_wifi_off=N` simulates it for testing | `wifi.cpp`, `web.cpp` |
 
 ## New features
 

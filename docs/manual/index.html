@@ -88,7 +88,7 @@
 
 <h2>Якщо щось не так</h2>
 <ul>
-  <li><b>Годинник не з'являється в мережі.</b> Видно точку «Clock ESP» — значить, він не під'єднався до вашої мережі: зайдіть на <code>192.168.4.1</code> і виберіть мережу знову.</li>
+  <li><b>Годинник не з'являється в мережі.</b> Видно точку «Clock ESP» — значить, він не під'єднався до вашої мережі: зайдіть на <code>192.168.4.1</code> і виберіть мережу знову. Якщо зник роутер (вимикали світло), годинник з версії 1.1.1 сам перезапускається приблизно через 10 хв і під'єднується знову.</li>
   <li><b>«Нема інтернету».</b> Годинник перевіряє зв'язок із 8.8.8.8 і 1.1.1.1, далі — http://www.msftconnecttest.com. Без інтернету погода й новини не оновлюються, але час іде; Wi-Fi перепідключається, лише коли не відповідає сам роутер. Якщо в 1.0.0 «нема інтернету» з'являється через ~1,5 год роботи — це помилка 1.0.0, виправлена в 1.1.0: оновіться (одразу після перезапуску).</li>
   <li><b>Скидання налаштувань</b>: «Оновлення» → «Файл конфігурації» → «Повернення до заводських установок». Після перезапуску — знову точка «Clock ESP».</li>
   <li>Журнал подій (сторінка System) показує перезапуски, аварії та їх причини — додайте його до повідомлення про помилку.</li>
@@ -171,7 +171,7 @@
 
 <h2>Troubleshooting</h2>
 <ul>
-  <li><b>The clock does not appear on the network.</b> If the “Clock ESP” access point is visible, it could not join your network: open <code>192.168.4.1</code> and choose the network again.</li>
+  <li><b>The clock does not appear on the network.</b> If the “Clock ESP” access point is visible, it could not join your network: open <code>192.168.4.1</code> and choose the network again. If the router went away (a power cut), since 1.1.1 the clock restarts by itself after about 10 min and joins again.</li>
   <li><b>“No internet”.</b> The clock checks 8.8.8.8 and 1.1.1.1, then http://www.msftconnecttest.com. Without internet, weather and news are not updated but the time keeps running; Wi-Fi reconnects only when the router itself does not answer. If on 1.0.0 “no internet” appears after ~1.5 h of work — it is a 1.0.0 bug fixed in 1.1.0: update (right after a restart).</li>
   <li><b>Factory reset</b>: “Update” → “Config File” → “Reset configuration to factory default settings”. After the restart — the “Clock ESP” access point again.</li>
   <li>The event log (System page) shows restarts, crashes and their causes — attach it to a bug report.</li>

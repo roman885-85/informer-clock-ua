@@ -68,7 +68,7 @@ release files):
 
 ```sh
 ~/.platformio/packages/toolchain-xtensa32/bin/xtensa-esp32-elf-addr2line -pfiaC \
-  -e informer-clock-ua-esp32-1.1.0.elf 0x400d1234 0x400d5678
+  -e informer-clock-ua-esp32-1.1.1.elf 0x400d1234 0x400d5678
 ```
 
 If `loop()` hangs for more than 3 min, the watchdog restarts the clock and writes `[BOOT] loop guard: loop() stuck > 180 s`.
@@ -84,6 +84,16 @@ If `loop()` hangs for more than 3 min, the watchdog restarts the clock and write
   10 min.
 - If sockets ever run out (no socket can be created three checks in a row), the clock writes
   `[NET ] Restart: no sockets…` and the `[SOCK] …` census to the event log and restarts.
+
+## Simulating a router outage (since 1.1.1)
+
+- `http://<address>/post?wdbg_wifi_off=N` — for N seconds (up to 3600) the clock “does not see” the router: it
+  disconnects and keeps reconnecting to a non-existent network. Works only with Wi-Fi debugging on; it is not saved to
+  the settings, and a restart ends it. The event log shows `[WIFI] Test: router outage simulated for N s` and
+  `[WIFI] Test: simulated outage over`.
+- A short simulation (2 min): the clock must come back by itself within seconds after it ends, without a restart. A
+  long one (30 min): after ~10 min — `[WIFI] Restart: router unreachable (cycle 3, …)`, a restart and `Connected`
+  right away.
 
 ## Security
 

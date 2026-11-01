@@ -1,5 +1,13 @@
 [
   {
+    "v": "1.1.1",
+    "date": "2026-11-01",
+    "items": [
+      { "t": "fixed", "text": "Годинник більше не «застрягає» без роутера: якщо після зникнення Wi-Fi кілька циклів перепідключення поспіль невдалі, а до його точки доступу ніхто не під'єднаний, він сам перезапускається — через ~10 хв, далі рідше (до разу на годину). Раніше міг годинами лишатися поза мережею до вимкнення живлення. / The clock no longer gets stuck without the router: if several reconnect cycles in a row fail and nobody is connected to its access point, it restarts itself — after ~10 min, then less often (up to once an hour). Before, it could stay off the network for hours until a power cycle." },
+      { "t": "added", "text": "Діагностика: у записі «AP restored» — номер циклу, причина останньої відмови й результат пошуку мереж; налагодження: /post?wdbg_wifi_off=N — імітація зникнення роутера на N с. / Diagnostics: the “AP restored” record has the cycle number, the last failure reason and the network scan result; debugging: /post?wdbg_wifi_off=N simulates the router disappearing for N s." }
+    ]
+  },
+  {
     "v": "1.1.0",
     "date": "2026-10-31",
     "items": [

@@ -45,7 +45,7 @@ function findChrome() {
 const LANGS = {
   uk: {
     book: 'Informer Clock UA — документація', sub: 'Незалежна прошивка годинника-інформера на ESP32 і матрицях MAX7219',
-    toc: 'Зміст', pre: 'Версію 1.1.0 перевірено на годиннику (ESP32, два поверхи по 4 матриці MAX7219). З 1.0.0 варто оновитися: через ~1,5 год роботи вона губить інтернет.',
+    toc: 'Зміст', pre: 'Версію 1.1.1 перевірено на годиннику (ESP32, два поверхи по 4 матриці MAX7219). З 1.0.0 варто оновитися: через ~1,5 год роботи вона губить інтернет.',
     credit: 'На основі проєкту Clock Informer автора Semen_p (thingiverse.com/thing:3924947). Ліцензія CC BY-NC 4.0.',
     version: 'Версія прошивки', date: 'Дата',
     parts: [['about', 'Про проєкт', 'README.md'], ['manual', 'Інструкція користувача', 'docs/manual/index.html'],
@@ -55,7 +55,7 @@ const LANGS = {
   },
   en: {
     book: 'Informer Clock UA — documentation', sub: 'Independent firmware for the ESP32 + MAX7219 LED-matrix information clock',
-    toc: 'Contents', pre: 'Version 1.1.0 is tested on a clock (ESP32, two floors of 4 MAX7219 matrices). Please update from 1.0.0: it loses internet after ~1.5 h of work.',
+    toc: 'Contents', pre: 'Version 1.1.1 is tested on a clock (ESP32, two floors of 4 MAX7219 matrices). Please update from 1.0.0: it loses internet after ~1.5 h of work.',
     credit: 'Based on the Clock Informer project by Semen_p (thingiverse.com/thing:3924947). License CC BY-NC 4.0.',
     version: 'Firmware version', date: 'Date',
     parts: [['about', 'About the project', 'README.en.md'], ['manual', 'User manual', 'docs/manual/index.html'],
