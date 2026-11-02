@@ -41,6 +41,43 @@ void news_compose(String &out, const String &title, const String &desc, const St
     out = p + String(": No data");
   }
 }
+// нове (1.1.3): GNews на безкоштовному тарифі віддає лише початок тексту статті (≈260 знаків, обірваний посеред слова)
+// і дописує «... [2072 chars]» — табло прокручувало цей хвіст. Прибираємо його й закінчуємо текст на останньому повному
+// реченні з другої половини тексту, а якщо такого немає — на останньому цілому слові з «...».
+static void news_cut_tail(String &c) {
+  c.trim();                          // переведення рядка в кінці text_typography_fix робить пробілом
+  int n = c.length();
+  int b = c.lastIndexOf('[');
+  if (b < 0 || !c.endsWith(" chars]") || b + 1 >= n - 7) return;
+  for (int i = b + 1; i < n - 7; i++)
+    if ((c[i] < '0' || c[i] > '9') && c[i] != '+') return;
+  c.remove(b);
+  c.trim();
+  if (c.endsWith("...")) c.remove(c.length() - 3);
+  c.trim();
+  n = c.length();
+  if (n == 0) return;
+  for (int i = n - 1; i >= n / 2; i--) {
+    char ch = c[i];
+    if (ch != '.' && ch != '!' && ch != '?') continue;
+    int e = i + 1;
+    if (e < n && (c[e] == '\'' || c[e] == '"' || c[e] == ')')) e++;   // лапка чи дужка після кінця речення
+    if (e < n && c[e] != ' ') continue;
+    if (ch == '.') {                 // не ініціал («Д. Трамп») і не «т. ч.»: перед крапкою більше однієї літери
+      int s = c.lastIndexOf(' ', i) + 1, k = 0;
+      for (int j = s; j < i; j++)
+        if ((c[j] & 0xc0) != 0x80) k++;
+      if (k < 2) continue;
+    }
+    c.remove(e);
+    return;
+  }
+  int s = c.lastIndexOf(' ');
+  if (s > 0) c.remove(s);
+  while (c.length() && strchr(",;:-", c[c.length() - 1])) c.remove(c.length() - 1);
+  c.trim();
+  c += "...";
+}
 static void news_err(const char *msg) {
   String p;
   led_phrase(p, g_c34b0, 0x50);
@@ -87,6 +124,7 @@ static void news_fetch(const String &url, const char *arr, const char *third, ui
       else d = String("");
       if (!o[third].isNull()) text_typography_fix(c, o[third].as<String>());
       else c = String("");
+      news_cut_tail(c);
       String s;
       news_compose(s, t, d, c);
       g_c30fc = s;

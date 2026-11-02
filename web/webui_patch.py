@@ -43,6 +43,21 @@ PATCHES = [
     ('Сторінка «System»: рядок FxWd у картці System — після смуги пам\'яті',
      'C,"%"]})]})]})]})}),t("div",{className:"rounded-[14px]',
      'C,"%"]})]})]}),t(FxWd,{ip:c.local_ip})]})}),t("div",{className:"rounded-[14px]'),
+    ('Сторінка «Новини»: бігучий рядок іде зі швидкістю табло. У автора прохід завжди триває 18 с (CSS .news-ticker), '
+     'тож довга новина мчала в кілька разів швидше за коротку. FxNt рахує тривалість із ширини рядка (вимір у браузері) '
+     'і «Швидкості прокрутки» speed — як табло: 70 − speed мс на стовпець (firmware/src/display.cpp), ≈6 стовпців на знак; '
+     'перераховує, коли змінюється ширина рамки (сторінка ще розгортається, поворот телефона)',
+     'uh=["news_show","news_src","nws_prv","apinews","cntr_news","Cat_news","descr_n"],mh=()=>{',
+     'FxNt=(f,sp)=>{let ro;return e=>{if(!e){ro&&ro.disconnect();return}'
+     'const k=70-Math.min(60,Math.max(10,parseInt(sp,10)||47)),u=()=>{const w=e.offsetWidth,q=w-e.parentNode.clientWidth;'
+     'q>0&&(e.style.animationDuration=Math.max(4,w*f.length/q*k*.006).toFixed(1)+"s")};'
+     'u();if(window.ResizeObserver){ro=new ResizeObserver(u);ro.observe(e.parentNode)}}},'
+     'uh=["news_show","news_src","nws_prv","apinews","cntr_news","Cat_news","descr_n","speed"],mh=()=>{'),
+    ('Сторінка «Новини»: «Швидкість прокрутки» (speed) — для бігучого рядка',
+     'a=v(p=>p.settings.news_now),', 'a=v(p=>p.settings.news_now),fxSp=v(p=>p.settings.speed),'),
+    ('Сторінка «Новини»: тривалість проходу бігучого рядка — FxNt',
+     't("span",{className:"news-ticker font-mono text-[17px] font-bold tracking-wide",style:',
+     't("span",{className:"news-ticker font-mono text-[17px] font-bold tracking-wide",ref:FxNt(f,fxSp),style:'),
     # --- усе, що бралось із сервера автора, — з цього проєкту
     ('Мовні пакети (index.json, <code>.json, <id>.led) — з репозиторію проєкту (lang/)',
      'xa="https://www.goldart.ee/api/lang"', f'xa="{RAW}/lang"'),
