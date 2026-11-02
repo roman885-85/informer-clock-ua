@@ -13,15 +13,21 @@ uint32_t g_fx_gate;
 volatile uint32_t g_fx_alive_ms;        // коли loop() востаннє дійшов до кінця (і для запису аварії)
 #define s_alive g_fx_alive_ms
 static esp_timer_handle_t s_tmr;
+extern "C" void esp_restart_noos() __attribute__((noreturn));   // ядро IDF 3.3: перезапуск без обробників зупинки
 
 void loop_guard_feed() { s_alive = millis(); }
 
 static void guard_cb(void *) {
   if (millis() - s_alive <= LOOP_GUARD_MS) return;
   rtc_guard = LOOP_GUARD_MAGIC;
-  fx_rtc_wdt_arm(4000);                          // нове (1.1.2): перезапуск може чекати Wi-Fi (core.cpp)
+  fx_rtc_wdt_arm(4000);                          // нове (1.1.2): апаратна страховка (core.cpp)
   fx_stuck_snapshot(1);                          // нове (1.1.3): де стоїть кожна задача
-  esp_restart();
+  // Виправлено (1.1.3): esp_restart() спершу зупиняє Wi-Fi (esp_wifi_stop) і з задачі esp_timer, коли годинник
+  // під'єднаний до роутера, не завершується: перевірка 02.11 — loop() крутиться, мережа справна, а після запуску
+  // однаково «WATCHDOG reset» (перезапустила страховка через 4 с). Тож нічні «WATCHDOG reset» після сторожа нічого не
+  // кажуть про мережу. Сторож перезапускає без зупинки Wi-Fi — як обробник аварій ядра (радіо скидається разом із
+  // системою); після запуску в журналі — «Software reset».
+  esp_restart_noos();
 }
 
 // Нове (1.1.3): знімок задач перед перезапуском. Уночі 01–02.11 сторож шість разів перезапускав годинник («loop()
