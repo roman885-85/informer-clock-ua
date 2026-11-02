@@ -150,6 +150,9 @@ void news_gnews() {
   }
   g_c1a84 = millis();
   String url = String("https://gnews.io/api/v4/top-headlines?country=") + g_c30c8 + String("&apikey=") + g_c30e0 + String("&pageSize=1&max=1&category=") + g_c30d4;
+  // нове (1.1.3): для України — новини українською (без lang GNews давав і російськомовні статті; NewsData в автора
+  // й так з language=uk). Для інших країн — як в автора, мову не задаємо.
+  if (g_c30c8.equals("ua")) url += String("&lang=uk");
   news_fetch(url, "articles", "content", 900000, 10000, true);
 }
 // @40104868: NewsData (раз на 10 хв)
