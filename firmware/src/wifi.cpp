@@ -104,6 +104,15 @@ String wifi_evt_why() {
   else s += ", driver: not associated";
   return s + ", status " + (int)WiFi.status() + ", heap " + ESP.getFreeHeap();
 }
+// те саме для знімка задач перед перезапуском (guard.cpp): лише читання змінних — можна з будь-якої задачі
+void wifi_evt_snap(uint32_t *o) {
+  uint32_t now = millis();
+  uint8_t cur = s_evt_cur, last = s_evt_last;
+  o[0] = s_evt_n;
+  o[1] = cur | (uint32_t)s_evt_step << 8 | (uint32_t)last << 16;
+  o[2] = cur != 0xff ? now - s_evt_t0 : 0;
+  o[3] = last != 0xff ? now - s_evt_last_t : 0;
+}
 // @400fbac0: обробник подій Wi-Fi (зареєстрований на всі події)
 static void wifi_event_do(system_event_id_t ev, system_event_info_t info) {
   if (ev == SYSTEM_EVENT_STA_DISCONNECTED) {
@@ -1182,6 +1191,7 @@ L8ed:
         if (s_silent_n != 0 && s_gotip_n == s_silent_gotip) {
           evlog_write(String("[NET ] Restart: router silent, no reconnect since last re-association (") + why + String(")"));
           delay(200);
+          fx_stuck_snapshot(2);                  // нове (1.1.3): де стоять задачі ядра
           fx_restart_planned();
         }
         s_silent_n = 1;
@@ -1240,6 +1250,7 @@ void wifi_reconnect_cycle(uint32_t per) {
         evlog_write(String("[WIFI] Restart: router unreachable") + wifi_cycle_why());
         rtc_wifi_rst = FX_WIFI_RST_TAG | (uint32_t)(rn < 250 ? rn + 1 : rn);
         delay(200);
+        fx_stuck_snapshot(2);
         fx_restart_planned();
       }
       g_c2e73 = 0;
@@ -1286,6 +1297,7 @@ void fx_wifi_evt_tick() {
       if (++s_mismatch_n >= 12) {
         evlog_write(String("[WIFI] Restart: status says connected, driver is not (") + wifi_evt_why() + String(")"));
         delay(200);
+        fx_stuck_snapshot(2);
         fx_restart_planned();
       }
     } else s_mismatch_n = 0;
@@ -1296,6 +1308,7 @@ void fx_wifi_evt_tick() {
     if (none) {
       evlog_write(String("[WIFI] Restart: Wi-Fi events not delivered after re-association (") + wifi_evt_why() + String(")"));
       delay(200);
+      fx_stuck_snapshot(2);
       fx_restart_planned();
     }
   }

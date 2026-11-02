@@ -56,6 +56,7 @@ void setup() {
     m += (st < 7) ? STAGE_NAMES[st] : "n/a";
     evlog_write(m);
   }
+  fx_stuck_log();                                // нове (1.1.3): де стояли задачі перед перезапуском (guard.cpp)
   rtc_magic = 0xc10c0fe5; rtc_stage = 0;
   config_load_file();
   {
@@ -191,6 +192,7 @@ void loop() {
   fx_wdbg_tick();
   fx_sock_tick();
   fx_wifi_evt_tick();                            // нове (1.1.2): вартовий подій Wi-Fi (wifi.cpp)
+  fx_loop_spin_tick();                           // налагодження 1.1.3-rc4 (лише з wdbg): перевірка знімка задач
   if (millis() - g_fx_dst_t > 60000) { g_fx_dst_t = millis(); fx_time_offset_apply(); }   // переходи літнього часу
   night_mode_tick(10000);
   ws_state_tick_5s(5000);

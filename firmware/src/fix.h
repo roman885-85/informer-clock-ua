@@ -102,3 +102,15 @@ extern uint32_t rtc_guard;
 void loop_guard_start();
 void loop_guard_feed();                 // «цикл живий» — наприкінці loop() і в довгих циклах очікування
 extern volatile uint32_t g_fx_alive_ms;
+
+// ---------- знімок задач перед перезапуском (guard.cpp, 1.1.3) ----------
+#define FX_STUCK_MAGIC 0x57ac4ed1UL
+#define FX_STUCK_TASKS 10
+struct FxStuckTask { char name[12]; uint8_t st, n; uint16_t free; uint32_t pc[8]; };   // st: стан FreeRTOS; +0x80 — знято через ipc, +0x40 — ipc не відповів
+struct FxStuck { uint32_t magic, up, heap, evt[4]; uint8_t stage, wst, cnt, why; FxStuckTask t[FX_STUCK_TASKS]; };
+extern FxStuck rtc_stuck;
+void fx_stuck_snapshot(uint8_t why);    // де стоїть кожна задача — у RTC-пам'ять (why: 1 — сторож циклу, 2 — вартовий Wi-Fi)
+void fx_stuck_log();                    // setup(): знімок — у журнал подій
+void wifi_evt_snap(uint32_t *o);        // стан обробки подій Wi-Fi: 4 слова, без String і без викликів драйвера (wifi.cpp)
+extern volatile uint32_t g_fx_loop_spin_req;   // налагодження: loop() крутиться N с (/post?wdbg_loop_spin=N; guard.cpp)
+void fx_loop_spin_tick();
