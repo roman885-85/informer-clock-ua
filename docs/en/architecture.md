@@ -19,7 +19,7 @@ for this project. The code in this repository was reconstructed from the 2.7.1 m
 - the reconstructed copy was tested on a real clock.
 
 The **`reconstructed-2.7.1`** tag is this copy with the original's behaviour (including its bugs). Everything changed
-after it is visible in the git history from that tag: `git diff reconstructed-2.7.1 v1.1.2`.
+after it is visible in the git history from that tag: `git diff reconstructed-2.7.1 v1.1.3`.
 
 ### Reading the code
 
@@ -117,6 +117,15 @@ not in the PlatformIO registry). The rest are `lib_deps` in `platformio.ini` wit
 | The clock lost the router while the core's Wi-Fi event handling (the `network_event` task) had stopped — `WiFi.status()` still said “connected”: a forced re-association every 6 min did not help, the 1.1.1 restart (the “cycle exhausted” branch) never fired, and the clock stayed off the network until a power cycle | an event watchdog: after a forced re-association (WIFI_OFF → STA) events must arrive within 8 s; “connected” while the driver is not associated — for no longer than a minute; the router is silent and there has been no GOT_IP since the previous re-association — in all three cases an event-log record with the event handling state and a restart. Only the event task is counted: the 1.0.4 core calls WIFI_READY synchronously from the main loop. `/post?wdbg_evt_reassoc=N`, `/post?wdbg_evt_block=N` simulate it for testing | `wifi.cpp`, `web.cpp` |
 | `ESP.restart()` stops Wi-Fi first and, with event handling stopped, waited forever — the loop guard could not restart the clock for 3 min | before a planned restart and in the loop guard — the hardware RTC watchdog for 3 s (system reset, RTC memory survives) | `core.cpp`, `guard.cpp` |
 | After any software restart (update, button, /reboot, settings) the event log showed “loop was stalled in: …” — a hang that never happened (the loop stage in RTC memory was not cleared) | a planned restart clears the stage (`fx_restart_planned()`; ArduinoOTA and network updates too); the record stays for the loop guard and crashes | `core.cpp`, `wdbg.cpp`, `services.cpp` |
+
+## Fixed in 1.1.3
+
+| What it was | What it is now | Where |
+|---|---|---|
+| The display flashed at full brightness for a few seconds before and after the scrolling line, and the two halves of the big clock face differed in brightness: the “Fade” clock-face effect (`PA_FADE`) fades to the intensity stored in the MD_Parola zones, which nobody updated since 1.1.0 (the `dim.cpp` thread writes the MAX7219 directly) — 0 after waking up, 15 after an alarm | the value stored in the zones = the sensor target (`setIntensityValue` — without writing the display) | `bright.cpp`, `lib/MD_Parola` |
+| The loop guard restarted through `esp_restart()` from the `esp_timer` task: while connected to the router stopping Wi-Fi never finished, and only the 1.1.2 hardware backup restarted the clock (`WATCHDOG reset` after 3–4 s) | `esp_restart_noos()` — like the core's panic handler, without stopping Wi-Fi (`Software reset`); before the restart — a task snapshot into RTC memory ([debugging](wifi-debug.md)) | `guard.cpp`, `wifi.cpp` |
+| On the free plan GNews gives only the beginning of the article text (≈260 characters, cut mid-word) with a “... [2072 chars]” tail — the display scrolled the tail; for the country “Ukraine” Russian-language articles came too | the tail is removed, the news ends at the last complete sentence or at a whole word with “...” (checked on a computer — `tools/sim/newstail`); for Ukraine the request has `lang=uk` | `feeds.cpp` |
+| The “News” page of the web interface: a pass of the scrolling line always took 18 s — a long news item raced several times faster than the display, a short one crawled | the duration comes from the line width and the “Scrolling speed”, like the display (70 − speed ms per column) | `web/webui_patch.py` |
 
 ## New features
 

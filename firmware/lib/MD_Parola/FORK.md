@@ -11,11 +11,9 @@
 | `src/MD_Parola.h` | коди ефектів `PA_NEON`…`PA_IRIS` (29–38) у `textEffect_t`, оголошення `effectCi*`, `getZoneCount()` / effect codes, declarations, `getZoneCount()` |
 | `src/MD_PZone.cpp` | виклик нових ефектів у `zoneAnimate()` / dispatch of the new effects in `zoneAnimate()` |
 
-Informer Clock UA 1.1.3 (2026-11-02), `src/MD_Parola.h`: `MD_Parola::getIntensity(z)`; `setIntensityValue()` у зоні й у
-`MD_Parola` — запам'ятати яскравість, не пишучи в MAX7219 (яскравістю керує потік прошивки, а ефект `PA_FADE` бере
-збережене значення); «слабкий» гачок `md_zone_intensity(dev0, value)` у `MD_PZone::setIntensity` (для журналу
-налагодження) / `MD_Parola::getIntensity(z)`; `setIntensityValue()` in the zone and in `MD_Parola` — store the
-intensity without writing the MAX7219 (the firmware thread drives brightness, `PA_FADE` reads the stored value); weak
-hook `md_zone_intensity(dev0, value)` in `MD_PZone::setIntensity` (debug log).
+Informer Clock UA 1.1.3 (2026-11-02), `src/MD_Parola.h`: `setIntensityValue()` у зоні й у `MD_Parola` — запам'ятати
+яскравість, не пишучи в MAX7219 (яскравістю керує потік прошивки, а ефект `PA_FADE` бере збережене значення) /
+`setIntensityValue()` in the zone and in `MD_Parola` — store the intensity without writing the MAX7219 (the firmware
+thread drives brightness, `PA_FADE` reads the stored value).
 
 Решта файлів — без змін / all other files are unchanged. MD_MAX72XX (`../MD_MAX72XX`) — 3.2.3 з гачками замка SPI, див. / with SPI lock hooks, see [../MD_MAX72XX/FORK.md](../MD_MAX72XX/FORK.md).

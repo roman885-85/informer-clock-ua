@@ -322,26 +322,9 @@ void smallclock_8m() {
   }
 }
 
-// діагностика 1.1.3-rc2 (лише з wdbg): ефект циферблата й яскравість, збережена в зонах
-static void fx_fx_note(const char *dir) {
-  if (!g_fx_wdbg) return;
-  char b[120];
-  int n = snprintf(b, sizeof b, "FX clock %s eff=%u zint=%u,%u,%u,%u dim=%u b3=%u zones=%u", dir, (unsigned)g_c19dc,
-                   P.getIntensity(0), P.getIntensity(1), P.getIntensity(2), P.getIntensity(3), (unsigned)fx_dim_level(),
-                   (unsigned)g_c34b3, (unsigned)P.getZoneCount());
-  fx_wdbg_line(b, n < (int)sizeof b ? n : sizeof b - 1);
-}
-void md_zone_intensity(uint8_t dev0, uint8_t value) {
-  if (!g_fx_wdbg) return;
-  char b[32];
-  int n = snprintf(b, sizeof b, "ZINT d%u=%u", (unsigned)dev0, (unsigned)value);
-  fx_wdbg_line(b, n);
-}
-
 // @400e2558: вхід циферблата з ефектом cl_effect (g_c19dc)
 void clock_enter() {
   uint16_t spd; uint32_t eff;
-  fx_fx_note("in");
   time_string_format(g_c347d, g_c34ae);
   strcpy80(g_c3472, g_c347d);
   switch (g_c19dc) {
@@ -395,7 +378,6 @@ end:
 // @400e2a7c: вихід циферблата з ефектом (той самий код ефекту)
 void clockface_effect_select() {
   uint16_t spd; uint32_t eff;
-  fx_fx_note("out");
   g_c2e8c = 1;
   time_string_format(g_c347d, g_c34ae);
   strcpy80(g_c3472, g_c347d);

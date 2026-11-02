@@ -3,6 +3,51 @@
 Формат: нові версії вгорі. Те саме для веб-інтерфейсу годинника — `update/changelog.json`.
 Format: newest first. The clock's web interface reads the same history from `update/changelog.json`.
 
+## 1.1.3 — 2026-11-02
+
+**Виправлено / fixed**
+- Табло більше не спалахує на кілька секунд на повну яскравість перед бігучим рядком і після нього, а половини
+  великого циферблата не світять по-різному. Ефект циферблата «Фэйд» (у випадковому виборі — кожен сьомий перехід) вів
+  яскравість до значення, збереженого в зонах табло, а його в режимі фоторезистора ніхто не оновлював. / The display no
+  longer flashes at full brightness for a few seconds before and after the scrolling line, and the halves of the big
+  clock face no longer differ in brightness. The “Fade” clock-face effect (every seventh transition when random) faded
+  to the intensity stored in the display zones, which nobody updated in photoresistor mode.
+- Новина на табло більше не закінчується хвостом «... [2072 chars]». Його дописує GNews: на безкоштовному тарифі
+  сервіс дає лише початок тексту статті (≈260 знаків, обірваний посеред слова). Тепер годинник прибирає хвіст і
+  закінчує новину на останньому повному реченні (або на цілому слові з «...»). / A news item on the display no longer
+  ends with a “... [2072 chars]” tail. GNews adds it: on the free plan the service gives only the beginning of the
+  article text (≈260 characters, cut mid-word). Now the clock removes the tail and ends the news at the last complete
+  sentence (or at a whole word with “...”).
+- Сторінка «Новини» веб-інтерфейсу: бігучий рядок іде зі швидкістю табло («Швидкість прокрутки»). Раніше прохід
+  завжди тривав 18 с, тож довга новина мчала в кілька разів швидше, а коротка повзла. / The “News” page of the web
+  interface: the scrolling line moves at the display's speed (“Scrolling speed”). Before, a pass always took 18 s, so a
+  long news item raced several times faster and a short one crawled.
+- Сторож головного циклу перезапускає годинник одразу (`Software reset`). Раніше перезапуск із задачі таймера при
+  з'єднанні з роутером не завершувався, і годинник перезапускала лише апаратна страховка через кілька секунд
+  (`WATCHDOG reset`). / The main-loop guard restarts the clock right away (`Software reset`). Before, the restart from
+  the timer task did not finish while connected to the router, and only the hardware backup restarted the clock a few
+  seconds later (`WATCHDOG reset`).
+
+**Змінено / changed**
+- Новини GNews для країни «Україна» — українською (`lang=uk`); раніше сервіс давав і російськомовні статті. Для інших
+  країн — як раніше. / GNews news for the country “Ukraine” are in Ukrainian (`lang=uk`); before, the service also gave
+  Russian-language articles. Other countries — as before.
+
+**Діагностика / diagnostics**
+- Перед перезапуском сторожем циклу чи вартовим подій Wi-Fi годинник записує стан задач: після запуску в журналі
+  подій — `[BOOT] stuck tasks (…)` і рядок на задачу (стан, запас стека, адреси ланцюжка викликів; розшифровка — ELF
+  випуску). Перевірка: `/post?wdbg_loop_spin=N` (лише з налагодженням по Wi-Fi). / Before a restart by the loop guard
+  or the Wi-Fi event watchdog the clock records the task state: after the start the event log shows
+  `[BOOT] stuck tasks (…)` and a line per task (state, free stack, call-chain addresses; decode with the release ELF).
+  Test: `/post?wdbg_loop_spin=N` (Wi-Fi debugging only).
+
+**Відомо / known**
+- Зрідка головний цикл зупиняється (у власника — кілька разів за ніч); сторож перезапускає годинник за 3 хв,
+  налаштування не губляться. Причину шукаємо: знімок задач покаже, де стоїть цикл, — такий журнал подій варто надіслати
+  в Issues. / Occasionally the main loop stops (a few times a night at the owner's); the guard restarts the clock
+  within 3 min, settings are kept. The cause is being investigated: the task snapshot shows where the loop stops —
+  please send such an event log to Issues.
+
 ## 1.1.2 — 2026-11-01
 
 **Виправлено / fixed**

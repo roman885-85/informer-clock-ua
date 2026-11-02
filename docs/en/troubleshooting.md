@@ -34,6 +34,8 @@
 | The display flickers, the clock restarts at high brightness | weak power: a 5 V 2 A supply, a 1000 µF capacitor, the display powered from the supply, not through the board |
 | The display does not turn off at night / on in the morning | “Display” → shut down the display at night, check the hours; time and zone — “Time” page |
 | Brightness “jumps” | photoresistor and 10 kΩ on GPIO34; “Brightness type”, “Brightness threshold” on the “Display” page; since 1.1.0 changes are smooth — the whole range in 2 s |
+| Before or after the scrolling line the display flashes at full brightness for a few seconds (the halves of the big clock face differ in brightness) | fixed in 1.1.3 — please update; on earlier versions pick another effect: “Clock face” → “Effect” (not “Fade” and not random) |
+| A news item ends with “... [2072 chars]” | that is how GNews gives the article text on the free plan — only the beginning; since 1.1.3 the clock removes the tail and ends the news at the last complete sentence |
 
 ## Time
 

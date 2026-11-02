@@ -68,10 +68,29 @@ release files):
 
 ```sh
 ~/.platformio/packages/toolchain-xtensa32/bin/xtensa-esp32-elf-addr2line -pfiaC \
-  -e informer-clock-ua-esp32-1.1.2.elf 0x400d1234 0x400d5678
+  -e informer-clock-ua-esp32-1.1.3.elf 0x400d1234 0x400d5678
 ```
 
 If `loop()` hangs for more than 3 min, the watchdog restarts the clock and writes `[BOOT] loop guard: loop() stuck > 180 s`.
+
+Since 1.1.3, before such a restart (and before a restart by the Wi-Fi event watchdog, see below) the clock records
+the **task state**, and after the start the event log shows:
+
+```
+[BOOT] stuck tasks (loop guard): up 246 s, stage 6, Wi-Fi status 3, heap 158060, events 2, last 7 243 s ago
+[BOOT] stuck loopTask R (ipc) free 2328: 4000d033 400828a3 400efc00 400e4fe3 401442a9 4008a1dd
+[BOOT] stuck tiT B free 1684: 400837a6 40089ff1 401c3b8d 401b431e 401accc4 4008a1dd
+…
+```
+
+The first line says who restarted the clock (`loop guard` or `Wi-Fi watchdog` — the Wi-Fi event watchdog), how long it
+had been running, the loop stage, `WiFi.status()`, free memory and the Wi-Fi event handling state (as in the section
+below). Then a line per task: name, state (`R` — running, `r` — ready, `B` — blocked, `S` — suspended; `(ipc)` — the
+frame was taken from the other core), free stack in bytes and up to 8 call-chain addresses — decode them with the same
+`addr2line` and the `.elf` of this version. Please send such a log to Issues: it shows where exactly the loop stopped.
+Test (only with Wi-Fi debugging on; not saved to the settings): `http://<address>/post?wdbg_loop_spin=N` — `loop()`
+spins for N s (up to 600); after 3 min — `Software reset` and a snapshot with `loopTask` in `fx_loop_spin_tick` (or in
+the `millis()` it calls: then the next address is the call of `fx_loop_spin_tick` in `loop()`).
 
 ## Sockets and signal strength (since 1.1.0)
 

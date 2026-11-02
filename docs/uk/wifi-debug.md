@@ -66,10 +66,29 @@ PLATFORMIO_UPLOAD_FLAGS="--auth=<пароль>" pio run -e clock -t upload --upl
 
 ```sh
 ~/.platformio/packages/toolchain-xtensa32/bin/xtensa-esp32-elf-addr2line -pfiaC \
-  -e informer-clock-ua-esp32-1.1.2.elf 0x400d1234 0x400d5678
+  -e informer-clock-ua-esp32-1.1.3.elf 0x400d1234 0x400d5678
 ```
 
 Якщо `loop()` завис довше 3 хв, сторож перезапускає годинник і пише `[BOOT] loop guard: loop() stuck > 180 s`.
+
+З 1.1.3 перед таким перезапуском (і перед перезапуском вартового подій Wi-Fi, див. нижче) годинник записує **стан
+задач**, і після запуску в журналі подій з'являється:
+
+```
+[BOOT] stuck tasks (loop guard): up 246 s, stage 6, Wi-Fi status 3, heap 158060, events 2, last 7 243 s ago
+[BOOT] stuck loopTask R (ipc) free 2328: 4000d033 400828a3 400efc00 400e4fe3 401442a9 4008a1dd
+[BOOT] stuck tiT B free 1684: 400837a6 40089ff1 401c3b8d 401b431e 401accc4 4008a1dd
+…
+```
+
+Перший рядок — хто перезапустив (`loop guard` — сторож циклу, `Wi-Fi watchdog` — вартовий подій Wi-Fi), скільки
+годинник працював, етап циклу, `WiFi.status()`, вільна пам'ять і стан обробки подій Wi-Fi (як у розділі нижче). Далі —
+рядок на задачу: ім'я, стан (`R` — виконується, `r` — готова, `B` — чекає, `S` — призупинена; `(ipc)` — кадр знято з
+другого ядра), запас стека в байтах і до 8 адрес ланцюжка викликів — їх розшифровує той самий `addr2line` з `.elf` цієї
+версії. Такий журнал варто надіслати в Issues: він показує, де саме стояв цикл. Перевірка (лише з увімкненим
+налагодженням по Wi-Fi; у налаштування не пишеться): `http://<адреса>/post?wdbg_loop_spin=N` — `loop()` крутиться N с
+(до 600); за 3 хв — `Software reset` і знімок, де `loopTask` стоїть у `fx_loop_spin_tick` (або в `millis()`, яку вона
+викликає: тоді наступна адреса — місце виклику `fx_loop_spin_tick` у `loop()`).
 
 ## Сокети й сила сигналу (з 1.1.0)
 

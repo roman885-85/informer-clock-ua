@@ -1,5 +1,17 @@
 [
   {
+    "v": "1.1.3",
+    "date": "2026-11-02",
+    "items": [
+      { "t": "fixed", "text": "Табло більше не спалахує на кілька секунд на повну яскравість перед бігучим рядком і після нього (ефект циферблата «Фэйд» вів яскравість до збереженої в зонах, а її ніхто не оновлював). / The display no longer flashes at full brightness for a few seconds before and after the scrolling line (the “Fade” clock-face effect faded to a stored intensity nobody updated)." },
+      { "t": "fixed", "text": "Новина на табло більше не закінчується хвостом GNews «... [2072 chars]» — годинник закінчує її на останньому повному реченні. / A news item no longer ends with the GNews “... [2072 chars]” tail — the clock ends it at the last complete sentence." },
+      { "t": "fixed", "text": "Сторінка «Новини»: бігучий рядок іде зі швидкістю табло (раніше прохід завжди тривав 18 с, і довга новина мчала). / “News” page: the scrolling line moves at the display’s speed (before, a pass always took 18 s and a long news item raced)." },
+      { "t": "fixed", "text": "Сторож головного циклу перезапускає годинник одразу (Software reset), не чекаючи апаратної страховки. / The main-loop guard restarts the clock right away (Software reset), without waiting for the hardware backup." },
+      { "t": "improved", "text": "Новини GNews для країни «Україна» — українською (lang=uk). / GNews news for the country “Ukraine” are in Ukrainian (lang=uk)." },
+      { "t": "added", "text": "Діагностика: перед перезапуском сторожем годинник записує стан задач — у журналі подій «[BOOT] stuck …»; перевірка: /post?wdbg_loop_spin=N. / Diagnostics: before a guard restart the clock records the task state — “[BOOT] stuck …” in the event log; test: /post?wdbg_loop_spin=N." }
+    ]
+  },
+  {
     "v": "1.1.2",
     "date": "2026-11-01",
     "items": [
