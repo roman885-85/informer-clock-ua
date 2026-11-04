@@ -167,6 +167,7 @@ void loop() {
   fx_sock_tick();
   fx_wifi_evt_tick();                            // нове (1.1.2): вартовий подій Wi-Fi (wifi.cpp)
   fx_loop_spin_tick();                           // нове (1.1.3), лише з wdbg: /post?wdbg_loop_spin=N — перевірка знімка задач
+  fx_guard_tick();                               // нове (1.1.4): хибна тривога сторожа — у журнал подій
   if (millis() - g_fx_dst_t > 60000) { g_fx_dst_t = millis(); fx_time_offset_apply(); }   // переходи літнього часу
   night_mode_tick(10000);
   ws_state_tick_5s(5000);

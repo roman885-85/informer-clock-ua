@@ -114,3 +114,5 @@ void fx_stuck_log();                    // setup(): знімок — у журн
 void wifi_evt_snap(uint32_t *o);        // стан обробки подій Wi-Fi: 4 слова, без String і без викликів драйвера (wifi.cpp)
 extern volatile uint32_t g_fx_loop_spin_req;   // налагодження: loop() крутиться N с (/post?wdbg_loop_spin=N; guard.cpp)
 void fx_loop_spin_tick();
+extern volatile uint32_t g_fx_guard_race_req;  // налагодження (1.1.4): N перевірок сторожа з довгим вікном (/post?wdbg_guard_race=N)
+void fx_guard_tick();                   // 1.1.4: відкинуту хибну тривогу сторожа — у журнал подій

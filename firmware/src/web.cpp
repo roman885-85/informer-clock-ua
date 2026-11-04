@@ -452,6 +452,11 @@ void h_post(AsyncWebServerRequest *r) {
       if (g_fx_wdbg && s > 0) g_fx_loop_spin_req = s > 600 ? 600 : (uint32_t)s;
       continue;
     }
+    if (p->name() == "wdbg_guard_race") {        // нове (1.1.4): N перевірок сторожа з довгим вікном — хибна тривога 1.1.3
+      long s = p->value().toInt();
+      if (g_fx_wdbg && s > 0) g_fx_guard_race_req = s > 60 ? 60 : (uint32_t)s;
+      continue;
+    }
     if (p->name() == "wdbg_evt_block" || p->name() == "wdbg_evt_reassoc") {
       long s = p->value().toInt();
       if (g_fx_wdbg && s > 0) {
