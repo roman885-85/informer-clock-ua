@@ -950,6 +950,10 @@ void mqtt_loop() {
     g_bed14 = -1;
   }
   if (-1 < g_bed10) {   // табло вкл/викл
+    // нове (1.1.4): табло, погашене командою, — у журнал подій (07.11 воно 18 хв стояло погашене командою з Home
+    // Assistant, а на годиннику причину ніде не було видно)
+    if ((g_bed10 == 0) != (g_c3080 != 0))
+      evlog_write(String(g_bed10 == 0 ? "[MQTT] Display off by command (display/set)" : "[MQTT] Display on by command (display/set)"));
     g_c3080 = g_bed10 == 0;
     P.displayShutdown(g_c3080);
     mqtt_topic(t, String("display"));

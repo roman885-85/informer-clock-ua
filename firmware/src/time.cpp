@@ -186,11 +186,11 @@ void rtc_lost_power_sync(int32_t interval) {
 // @400dd7c8: синхронізація системного часу з NTP
 void sys_sync_ntp() {
   if (g_c2d29 == 0 || g_c3319 != 0) { dbg_ws_print(String("NTP        : offline mode, skipping time sync")); return; }
-  if (g_c30c5 != 0) {
-    for (int i = 0; i < 12; i++) g_c2628.unsubscribe(g_c2500[i].c_str());
-    if (WiFi.isConnected() && g_c3319 == 0) g_bed1c = 1;
-    g_c2628.disconnect(true);
-  }
+  // Виправлено (1.1.4): автор перед кожною синхронізацією часу відписувався від усіх 12 топіків і рвав з'єднання MQTT.
+  // Відписку від порожнього топіка брокер вважає зіпсованим пакетом і сам рве з'єднання (Mosquitto, 07.11: «Empty
+  // unsubscription string … disconnected: malformed packet»), а розрив публікує заповіт «offline»: у Home Assistant усі
+  // сутності годинника кожні t_syn хв (у власника — 10) на 2–7 с ставали «недоступні». Клієнт MQTT працює в задачі
+  // AsyncTCP і запиту NTP не заважає — з'єднання не чіпаємо.
   ntp_request();
   if (g_c22b5 == 0) return;
   g_c3458 = year(g_c3464);
