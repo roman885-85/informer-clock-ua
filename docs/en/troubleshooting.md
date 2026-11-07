@@ -10,6 +10,7 @@
 | “Failed to connect”, “Timed out waiting for packet header” | hold **BOOT** for 2–3 s while connecting; another USB port (no hub); a lower speed (`BAUD=115200`) |
 | Linux: “Permission denied” on `/dev/ttyUSB0` | `sudo usermod -aG dialout $USER` and log in again |
 | After flashing the clock restarts in a loop | clean install (with erase); check the 5 V 2 A power supply |
+| The clock restarts by itself every few hours; the event log shows “loop guard: loop() stuck > 180 s”, each time with a different stage | a false alarm of the loop guard before 1.1.4 (the loop was running) — please update; since 1.1.4 the event log shows “[GUARD] loop() running, false alarm skipped” instead of a restart |
 | I want to go back to the author's firmware | over USB, with the author's files from [Thingiverse](https://www.thingiverse.com/thing:3924947) |
 
 ## Network
@@ -25,6 +26,7 @@
 | After a router or power outage the clock stays off the network for hours (the event log shows “AP restored” every ~3.5 min) | before 1.1.1: power the clock off and on; since 1.1.1 it restarts by itself — after ~10 min, and less often (up to once an hour) while the router is gone |
 | The clock is off the network, and every 6 min the event log shows “Forced re-association (… router silent …)” | before 1.1.2: power the clock off and on; since 1.1.2 it restarts by itself (the log shows “Restart: Wi-Fi events not delivered…” or “Restart: status says connected, driver is not…”); if it keeps happening, please send the event log to Issues: the records show where event handling got stuck |
 | Updates break off (“Stream Read Timeout”, “Verify Bin Header Failed”), the web interface is slow, the clock drops off the network | the clock stands right next to the router: its receiver is overloaded (up to 67 % lost packets). Move it 1–2 m away — at 1.5–2 m there are no losses; the signal strength is in the event log (“RSSI=… dBm”, −40…−70 is fine) |
+| In Home Assistant the clock entities become “unavailable” for a few seconds every few minutes | before 1.1.4 the clock dropped the MQTT connection at every time sync — please update |
 
 ## Display
 
@@ -36,13 +38,14 @@
 | Brightness “jumps” | photoresistor and 10 kΩ on GPIO34; “Brightness type”, “Brightness threshold” on the “Display” page; since 1.1.0 changes are smooth — the whole range in 2 s |
 | Before or after the scrolling line the display flashes at full brightness for a few seconds (the halves of the big clock face differ in brightness) | fixed in 1.1.3 — please update; on earlier versions pick another effect: “Clock face” → “Effect” (not “Fade” and not random) |
 | A news item ends with “... [2072 chars]” | that is how GNews gives the article text on the free plan — only the beginning; since 1.1.3 the clock removes the tail and ends the news at the last complete sentence |
+| The display went dark and does not come back, although the clock is online | it was switched off by an MQTT command — for example the “Display” light or a voice command in Home Assistant: switch it on there; since 1.1.4 the event log shows when — “[MQTT] Display off by command” |
 
 ## Time
 
 | What you see | What to do |
 |---|---|
 | The time is off by an hour | “Time” → “Summer time”: “Auto” for Europe; check the time zone |
-| The time is inaccurate after a restart without internet | expected: until the first sync the system time is shown (drifts up to minutes per day of operation); with a DS3231 — accurate |
+| The time is inaccurate after a restart without internet | expected: until the first sync the system time is shown (drifts from minutes to tens of minutes per day of operation); with a DS3231 — accurate |
 
 ## Sound
 

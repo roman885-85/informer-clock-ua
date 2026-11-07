@@ -68,10 +68,17 @@ release files):
 
 ```sh
 ~/.platformio/packages/toolchain-xtensa32/bin/xtensa-esp32-elf-addr2line -pfiaC \
-  -e informer-clock-ua-esp32-1.1.3.elf 0x400d1234 0x400d5678
+  -e informer-clock-ua-esp32-1.1.4.elf 0x400d1234 0x400d5678
 ```
 
 If `loop()` hangs for more than 3 min, the watchdog restarts the clock and writes `[BOOT] loop guard: loop() stuck > 180 s`.
+
+Before 1.1.4 the guard sometimes fired falsely: about once every few hours it restarted the clock although the loop was
+running (see [architecture](architecture.md)). Since 1.1.4 it rejects such an alarm and writes
+`[GUARD] loop() running, false alarm skipped (N since start)` to the event log — without a restart. Test (only with
+Wi-Fi debugging on; not saved to the settings): `http://<address>/post?wdbg_guard_race=N` — N guard checks (up to 60,
+one a second) with a deliberately long window between reading the time and the loop's stamp; the log gets N such
+lines, and the clock keeps running.
 
 Since 1.1.3, before such a restart (and before a restart by the Wi-Fi event watchdog, see below) the clock records
 the **task state**, and after the start the event log shows:

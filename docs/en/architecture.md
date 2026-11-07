@@ -19,7 +19,7 @@ for this project. The code in this repository was reconstructed from the 2.7.1 m
 - the reconstructed copy was tested on a real clock.
 
 The **`reconstructed-2.7.1`** tag is this copy with the original's behaviour (including its bugs). Everything changed
-after it is visible in the git history from that tag: `git diff reconstructed-2.7.1 v1.1.3`.
+after it is visible in the git history from that tag: `git diff reconstructed-2.7.1 v1.1.4`.
 
 ### Reading the code
 
@@ -117,6 +117,14 @@ not in the PlatformIO registry). The rest are `lib_deps` in `platformio.ini` wit
 | The clock lost the router while the core's Wi-Fi event handling (the `network_event` task) had stopped — `WiFi.status()` still said “connected”: a forced re-association every 6 min did not help, the 1.1.1 restart (the “cycle exhausted” branch) never fired, and the clock stayed off the network until a power cycle | an event watchdog: after a forced re-association (WIFI_OFF → STA) events must arrive within 8 s; “connected” while the driver is not associated — for no longer than a minute; the router is silent and there has been no GOT_IP since the previous re-association — in all three cases an event-log record with the event handling state and a restart. Only the event task is counted: the 1.0.4 core calls WIFI_READY synchronously from the main loop. `/post?wdbg_evt_reassoc=N`, `/post?wdbg_evt_block=N` simulate it for testing | `wifi.cpp`, `web.cpp` |
 | `ESP.restart()` stops Wi-Fi first and, with event handling stopped, waited forever — the loop guard could not restart the clock for 3 min | before a planned restart and in the loop guard — the hardware RTC watchdog for 3 s (system reset, RTC memory survives) | `core.cpp`, `guard.cpp` |
 | After any software restart (update, button, /reboot, settings) the event log showed “loop was stalled in: …” — a hang that never happened (the loop stage in RTC memory was not cleared) | a planned restart clears the stage (`fx_restart_planned()`; ArduinoOTA and network updates too); the record stays for the loop guard and crashes | `core.cpp`, `wdbg.cpp`, `services.cpp` |
+
+## Fixed in 1.1.4
+
+| What it was | What it is now | Where |
+|---|---|---|
+| The loop guard computed `millis() - stamp`, and GCC read the time before the stamp written by `loop()` on the other core: when the stamp was updated between the two reads and the time moved on to the next millisecond, the difference went negative — ≈49 days unsigned, and the guard restarted a working clock (in every version since 1.0.0, about once every few hours; the 1.1.3 task snapshots showed the loop in a different ordinary function each time) | the stamp is read before the time, the difference is signed, a restart needs the next check (1 s later) to confirm it; a rejected alarm — `[GUARD] … false alarm skipped` in the event log; test — `/post?wdbg_guard_race=N` ([debugging](wifi-debug.md)) | `guard.cpp` |
+| Before every NTP sync (original 2.7.1) the clock unsubscribed from all 12 MQTT topics — Mosquitto treats empty ones as a malformed packet — and dropped the connection: the broker published the “offline” will, and in Home Assistant all clock entities became “unavailable” for 2–7 s every `t_syn` minutes | the MQTT connection is left alone during the sync (the client runs in the AsyncTCP task and does not get in the way of the NTP request) | `time.cpp` |
+| A display switched off by the MQTT command `display/set` (the “Display” light in Home Assistant) left no trace — a blank display without a visible cause | a `[MQTT] Display off/on by command (display/set)` line in the event log | `mqtt.cpp` |
 
 ## Fixed in 1.1.3
 

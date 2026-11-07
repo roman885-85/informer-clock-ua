@@ -3,6 +3,36 @@
 Формат: нові версії вгорі. Те саме для веб-інтерфейсу годинника — `update/changelog.json`.
 Format: newest first. The clock's web interface reads the same history from `update/changelog.json`.
 
+## 1.1.4 — 2026-11-07
+
+**Виправлено / fixed**
+- Сторож головного циклу більше не перезапускає справний годинник. У всіх версіях з 1.0.0 годинник приблизно раз на
+  кілька годин сам перезапускався з записом «loop guard: loop() stuck > 180 s» на будь-якому етапі, хоча цикл працював:
+  сторож читав час раніше за мітку циклу, і коли цикл на іншому ядрі оновлював мітку саме в цю мить, різниця ставала
+  від'ємною (≈49 діб). Тепер мітка читається першою, а перезапуск — лише якщо перевищення підтверджує наступна
+  перевірка. Це й були «зупинки головного циклу» з розділу «Відомо» 1.1.3. / The main-loop guard no longer restarts a
+  working clock. In every version since 1.0.0 the clock restarted by itself about once every few hours with “loop
+  guard: loop() stuck > 180 s” at any stage, although the loop was running: the guard read the time before the loop's
+  stamp, and when the loop on the other core updated the stamp right then, the difference went negative (≈49 days).
+  Now the stamp is read first, and a restart needs the next check to confirm it. These were the “main loop stops” from
+  the “Known” section of 1.1.3.
+- MQTT: годинник більше не рве з'єднання з брокером при кожній синхронізації часу. Від оригіналу 2.7.1 перед
+  синхронізацією він відписувався від усіх 12 топіків (порожні брокер Mosquitto вважає зіпсованим пакетом) і
+  від'єднувався — у Home Assistant усі сутності годинника з інтервалом синхронізації (у власника — кожні 10 хв) на
+  кілька секунд ставали «недоступні». / MQTT: the clock no longer drops the broker connection at every time sync. Since
+  the original 2.7.1, before a sync it unsubscribed from all 12 topics (Mosquitto treats empty ones as a malformed
+  packet) and disconnected — in Home Assistant all clock entities became “unavailable” for a few seconds at every sync
+  interval (every 10 min at the owner's).
+
+**Діагностика / diagnostics**
+- Журнал подій: `[GUARD] loop() running, false alarm skipped (N since start)` — сторож відкинув хибну тривогу (до 1.1.4
+  тут був би перезапуск); `[MQTT] Display off/on by command (display/set)` — табло вимкнено чи ввімкнено командою MQTT
+  (наприклад, з Home Assistant): погасле табло тепер має видиму причину. Перевірка сторожа: `/post?wdbg_guard_race=N`
+  (лише з налагодженням по Wi-Fi). / Event log: `[GUARD] loop() running, false alarm skipped (N since start)` — the
+  guard rejected a false alarm (before 1.1.4 this was a restart); `[MQTT] Display off/on by command (display/set)` — the
+  display was switched off or on by an MQTT command (for example from Home Assistant): a blank display now has a
+  visible cause. Guard test: `/post?wdbg_guard_race=N` (Wi-Fi debugging only).
+
 ## 1.1.3 — 2026-11-02
 
 **Виправлено / fixed**

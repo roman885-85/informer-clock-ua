@@ -1,5 +1,14 @@
 [
   {
+    "v": "1.1.4",
+    "date": "2026-11-07",
+    "items": [
+      { "t": "fixed", "text": "Сторож головного циклу більше не перезапускає справний годинник (у всіх версіях з 1.0.0 — раз на кілька годин «loop() stuck > 180 s», хоча цикл працював). / The main-loop guard no longer restarts a working clock (in every version since 1.0.0 — “loop() stuck > 180 s” every few hours although the loop was running)." },
+      { "t": "fixed", "text": "MQTT не рветься при кожній синхронізації часу — у Home Assistant сутності годинника більше не стають «недоступні» кожні кілька хвилин. / MQTT no longer drops at every time sync — clock entities in Home Assistant no longer become “unavailable” every few minutes." },
+      { "t": "added", "text": "Журнал подій: «[GUARD] … false alarm skipped» — відкинута хибна тривога сторожа; «[MQTT] Display off/on by command» — табло вимкнено чи ввімкнено командою MQTT (Home Assistant). / Event log: “[GUARD] … false alarm skipped” — a rejected guard false alarm; “[MQTT] Display off/on by command” — the display switched off or on by an MQTT command (Home Assistant)." }
+    ]
+  },
+  {
     "v": "1.1.3",
     "date": "2026-11-02",
     "items": [

@@ -92,6 +92,8 @@
   <li><b>«Нема інтернету».</b> Годинник перевіряє зв'язок із 8.8.8.8 і 1.1.1.1, далі — http://www.msftconnecttest.com. Без інтернету погода й новини не оновлюються, але час іде; Wi-Fi перепідключається, лише коли не відповідає сам роутер. Якщо в 1.0.0 «нема інтернету» з'являється через ~1,5 год роботи — це помилка 1.0.0, виправлена в 1.1.0: оновіться (одразу після перезапуску).</li>
   <li><b>Табло на кілька секунд спалахує на повну яскравість</b> перед бігучим рядком чи після нього — виправлено у 1.1.3 (ефект циферблата «Фэйд»); у попередніх версіях виберіть інший ефект: «Циферблат» → «Ефект».</li>
   <li><b>Новина обривається на «... [2072 chars]».</b> Так GNews на безкоштовному тарифі віддає текст статті — лише початок (≈260 знаків). З 1.1.3 годинник прибирає цей хвіст і закінчує новину на останньому повному реченні; для країни «Україна» новини GNews — українською.</li>
+  <li><b>Табло погасло, а годинник у мережі.</b> Табло вимкнено командою MQTT — наприклад, світлом «Display» чи голосовою командою в Home Assistant; увімкніть там само. З 1.1.4 у журналі подій видно, коли саме: «[MQTT] Display off by command».</li>
+  <li><b>Годинник сам перезапускається раз на кілька годин</b> («loop guard: loop() stuck &gt; 180 s» у журналі подій) — хибна тривога сторожа, виправлено в 1.1.4.</li>
   <li><b>Скидання налаштувань</b>: «Оновлення» → «Файл конфігурації» → «Повернення до заводських установок». Після перезапуску — знову точка «Clock ESP».</li>
   <li>Журнал подій (сторінка System) показує перезапуски, аварії та їх причини — додайте його до повідомлення про помилку.</li>
 </ul>
@@ -177,6 +179,8 @@
   <li><b>“No internet”.</b> The clock checks 8.8.8.8 and 1.1.1.1, then http://www.msftconnecttest.com. Without internet, weather and news are not updated but the time keeps running; Wi-Fi reconnects only when the router itself does not answer. If on 1.0.0 “no internet” appears after ~1.5 h of work — it is a 1.0.0 bug fixed in 1.1.0: update (right after a restart).</li>
   <li><b>The display flashes at full brightness for a few seconds</b> before or after the scrolling line — fixed in 1.1.3 (the “Fade” clock-face effect); on earlier versions pick another effect: “Clock face” → “Effect”.</li>
   <li><b>A news item ends with “... [2072 chars]”.</b> That is how GNews gives the article text on the free plan — only the beginning (≈260 characters). Since 1.1.3 the clock removes this tail and ends the news at the last complete sentence; for the country “Ukraine” GNews news are in Ukrainian.</li>
+  <li><b>The display went dark while the clock is online.</b> It was switched off by an MQTT command — for example the “Display” light or a voice command in Home Assistant; switch it on there. Since 1.1.4 the event log shows when: “[MQTT] Display off by command”.</li>
+  <li><b>The clock restarts by itself every few hours</b> (“loop guard: loop() stuck &gt; 180 s” in the event log) — a false alarm of the guard, fixed in 1.1.4.</li>
   <li><b>Factory reset</b>: “Update” → “Config File” → “Reset configuration to factory default settings”. After the restart — the “Clock ESP” access point again.</li>
   <li>The event log (System page) shows restarts, crashes and their causes — attach it to a bug report.</li>
 </ul>
