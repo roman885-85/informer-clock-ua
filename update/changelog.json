@@ -1,5 +1,12 @@
 [
   {
+    "v": "1.1.5",
+    "date": "2026-11-09",
+    "items": [
+      { "t": "fixed", "text": "Home Assistant: годинник більше не публікує порожню дату «Set date» — у журналі HA більше немає помилки «does not match expected pattern» при кожному запуску й підключенні годинника. / Home Assistant: the clock no longer publishes an empty “Set date” — no more “does not match expected pattern” error in the HA log at every start and clock reconnect." }
+    ]
+  },
+  {
     "v": "1.1.4",
     "date": "2026-11-07",
     "items": [

@@ -94,6 +94,7 @@
   <li><b>Новина обривається на «... [2072 chars]».</b> Так GNews на безкоштовному тарифі віддає текст статті — лише початок (≈260 знаків). З 1.1.3 годинник прибирає цей хвіст і закінчує новину на останньому повному реченні; для країни «Україна» новини GNews — українською.</li>
   <li><b>Табло погасло, а годинник у мережі.</b> Табло вимкнено командою MQTT — наприклад, світлом «Display» чи голосовою командою в Home Assistant; увімкніть там само. З 1.1.4 у журналі подій видно, коли саме: «[MQTT] Display off by command».</li>
   <li><b>Годинник сам перезапускається раз на кілька годин</b> («loop guard: loop() stuck &gt; 180 s» у журналі подій) — хибна тривога сторожа, виправлено в 1.1.4.</li>
+  <li><b>У журналі Home Assistant — помилка дати «Set date».</b> До 1.1.5 годинник публікував дату порожньою, і Home Assistant при кожному запуску писав «does not match expected pattern»; оновіться.</li>
   <li><b>Скидання налаштувань</b>: «Оновлення» → «Файл конфігурації» → «Повернення до заводських установок». Після перезапуску — знову точка «Clock ESP».</li>
   <li>Журнал подій (сторінка System) показує перезапуски, аварії та їх причини — додайте його до повідомлення про помилку.</li>
 </ul>
@@ -181,6 +182,7 @@
   <li><b>A news item ends with “... [2072 chars]”.</b> That is how GNews gives the article text on the free plan — only the beginning (≈260 characters). Since 1.1.3 the clock removes this tail and ends the news at the last complete sentence; for the country “Ukraine” GNews news are in Ukrainian.</li>
   <li><b>The display went dark while the clock is online.</b> It was switched off by an MQTT command — for example the “Display” light or a voice command in Home Assistant; switch it on there. Since 1.1.4 the event log shows when: “[MQTT] Display off by command”.</li>
   <li><b>The clock restarts by itself every few hours</b> (“loop guard: loop() stuck &gt; 180 s” in the event log) — a false alarm of the guard, fixed in 1.1.4.</li>
+  <li><b>The Home Assistant log shows a “Set date” date error.</b> Before 1.1.5 the clock published an empty date, and Home Assistant logged “does not match expected pattern” at every start; please update.</li>
   <li><b>Factory reset</b>: “Update” → “Config File” → “Reset configuration to factory default settings”. After the restart — the “Clock ESP” access point again.</li>
   <li>The event log (System page) shows restarts, crashes and their causes — attach it to a bug report.</li>
 </ul>

@@ -3,6 +3,18 @@
 Формат: нові версії вгорі. Те саме для веб-інтерфейсу годинника — `update/changelog.json`.
 Format: newest first. The clock's web interface reads the same history from `update/changelog.json`.
 
+## 1.1.5 — 2026-11-09
+
+**Виправлено / fixed**
+- Home Assistant: годинник більше не публікує порожню дату. Стан сутності «Set date» (`text.*_set_date`, топік `d_m`,
+  утримуване повідомлення) годинник надсилав порожнім рядком, а Home Assistant відкидає його за шаблоном дати — у журналі
+  HA при кожному його запуску й кожному підключенні годинника була помилка «Value error … does not match expected
+  pattern». Тепер, коли дату не задано, годинник публікує свою сьогоднішню дату (лише коли час уже відомий). /
+  Home Assistant: the clock no longer publishes an empty date. The clock sent the state of the “Set date” entity
+  (`text.*_set_date`, topic `d_m`, a retained message) as an empty string, and Home Assistant rejects it by the date
+  pattern — the HA log had a “Value error … does not match expected pattern” error at every HA start and every clock
+  reconnect. Now, when no date is set, the clock publishes its current date (only once the time is known).
+
 ## 1.1.4 — 2026-11-07
 
 **Виправлено / fixed**

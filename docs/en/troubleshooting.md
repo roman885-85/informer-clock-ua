@@ -27,6 +27,7 @@
 | The clock is off the network, and every 6 min the event log shows “Forced re-association (… router silent …)” | before 1.1.2: power the clock off and on; since 1.1.2 it restarts by itself (the log shows “Restart: Wi-Fi events not delivered…” or “Restart: status says connected, driver is not…”); if it keeps happening, please send the event log to Issues: the records show where event handling got stuck |
 | Updates break off (“Stream Read Timeout”, “Verify Bin Header Failed”), the web interface is slow, the clock drops off the network | the clock stands right next to the router: its receiver is overloaded (up to 67 % lost packets). Move it 1–2 m away — at 1.5–2 m there are no losses; the signal strength is in the event log (“RSSI=… dBm”, −40…−70 is fine) |
 | In Home Assistant the clock entities become “unavailable” for a few seconds every few minutes | before 1.1.4 the clock dropped the MQTT connection at every time sync — please update |
+| The Home Assistant log shows “Value error … text.…_set_date … does not match expected pattern” at every start | before 1.1.5 the clock published an empty “Set date” — please update (right after the update the error may appear once more while HA reads the old retained value) |
 
 ## Display
 

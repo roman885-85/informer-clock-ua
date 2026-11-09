@@ -8,10 +8,10 @@
 **Independent firmware for the ESP32 + MAX7219 LED-matrix information clock — with full source code**, based on the
 **Clock Informer 2.7.1** firmware by **Semen_p**.
 
-> **Release 1.1.4** is tested on a clock (ESP32, two floors of 4 MAX7219 matrices): Wi-Fi updates, the web
+> **Release 1.1.5** is tested on a clock (ESP32, two floors of 4 MAX7219 matrices): Wi-Fi updates, the web
 > interface under load, hours of work without losing internet, getting back online after the router disappears and
 > after a Wi-Fi “hang”, a display without brightness flashes, news without a cut-off tail, 2.5 days without false guard
-> restarts, MQTT (Home Assistant) without disconnects.
+> restarts, MQTT (Home Assistant) without disconnects and without log errors.
 > Please update from 1.0.0 — it loses internet after ~1.5 h of work. Please report problems in [Issues](https://github.com/roman885-85/informer-clock-ua/issues).
 
 ## Why this project exists
