@@ -573,7 +573,20 @@ void mqtt_ha_publish_state() {
   mqtt_topic(t, String("t_m"));
   mqttClient.publish(t.c_str(), 0, true, g_c344c.c_str(), 0, false, 0);
   mqtt_topic(t, String("d_m"));
-  mqttClient.publish(t.c_str(), 0, true, g_c3440.c_str(), 0, false, 0);
+  {
+    // 1.1.5: «Set date» без значення годинник публікував порожнім рядком — Home Assistant відкидає його за шаблоном дати
+    // (помилка в журналі HA на кожному запуску HA й підключенні годинника). Не задано — сьогоднішня дата годинника;
+    // час ще невідомий — не публікуємо.
+    // EN: an empty "Set date" state failed Home Assistant's date pattern (an error on every HA start and clock reconnect).
+    // When unset, publish the clock's current date; skip while the time is still unknown.
+    String dm = g_c3440;
+    if (dm.length() != 10 && year() >= 2024) {
+      char b[11];
+      snprintf(b, sizeof b, "%04d-%02d-%02d", year(), month(), day());
+      dm = String(b);
+    }
+    if (dm.length() == 10) mqttClient.publish(t.c_str(), 0, true, dm.c_str(), 0, false, 0);
+  }
   yield();
   for (int i = 0; i < 7; i++) {
     const char *k = HA_NUM[i].key;
