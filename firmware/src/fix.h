@@ -19,7 +19,7 @@ extern bool g_fx_dns_on;                // DNS captive-порталу запущ
 extern uint32_t g_fx_gate;              // коли востаннє виконано блок мережевих задач
 
 // ---------- час (netfix.cpp, timefix.cpp) ----------
-extern volatile uint32_t g_fx_sntp_n;   // скільки разів SNTP встановив системний час
+extern volatile uint32_t g_fx_sntp_n;   // скільки разів хтось ставив системний час (settimeofday; з 1.1.6 — лише fx_ntp_sync)
 bool fx_time_known();                   // TimeLib має справжній час (не 1970 р.)
 void fx_time_boot();                    // після перезапуску — системний час ESP32 до першої синхронізації
 int32_t fx_tz_offset();                 // пояс tz, с
@@ -29,6 +29,31 @@ extern bool g_fx_off_known;             // TimeLib ставили в місце�
 extern uint32_t g_fx_dst_t;             // коли востаннє перевіряли перехід літнього часу
 void fx_time_offset_set();              // TimeLib щойно поставлено в місцевому часі з поточними tz/sumT
 void fx_time_offset_apply();            // tz/sumT змінились або настав перехід — перерахувати показаний час
+// 1.1.6: поставити показаний (місцевий) час; зміна більш ніж на хвилину — рядок «[TIME] джерело: було -> стало» у журнал подій
+void fx_time_set_local(time_t t, const String &src);
+String fx_time_text(time_t t);          // «ГГ:ХХ:СС ДД.ММ.РРРР» без спільного кешу TimeLib (будь-яка задача)
+
+// ---------- NTP (ntp.cpp, 1.1.6) ----------
+#define FX_NTP_REPLY_MS 1500            // чекати відповідь одного сервера
+#define FX_NTP_BUDGET_MS 5000UL         // нового сервера після стількох мс від початку синхронізації не питаємо (у автора — 5 с)
+#define FX_NTP_JUMP_S 60                // відомий час змінюється більш ніж на стільки — спершу другий, незалежний сервер
+#define FX_NTP_AGREE_S 5                // два сервери (чи два запити поспіль) «згодні»
+#define FX_NTP_MAXDIST_MS 1500          // відстань до еталона сервера (root delay/2 + root dispersion) — як MAXDIST у ntpd
+#define FX_NTP_REF_AGE_S 86400          // еталон сервера не оновлювався довше доби — сервер втратив синхронізацію
+struct FxNtpReply {
+  const char *host;                     // ім'я сервера
+  const char *why;                      // чому відкинуто чи не вдалось ("" — придатна)
+  uint32_t ip;                          // адреса (як у IPAddress)
+  uint32_t utc, us;                     // час сервера: секунди Unix (UTC) і мікросекунди
+  uint32_t ms;                          // millis() у мить приходу відповіді
+  uint32_t rtt_ms, dist_ms;             // коло запит-відповідь; відстань до еталона сервера
+  uint16_t foreign;                     // пакетів не на цей запит (чужа адреса, чужа мітка) — відкинуто
+  uint8_t li, vn, mode, stratum;
+  bool has_time;                        // у відповіді є час (не KoD, transmit ≠ 0) — є з чим порівняти годинник
+};
+int8_t fx_ntp_parse(const uint8_t *p, size_t n, const uint8_t *req_tx, FxNtpReply &out);   // -1 чужий, 0 відкинуто, 1 придатна
+int8_t fx_ntp_sync(const char *srv, uint32_t &utc, String &src);   // 1 — час прийнято (utc), системний поставлено; 0 — відкинуто; -1 — тиша
+void fx_ntp_diag(String &out);          // остання прийнята й остання відкинута відповідь (/content?ntp_diag=)
 
 // ---------- голос щогодини (sound.cpp, timefix.cpp) ----------
 extern bool g_fx_voice_init;            // автомат оголошення підготовлено

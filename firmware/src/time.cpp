@@ -14,43 +14,35 @@ static String rtc_stamp(const DateTime &rt) {
   return t + ":" + String(ss / 10) + String((uint32_t)ss % 10) + " - " + two(dd) + "." + two(mm) + "." + String(yo + 2000);
 }
 
-// @400db554: запит NTP (configTime) і очікування до 5 с.
-// Виправлено: автор вважав «отриманим від NTP» будь-який системний час після 2021 р. — а системний час переживає
+// @400db554: запит NTP; g_c3464 — місцевий час (секунди), g_c22b5 = 1 — отримано.
+// Виправлено (1.1.0): автор вважав «отриманим від NTP» будь-який системний час після 2021 р. — а системний час переживає
 // програмний перезапуск (іде від неточного RC-генератора RTC), тож після кожного перезапуску годинник одразу брав
 // старий час за синхронізований і до наступної синхронізації (t_syn хв) показував його з похибкою; потім — стрибок
-// (скарги користувачів: «время прыгает на 10–20 минут»). Тепер чекаємо свіжої відповіді сервера (лічильник
-// встановлень часу SNTP, netfix.cpp).
+// (скарги користувачів: «время прыгает на 10–20 минут»).
+// Виправлено ще раз (1.1.6): виправлення 1.1.0 чекало свіжої відповіді лише на першому проході — далі
+// t = time(nullptr) у кінці кожного проходу, і через 100 мс бралось системне, не свіже; а системний час ставив клієнт
+// SNTP ядра (configTime), що приймає будь-яку відповідь без перевірок. 14.11.2026 так годинник став на 12 год 24 хв
+// назад. Тепер — власний клієнт NTP з перевірками відповіді й другим сервером для стрибків (ntp.cpp); SNTP ядра не
+// запускається.
+static String s_ntp_src;                           // звідки прийнято час — для рядка журналу подій (sys_sync_ntp)
 void ntp_request() {
-  float f = g_c3430 * 3600.0;
-  int dst = fx_dst_offset(time(nullptr));          // виправлено: sumT 2 — авто (timefix.cpp)
-  int off = (int)f;
   const char *srv = "pool.ntp.org";
   if (g_c3434.length() != 0) srv = g_c3434.c_str();
   g_c22b5 = 0;
   g_c3464 = 0;
-  uint32_t n0 = g_fx_sntp_n;
-  configTime(dst + off, 0, srv, "time.nist.gov", 0);
-  time_t t = 0;
-  uint32_t t0 = millis();
-  while (true) {
-    if (g_fx_sntp_n != n0) t = time(nullptr);
-    if (0x5fee65ff < t) {
-      dst = fx_dst_offset(t);
-      g_c3464 = t + dst + off;
-      g_fx_off_applied = dst + off;
-      g_fx_off_known = true;
-      dbg_ws_print(String("NTP server - data received, unix=") + String((long)g_c3464, 10));
-      g_c22b5 = 1;
-      g_c2eb4 = 1;
-      return;
-    }
-    if (millis() - t0 > 4999 || g_c2d29 == 0 || g_c3319 != 0) {
-      dbg_ws_print(String("NTP server error"));
-      return;
-    }
-    delay(100);
-    t = time(nullptr);
+  uint32_t utc;
+  int8_t r = (g_c2d29 == 0 || g_c3319 != 0) ? -1 : fx_ntp_sync(srv, utc, s_ntp_src);
+  if (r != 1) {
+    dbg_ws_print(String(r < 0 ? "NTP server error" : "NTP        : reply rejected, time kept"));
+    return;
   }
+  int32_t off = fx_tz_offset() + fx_dst_offset((time_t)utc);   // sumT 2 — авто (timefix.cpp)
+  g_c3464 = utc + off;
+  g_fx_off_applied = off;
+  g_fx_off_known = true;
+  dbg_ws_print(String("NTP server - data received, unix=") + String((long)g_c3464, 10));
+  g_c22b5 = 1;
+  g_c2eb4 = 1;
 }
 // @400db6e8 / @400db7c4 / @400db890: день, місяць (з нулем), рік (2 цифри)
 void day2_text(String &out) {
@@ -91,7 +83,12 @@ void manual_time_set() {
   manual_time_print();
   g_c22d0 = g_c344c;
   g_c22c4 = g_c3440;
-  setTime(g_c22c0, g_c22bf, 0, g_c22be, g_c22bd, g_c22b8);
+  {
+    tmElements_t e;                                  // 1.1.6: без спільного кешу TimeLib (кличеться й з веб-сервера)
+    e.Second = 0; e.Minute = g_c22bf; e.Hour = g_c22c0; e.Day = g_c22be; e.Month = g_c22bd;
+    e.Year = g_c22b8 > 99 ? g_c22b8 - 1970 : g_c22b8 + 30;   // як setTime(год, хв, с, д, м, р) TimeLib
+    fx_time_set_local(makeTime(e), String("manual (t_m/d_m)"));   // стрибок понад хвилину — у журнал подій
+  }
   fx_time_offset_set();                              // нове: подальші переходи літнього часу — від цього часу
   if (g_c3468 != 0) {
     DateTime d(g_c22b8 & 0xffff, g_c22bd, g_c22be, g_c22c0, g_c22bf, 0);
@@ -173,7 +170,7 @@ void rtc_lost_power_sync(int32_t interval) {
       if ((uint16_t)(yo - 2) < 0x61 && rt.hour() < 0x18) {
         if (g_c22bc == 1) {
           dbg_ws_print(String("=== SYS synced from RTC (offline) ==="));
-          setTime(rt.hour(), rt.minute(), rt.second(), rt.day(), rt.month(), yo + 2000);
+          fx_time_set_local(rt.unixtime(), String("RTC (offline)"));   // 1.1.6: стрибок понад хвилину — у журнал подій
           g_c18a4 = interval * 60000;
         } else g_c18a4 = 0;
       }
@@ -193,14 +190,18 @@ void sys_sync_ntp() {
   // AsyncTCP і запиту NTP не заважає — з'єднання не чіпаємо.
   ntp_request();
   if (g_c22b5 == 0) return;
-  g_c3458 = year(g_c3464);
-  g_c345c = month(g_c3464);
-  g_c345d = day(g_c3464);
-  g_c345e = hour(g_c3464);
-  g_c345f = minute(g_c3464);
-  g_c3460 = second(g_c3464);
+  // 1.1.6: поля — через власну структуру, час — setTime(time_t). У автора year(t)…second(t) і setTime(год, хв, …)
+  // ішли через спільний кеш TimeLib (tm), куди паралельно пише веб-сервер (потік AsyncTCP: /content?sys_time= тощо).
+  tmElements_t e;
+  breakTime((time_t)g_c3464, e);
+  g_c3458 = e.Year + 1970;
+  g_c345c = e.Month;
+  g_c345d = e.Day;
+  g_c345e = e.Hour;
+  g_c345f = e.Minute;
+  g_c3460 = e.Second;
   dbg_ws_print(String("=== SYS synced from NTP ==="));
-  setTime(g_c345e, g_c345f, g_c3460, g_c345d, g_c345c, g_c3458);
+  fx_time_set_local((time_t)g_c3464, s_ntp_src);  // стрибок понад хвилину — у журнал подій
   if (g_c3468 != 0) rtc_lost_power_sync(1);
   rtc_sync_from_ntp();
   g_c33fc = ntp_stamp();
@@ -227,7 +228,7 @@ void rtc_detect_sync() {
       dbg_ws_print(String("=== RTC connected ==="));
       uint8_t yo = rt.year() - 2000;
       if ((uint16_t)(yo - 2) < 0x61 && rt.hour() < 0x18 && (g_c3319 != 0 || g_c2d29 == 0)) {
-        setTime(rt.hour(), rt.minute(), rt.second(), rt.day(), rt.month(), yo + 2000);
+        fx_time_set_local(rt.unixtime(), String("RTC"));   // 1.1.6: стрибок понад хвилину — у журнал подій
         g_c3408 = rtc_stamp(rt);
         dbg_ws_print(String("=== SYS synced from RTC ==="));
       }

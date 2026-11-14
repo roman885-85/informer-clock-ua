@@ -35,6 +35,21 @@
 
 #include "TimeLib.h"
 
+// Informer Clock UA (2026-11-14): замок для двох задач (FORK.md). У годиннику now() кличуть головний цикл і потік
+// AsyncTCP (веб-сервер, журнал подій з MQTT); без замка now() міг додати ≈4 294 967 с (49,7 доби), а hour(t)… —
+// повернути поле іншого часу (спільний кеш tm). EN: a lock for two tasks (see FORK.md).
+#ifndef TL_LOCK
+#if defined(ESP32)
+#include <freertos/FreeRTOS.h>
+static portMUX_TYPE tl_mux = portMUX_INITIALIZER_UNLOCKED;
+#define TL_LOCK() portENTER_CRITICAL(&tl_mux)
+#define TL_UNLOCK() portEXIT_CRITICAL(&tl_mux)
+#else
+#define TL_LOCK()
+#define TL_UNLOCK()
+#endif
+#endif
+
 static tmElements_t tm;          // a cache of time elements
 static time_t cacheTime;   // the time the cache was updated
 static uint32_t syncInterval = 300;  // time sync will be attempted after this many seconds
@@ -51,8 +66,11 @@ int hour() { // the hour now
 }
 
 int hour(time_t t) { // the hour for the given time
+  TL_LOCK();
   refreshCache(t);
-  return tm.Hour;  
+  int v = tm.Hour;
+  TL_UNLOCK();
+  return v;
 }
 
 int hourFormat12() { // the hour now in 12 hour format
@@ -60,13 +78,13 @@ int hourFormat12() { // the hour now in 12 hour format
 }
 
 int hourFormat12(time_t t) { // the hour for the given time in 12 hour format
-  refreshCache(t);
-  if( tm.Hour == 0 )
+  int h = hour(t);
+  if( h == 0 )
     return 12; // 12 midnight
-  else if( tm.Hour  > 12)
-    return tm.Hour - 12 ;
+  else if( h  > 12)
+    return h - 12 ;
   else
-    return tm.Hour ;
+    return h ;
 }
 
 uint8_t isAM() { // returns true if time now is AM
@@ -90,8 +108,11 @@ int minute() {
 }
 
 int minute(time_t t) { // the minute for the given time
+  TL_LOCK();
   refreshCache(t);
-  return tm.Minute;  
+  int v = tm.Minute;
+  TL_UNLOCK();
+  return v;
 }
 
 int second() {
@@ -99,8 +120,11 @@ int second() {
 }
 
 int second(time_t t) {  // the second for the given time
+  TL_LOCK();
   refreshCache(t);
-  return tm.Second;
+  int v = tm.Second;
+  TL_UNLOCK();
+  return v;
 }
 
 int day(){
@@ -108,8 +132,11 @@ int day(){
 }
 
 int day(time_t t) { // the day for the given time (0-6)
+  TL_LOCK();
   refreshCache(t);
-  return tm.Day;
+  int v = tm.Day;
+  TL_UNLOCK();
+  return v;
 }
 
 int weekday() {   // Sunday is day 1
@@ -117,8 +144,11 @@ int weekday() {   // Sunday is day 1
 }
 
 int weekday(time_t t) {
+  TL_LOCK();
   refreshCache(t);
-  return tm.Wday;
+  int v = tm.Wday;
+  TL_UNLOCK();
+  return v;
 }
    
 int month(){
@@ -126,8 +156,11 @@ int month(){
 }
 
 int month(time_t t) {  // the month for the given time
+  TL_LOCK();
   refreshCache(t);
-  return tm.Month;
+  int v = tm.Month;
+  TL_UNLOCK();
+  return v;
 }
 
 int year() {  // as in Processing, the full four digit year: (2009, 2010 etc) 
@@ -135,8 +168,11 @@ int year() {  // as in Processing, the full four digit year: (2009, 2010 etc)
 }
 
 int year(time_t t) { // the year for the given time
+  TL_LOCK();
   refreshCache(t);
-  return tmYearToCalendar(tm.Year);
+  int v = tmYearToCalendar(tm.Year);
+  TL_UNLOCK();
+  return v;
 }
 
 /*============================================================================*/	
@@ -249,26 +285,31 @@ time_t sysUnsyncedTime = 0; // the time sysTime unadjusted by sync
 
 time_t now() {
 	// calculate number of seconds passed since last call to now()
-  while (millis() - prevMillis >= 1000) {
-		// millis() and prevMillis are both unsigned ints thus the subtraction will always be the absolute value of the difference
+  // Informer Clock UA: під замком і зі знаком — без «від'ємної» різниці (≈49,7 доби), коли інша задача щойно
+  // посунула prevMillis (FORK.md)
+  TL_LOCK();
+  while ((int32_t)(millis() - prevMillis) >= 1000) {
     sysTime++;
     prevMillis += 1000;	
 #ifdef TIME_DRIFT_INFO
     sysUnsyncedTime++; // this can be compared to the synced time to measure long term drift     
 #endif
   }
-  if (nextSyncTime <= sysTime) {
-    if (getTimePtr != 0) {
-      time_t t = getTimePtr();
-      if (t != 0) {
-        setTime(t);
-      } else {
-        nextSyncTime = sysTime + syncInterval;
-        Status = (Status == timeNotSet) ?  timeNotSet : timeNeedsSync;
-      }
+  uint32_t st = sysTime;
+  bool sync = nextSyncTime <= sysTime && getTimePtr != 0;
+  TL_UNLOCK();
+  if (sync) {
+    time_t t = getTimePtr();                 // поза замком: джерело часу може чекати мережу
+    if (t != 0) {
+      setTime(t);
+      return t;
     }
-  }  
-  return (time_t)sysTime;
+    TL_LOCK();
+    nextSyncTime = sysTime + syncInterval;
+    Status = (Status == timeNotSet) ?  timeNotSet : timeNeedsSync;
+    TL_UNLOCK();
+  }
+  return (time_t)st;
 }
 
 void setTime(time_t t) { 
@@ -277,10 +318,12 @@ void setTime(time_t t) {
    sysUnsyncedTime = t;   // store the time of the first call to set a valid Time   
 #endif
 
+  TL_LOCK();
   sysTime = (uint32_t)t;  
   nextSyncTime = (uint32_t)t + syncInterval;
   Status = timeSet;
   prevMillis = millis();  // restart counting from now (thanks to Korman for this fix)
+  TL_UNLOCK();
 } 
 
 void setTime(int hr,int min,int sec,int dy, int mnth, int yr){
@@ -290,17 +333,20 @@ void setTime(int hr,int min,int sec,int dy, int mnth, int yr){
       yr = yr - 1970;
   else
       yr += 30;  
-  tm.Year = yr;
-  tm.Month = mnth;
-  tm.Day = dy;
-  tm.Hour = hr;
-  tm.Minute = min;
-  tm.Second = sec;
-  setTime(makeTime(tm));
+  tmElements_t e;                            // Informer Clock UA: власна структура, не спільний кеш tm (FORK.md)
+  e.Year = yr;
+  e.Month = mnth;
+  e.Day = dy;
+  e.Hour = hr;
+  e.Minute = min;
+  e.Second = sec;
+  setTime(makeTime(e));
 }
 
 void adjustTime(long adjustment) {
+  TL_LOCK();
   sysTime += adjustment;
+  TL_UNLOCK();
 }
 
 // indicates if time has been set and recently synchronized

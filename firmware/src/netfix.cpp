@@ -49,8 +49,9 @@ extern "C" int __wrap_lwip_connect(int s, const struct sockaddr *name, socklen_t
   return r;
 }
 
-// Лічильник встановлень системного часу: його кличе лише клієнт SNTP lwIP (lwipopts.h: SNTP_SET_SYSTEM_TIME_US) —
-// так ntp_request() відрізняє свіжу відповідь сервера від старого системного часу.
+// Лічильник встановлень системного часу. До 1.1.5 його кликав лише клієнт SNTP lwIP (lwipopts.h: SNTP_SET_SYSTEM_TIME_US).
+// З 1.1.6 SNTP ядра не запускається, системний час ставить лише fx_ntp_sync() (ntp.cpp) після перевірок; будь-яке
+// інше встановлення лічильник покаже, і fx_ntp_sync() запише його в журнал подій.
 volatile uint32_t g_fx_sntp_n;
 extern "C" int __real_settimeofday(const struct timeval *tv, const struct timezone *tz);
 extern "C" int __wrap_settimeofday(const struct timeval *tv, const struct timezone *tz) {

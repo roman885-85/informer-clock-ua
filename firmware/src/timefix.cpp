@@ -4,6 +4,30 @@
 
 bool fx_time_known() { return year() >= 2021; }
 
+// «ГГ:ХХ:СС ДД.ММ.РРРР». breakTime — у власну структуру: hour(t)/day(t)… TimeLib пишуть спільний кеш tm, і з двох
+// задач (цикл і AsyncTCP) поля могли б змішатись.
+String fx_time_text(time_t t) {
+  tmElements_t e;
+  breakTime(t, e);
+  char b[24];
+  snprintf(b, sizeof b, "%02u:%02u:%02u %02u.%02u.%04u", e.Hour, e.Minute, e.Second, e.Day, e.Month, (unsigned)e.Year + 1970);
+  return String(b);
+}
+
+// Нове (1.1.6): усі встановлення показаного часу (NTP, вручну, RTC) — через цю функцію. Зміна відомого часу більш ніж
+// на хвилину — рядок у журнал подій: звідки, було → стало. 14.11.2026 годинник показував час на 12 год 24 хв назад, а в
+// журналі подій не лишилось жодного сліду, коли й звідки він узявся.
+void fx_time_set_local(time_t t, const String &src) {
+  bool known = fx_time_known();
+  time_t was = now();
+  setTime(t);
+  if (!known) return;                                // до першого встановлення (1970 р.) — не стрибок
+  int32_t d = (int32_t)(t - was);
+  if (d > 60 || d < -60)
+    evlog_write(String("[TIME] ") + src + ": " + fx_time_text(was) + " -> " + fx_time_text(t) + " (" + (d > 0 ? "+" : "") +
+                String((long)d) + " s)");
+}
+
 // Системний час ESP32 переживає програмний перезапуск (лічильник RTC), а TimeLib — ні: у автора до першої вдалої
 // синхронізації годинник жив у 00:00 1 січня 1970 р. Якщо перезапуск стався вночі без Wi-Fi (роутер перезавантажується
 // чи вимикає Wi-Fi за розкладом), табло за нічним розкладом (напр. 00:00–05:00) гасло ще на 5 год, а годинник
@@ -62,9 +86,9 @@ void fx_time_offset_apply() {
   time_t utc = now() - g_fx_off_applied;
   int32_t off = fx_tz_offset() + fx_dst_offset(utc);
   if (off == g_fx_off_applied) return;
-  setTime(utc + off);
-  dbg_ws_print(String("Time        : offset ") + String((long)g_fx_off_applied / 60) + String(" -> ") + String((long)off / 60) +
-               String(" min (time zone / summer time)"));
-  evlog_write(String("[TIME] offset ") + String((long)off / 60) + String(" min (time zone / summer time)"));
+  String why = String("offset ") + String((long)g_fx_off_applied / 60) + String(" -> ") + String((long)off / 60) +
+               String(" min (time zone / summer time)");
+  dbg_ws_print(String("Time        : ") + why);
   g_fx_off_applied = off;
+  fx_time_set_local(utc + off, why);                 // 1.1.6: у журналі подій — і було -> стало (раніше лише новий зсув)
 }
