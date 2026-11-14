@@ -64,6 +64,8 @@ int8_t fx_ntp_parse(const uint8_t *p, size_t n, const uint8_t *req_tx, FxNtpRepl
 // ---------- мережа ----------
 static uint32_t s_foreign_log_ms;                       // коли востаннє писали в журнал подій про чужі пакети
 // Запит одному серверу. 1 — придатна відповідь (r), 0 — сервер відповів, але відкинуто (r.why), -1 — немає відповіді.
+// avoid_ip ≠ 0 — друга думка: сервер з тієї самої мережі /16, що й перший, не питаємо — це не незалежна перевірка
+// (14.11, на годиннику: пул дав 162.159.200.123, а «другим» став time.cloudflare.com = 162.159.200.1 — той самий Cloudflare).
 static int8_t ntp_ask(const char *host, uint32_t avoid_ip, FxNtpReply &r) {
   memset(&r, 0, sizeof r);
   r.why = "";
@@ -71,7 +73,7 @@ static int8_t ntp_ask(const char *host, uint32_t avoid_ip, FxNtpReply &r) {
   IPAddress ip;
   if (!WiFi.hostByName(host, ip)) { r.why = "DNS"; return -1; }
   r.ip = (uint32_t)ip;
-  if (avoid_ip != 0 && r.ip == avoid_ip) { r.why = "same server"; return -1; }
+  if (avoid_ip != 0 && (r.ip & 0xffff) == (avoid_ip & 0xffff)) { r.why = "same network as the first server"; return -1; }   // перші два октети
   int s = lwip_socket(AF_INET, SOCK_DGRAM, 0);
   if (s < 0) { r.why = "socket"; return -1; }
   uint8_t req[48], buf[68];

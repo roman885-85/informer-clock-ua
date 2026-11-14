@@ -34,7 +34,8 @@ static const uint32_t G = sim_ip(198, 51, 100, 10);   // справний сер
 static const uint32_t B = sim_ip(192, 0, 2, 66);      // сервер пулу з хибним годинником
 static const uint32_t D = sim_ip(198, 51, 100, 20);   // мовчить
 static const uint32_t CF = sim_ip(203, 0, 113, 1);    // «time.cloudflare.com»
-static const uint32_t GG = sim_ip(203, 0, 113, 2);    // «time.google.com»
+static const uint32_t GG = sim_ip(192, 0, 2, 200);    // «time.google.com» (інша мережа /16, ніж «Cloudflare»)
+static const uint32_t CF2 = sim_ip(203, 0, 113, 123); // адреса «Cloudflare», яку роздає пул (як 162.159.200.123 у житті)
 static const uint32_t P1 = sim_ip(198, 51, 100, 7);   // «1.pool.ntp.org»
 
 static void world_std(int32_t bad_off, uint8_t bad_li, uint8_t bad_st, uint32_t rtt) {
@@ -208,6 +209,18 @@ static void s_bad_forever() {
   check(clock_off() >= -1 && clock_off() <= 1, "час правильний (щоразу від другого сервера)");
   check(n == 2, "у журналі подій 2 рядки за 12 год (о 00:10 і через 6 год)");
 }
+// пул дав адресу «Cloudflare», і вона бреше; time.cloudflare.com (та сама мережа /16) бреше так само — другим має
+// стати time.google.com, а не «Cloudflare» вдруге (14.11 на годиннику: 162.159.200.123 і 162.159.200.1)
+static void s_same_operator() {
+  boot(loc(18, 14, 44));
+  world_std(0, 0, 2, 30);
+  SimSrv bad; bad.off_s = -44622; sim_server(CF2, bad); sim_server(CF, bad);
+  run_to(loc(18, 24, 40));
+  sim_dns("pool.ntp.org", CF2);
+  run_to(loc(18, 24, 50)); show("18:24:50");
+  check(clock_off() >= -1 && clock_off() <= 1, "час правильний: «підтвердження» з тієї самої мережі не взято");
+  check(evlog_has("second server time.google.com 192.0.2.200 agrees with the clock"), "другий — time.google.com (інша мережа)");
+}
 // встановлення вручну й назад NTP
 static void s_manual() {
   boot(loc(18, 14, 44));
@@ -319,6 +332,7 @@ int main(int argc, char **argv) {
   run("увімкнення живлення без часу", s_power_on);
   run("другого сервера немає", s_no_second);
   run("основний сервер зламаний назавжди: журнал подій не переповнюється", s_bad_forever);
+  run("пул дав адресу Cloudflare, Cloudflare бреше: друга думка — з іншої мережі", s_same_operator);
   run("встановлення вручну, потім NTP", s_manual);
   run("зміна поясу 2 -> 3", s_tz);
   run("доба звичайної роботи", s_day);
