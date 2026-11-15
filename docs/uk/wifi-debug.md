@@ -66,7 +66,7 @@ PLATFORMIO_UPLOAD_FLAGS="--auth=<пароль>" pio run -e clock -t upload --upl
 
 ```sh
 ~/.platformio/packages/toolchain-xtensa32/bin/xtensa-esp32-elf-addr2line -pfiaC \
-  -e informer-clock-ua-esp32-1.1.5.elf 0x400d1234 0x400d5678
+  -e informer-clock-ua-esp32-1.1.6.elf 0x400d1234 0x400d5678
 ```
 
 Якщо `loop()` завис довше 3 хв, сторож перезапускає годинник і пише `[BOOT] loop guard: loop() stuck > 180 s`.
@@ -135,6 +135,20 @@ PLATFORMIO_UPLOAD_FLAGS="--auth=<пароль>" pio run -e clock -t upload --upl
   — обробка подій стає на N с (до 3600), годинник примусово перепідключається; за ~8 с має бути `Restart: Wi-Fi
   events not delivered…` і одразу `Connected`. `http://<адреса>/post?wdbg_evt_block=N` — те саме з обривом зв'язку;
   за ~1 хв — `Restart: status says connected, driver is not…`.
+
+## Час і NTP (з 1.1.6)
+
+Працює й без налагодження по Wi-Fi.
+
+- `http://<адреса>/content?ntp_diag=` — остання прийнята відповідь NTP (`ok:` — новий місцевий час, сервер, адреса,
+  страта, коло запит-відповідь; `2nd server` — час узято від другого сервера) і остання відкинута (`rejected:` — коли,
+  сервер, адреса, LI, страта, відстань до еталона, коло, причина й різниця «сервер − годинник»).
+- Журнал подій: `[TIME] NTP …: було -> стало (±N s)` — синхронізація змінила час більш ніж на хвилину
+  (`confirmed by …` — хто підтвердив стрибок); `[TIME] NTP rejected …` — відкинута відповідь, що змінила б час більш
+  ніж на хвилину; `[TIME] manual …`, `[TIME] RTC …`, `[TIME] offset …` — ручне встановлення, DS3231, зміна пояса чи
+  літнього часу; `[TIME] … stray packet(s) …` — на сокет NTP прийшли чужі пакети (не частіше разу на годину).
+- Перевірка на комп'ютері — імітатор зі справжнім кодом `ntp.cpp` і серверами, що брешуть, мовчать чи шлють чужі
+  пакети: `sh tools/sim/ntpsim/run.sh` ([збирання](building.md)).
 
 ## Безпека
 

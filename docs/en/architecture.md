@@ -19,7 +19,7 @@ for this project. The code in this repository was reconstructed from the 2.7.1 m
 - the reconstructed copy was tested on a real clock.
 
 The **`reconstructed-2.7.1`** tag is this copy with the original's behaviour (including its bugs). Everything changed
-after it is visible in the git history from that tag: `git diff reconstructed-2.7.1 v1.1.5`.
+after it is visible in the git history from that tag: `git diff reconstructed-2.7.1 v1.1.6`.
 
 ### Reading the code
 
@@ -56,21 +56,22 @@ after it is visible in the git history from that tag: `git diff reconstructed-2.
 | `g.cpp`, `g.h`, `objects.*`, `protos.h`, `fw.h`, `libs.h` | global variables and objects, prototypes | generated during the reconstruction |
 | `version.h` | name, version, repository addresses | **new** |
 | `fix.h` | declarations and constants of all fixes | **new** |
-| `netfix.cpp` | safe DNS, connect with timeout, SNTP counter | **new** |
+| `netfix.cpp` | safe DNS, connect with timeout, system time-set counter | **new** |
 | `guard.cpp` | main-loop watchdog | **new** |
 | `crash.cpp` | crash cause record | **new** |
 | `status.cpp` | start-up status on the display | **new** |
 | `bright.cpp` | smooth brightness | **new** |
 | `night.cpp` | night quiet | **new** |
-| `timefix.cpp` | time after restart, time zone and summer time | **new** |
+| `timefix.cpp` | time after restart, time zone and summer time; since 1.1.6 — every setting of the shown time and the `[TIME]` event-log lines | **new** |
 | `wdbg.cpp` | Wi-Fi debugging | **new** |
 | `dim.cpp` | smooth display brightness: a separate FreeRTOS task blends neighbouring MAX7219 levels | **new** (1.1.0) |
 | `bigslide.cpp` | upward rolling digits of the big clock face | **new** (1.1.0) |
 | `sockdiag.cpp` | lwIP socket ledger and census (diagnostics) | **new** (1.1.0) |
+| `ntp.cpp` | own NTP client: reply checks, fallback servers, a second server for time jumps, `ntp_diag` | **new** (1.1.6) |
 
 Libraries in `firmware/lib`: **MD_Parola 3.5.2** with the author's 10 effects and **MD_MAX72XX 3.2.3** with SPI lock hooks
-for smooth brightness, **ESPAsyncWebServer-esphome 2.1.0** and **AsyncTCP-esphome 1.2.2** with fixes (since 1.1.0) — each
-folder has a `FORK.md` listing the changes; `MHZ19_uart`, `Base64`, `MD5` — reconstructed from machine code (they are
+for smooth brightness, **ESPAsyncWebServer-esphome 2.1.0** and **AsyncTCP-esphome 1.2.2** with fixes (since 1.1.0), **Time (TimeLib)
+1.6.1** with a lock for two tasks (since 1.1.6) — each folder has a `FORK.md` listing the changes; `MHZ19_uart`, `Base64`, `MD5` — reconstructed from machine code (they are
 not in the PlatformIO registry). The rest are `lib_deps` in `platformio.ini` with exact versions.
 
 ## Fixes to 2.7.1 bugs
@@ -84,7 +85,7 @@ not in the PlatformIO registry). The rest are `lib_deps` in `platformio.ini` wit
 | The weather/news HTTPS client connected without a timeout — the loop stalled for minutes | connect for at most 10 s (`--wrap` `lwip_connect`) | `netfix.cpp` |
 | The whole service block waited for a news item to finish scrolling (2–4.5 min): brightness, night, morning, network recovery | fast tasks run every loop; network tasks after the animation, but no later than 5 min | `core.cpp` |
 | `parsePacket()` every loop without a DNS server: ~180 lines/s on Serial, jerky animation, fragmented memory | the captive-portal DNS runs only when it is started | `core.cpp` |
-| Any system time after 2021 was taken as “from NTP”: after a restart — stale time, then a jump | wait for a fresh NTP reply (SNTP counter, `--wrap` `settimeofday`) | `time.cpp`, `netfix.cpp` |
+| Any system time after 2021 was taken as “from NTP”: after a restart — stale time, then a jump | wait for a fresh NTP reply (SNTP counter, `--wrap` `settimeofday`); since 1.1.6 — an own NTP client (below) | `time.cpp`, `netfix.cpp` |
 | Time zone and summer time were applied only at sync time; the “Summer time” switch “did nothing” | changes apply immediately; new “Auto” mode (EU rules) | `timefix.cpp` |
 | Hourly voice: the first announcement was “eaten”, “Now” without the hour, announcements at random minutes; “Voice test” played a random hour | announcements only at the top of the hour and with a known time; the test announces the current time | `sound.cpp` |
 | An alarm at night rang with the display off | the display turns on while ringing | `sound.cpp` |
@@ -117,6 +118,14 @@ not in the PlatformIO registry). The rest are `lib_deps` in `platformio.ini` wit
 | The clock lost the router while the core's Wi-Fi event handling (the `network_event` task) had stopped — `WiFi.status()` still said “connected”: a forced re-association every 6 min did not help, the 1.1.1 restart (the “cycle exhausted” branch) never fired, and the clock stayed off the network until a power cycle | an event watchdog: after a forced re-association (WIFI_OFF → STA) events must arrive within 8 s; “connected” while the driver is not associated — for no longer than a minute; the router is silent and there has been no GOT_IP since the previous re-association — in all three cases an event-log record with the event handling state and a restart. Only the event task is counted: the 1.0.4 core calls WIFI_READY synchronously from the main loop. `/post?wdbg_evt_reassoc=N`, `/post?wdbg_evt_block=N` simulate it for testing | `wifi.cpp`, `web.cpp` |
 | `ESP.restart()` stops Wi-Fi first and, with event handling stopped, waited forever — the loop guard could not restart the clock for 3 min | before a planned restart and in the loop guard — the hardware RTC watchdog for 3 s (system reset, RTC memory survives) | `core.cpp`, `guard.cpp` |
 | After any software restart (update, button, /reboot, settings) the event log showed “loop was stalled in: …” — a hang that never happened (the loop stage in RTC memory was not cleared) | a planned restart clears the stage (`fx_restart_planned()`; ArduinoOTA and network updates too); the record stays for the loop guard and crashes | `core.cpp`, `wdbg.cpp`, `services.cpp` |
+
+## Fixed in 1.1.6
+
+| What it was | What it is now | Where |
+|---|---|---|
+| The time could go wrong by hours. The system time was set by the SNTP client of core 1.0.4 (lwIP, `SNTP_CHECK_RESPONSE 0`): it takes any mode-4 packet to its port — without checking the request stamp, LI = 3 or stratum 16. The core keeps a single server (`CONFIG_LWIP_DHCP_MAX_NTP_SERVERS 1`), so the author's second server `time.nist.gov` was never used. `ntp_request()` waited for a fresh reply only on the first pass, then took the system time after 100 ms. On 2026-11-14 a pool server (ua zone) served a time 12–24 h behind for several hours — the clock went 12 h 24 min back until the next sync | the core SNTP is not started (`configTime` is not called), only the own client `fx_ntp_sync()` sets the system time. The random request stamp must come back as originate, and the reply must come from the server's address and port. Rejected: mode ≠ 4, KoD (stratum 0), LI = 3, stratum > 15, version, zero time, “never synchronized” (reference = 0), root distance > 1.5 s (like MAXDIST in ntpd), a reference older than a day. If the main server (from the settings, `pool.ntp.org` by default) is silent or rejected — fallbacks `time.cloudflare.com`, `time.google.com`, `1.pool.ntp.org` (all within 5 s). A change of the known time by over 60 s — a second opinion from a server in another /16 network: it agrees (±5 s) — taken; the second agrees with the clock — the first is rejected; both differ — the time is kept; no second server — the jump is accepted only if the next sync repeats it (within an hour) | `ntp.cpp`, `time.cpp` |
+| A time change left no trace: on 11-14 the event log had no record of where the wrong time came from | every setting of the shown time goes through `fx_time_set_local()`: a change over a minute — `[TIME] source: was -> became (±N s)` (NTP, manual, DS3231, time zone or summer time); a rejected reply that would have changed the time by over a minute — `[TIME] NTP rejected …` (the same error ±5 min — at most once in 6 h); a system time set around the checks — `[TIME] system clock was set outside the NTP check`; `/content?ntp_diag=` — the last accepted and the last rejected reply | `timefix.cpp`, `ntp.cpp`, `web_content.cpp` |
+| TimeLib 1.6.1 is not made for two tasks, yet `now()` is called by the main loop and the AsyncTCP thread: the unsigned `millis() - prevMillis` could go negative (≈4.29 billion ms), and `now()` added ≈4,294,967 s — +49.7 days until the next sync; the shared `tm` cache could return a field of another time | the `lib/Time` fork: `now()`, `setTime()`, `adjustTime()` and the field reads are under a FreeRTOS spinlock, the difference is signed; reproduced and checked with the `tools/sim/timelibrace` simulator | `lib/Time` |
 
 ## Fixed in 1.1.5
 
@@ -177,7 +186,8 @@ original's check that “the update address must be unchanged”, which restarte
 address.
 
 Third-party services the firmware talks to (as in the original, according to the user's settings): NTP
-(`pool.ntp.org` by default), OpenWeatherMap, Weatherbit, Yandex Weather, GNews, NewsData, Frankfurter (rates),
+(`pool.ntp.org` by default; since 1.1.6 fallbacks and the second opinion for time jumps — `time.cloudflare.com`,
+`time.google.com`, `1.pool.ntp.org`), OpenWeatherMap, Weatherbit, Yandex Weather, GNews, NewsData, Frankfurter (rates),
 CoinGecko, YouTube Data API, narodmon.ru, rzhunemogu.ru, ip-api.com and api.ipify.org (IP geolocation), internet
 check — 8.8.8.8, 1.1.1.1, `www.msftconnecttest.com`.
 
@@ -190,7 +200,7 @@ of its weak spots are replaced at link time (`-Wl,--wrap=…` in `platformio.ini
 |---|---|
 | `WiFiGenericClass::hostByName` | DNS through the lwIP thread, waiting for the result |
 | `lwip_connect` | a blocking connect for at most `NET_CONNECT_TIMEOUT_S` |
-| `settimeofday` | SNTP time-set counter: “the time really arrived” |
+| `settimeofday` | system time-set counter; since 1.1.6 only `fx_ntp_sync()` sets the time, any other setting is an event-log line |
 | `xt_unhandled_exception`, `panicHandler` | crash cause record in RTC memory |
 | `log_printf` | core messages also go to the network log |
 | `lwip_socket`, `lwip_accept`, `lwip_close_r` | socket ledger (`sockdiag.cpp`) |

@@ -95,7 +95,13 @@ python3 tools/sim/mockclock.py --port 8791      # http://localhost:8791
 | `voicesim` | `sh tools/sim/voicesim/build.sh` | автомат голосу щогодини (`sound.cpp`) |
 | `slidesim` | `sh tools/sim/slidesim/run.sh` | «лишні точки» при зміні години на циферблаті зі зсувом цифр |
 | `wdbgsim` | `sh tools/sim/wdbgsim/build.sh`, потім запустити надрукований файл і `nc localhost 2323` | сетевий журнал (`wdbg.cpp`, порт 2323 замість 23) |
-| `dsttest` | `sh tools/sim/dsttest/build.sh` (після `pio run`: потрібна TimeLib) | дати переходу на літній час ЄС 2024–2031 |
+| `dsttest` | `sh tools/sim/dsttest/build.sh` | дати переходу на літній час ЄС 2024–2031 |
+| `dimsim` | `sh tools/sim/dimsim/run.sh` | плавну яскравість табло (`dim.cpp`, крок 1 мс) |
+| `bigslidesim` | `sh tools/sim/bigslidesim/run.sh` | перелистування цифр великого циферблата (`bigslide.cpp` з бібліотеками табло) |
+| `wsboxsim` | `sh tools/sim/wsboxsim/run.sh` | чергу повідомлень веб-інтерфейсу (`ws.cpp`) |
+| `newstail` | `sh tools/sim/newstail/run.sh` | обрізання хвоста новин GNews (`feeds.cpp`, справжній `String` ядра) |
+| `ntpsim` | `sh tools/sim/ntpsim/run.sh` | клієнт NTP (`ntp.cpp`, `time.cpp`, `timefix.cpp`): сервери, що брешуть (зокрема випадок 14.11.2026), мовчать, шлють чужі пакети; ті самі сценарії — і на коді 1.1.5 |
+| `timelibrace` | `sh tools/sim/timelibrace/run.sh` | гонку двох задач у TimeLib: оригінал 1.6.1 — стрибок на 49,7 доби, `lib/Time` — без стрибка |
 | `masktest` | `sh tools/sim/masktest/build.sh` | приховування паролів Wi-Fi у консолі (`ws.cpp`) |
 | `statusprev` | `python3 tools/sim/statusprev/preview.py 1 out.gif --rows 2` | як виглядає стан запуску на табло (GIF) |
 | `status_icons.py` | `python3 tools/sim/status_icons.py --png icons.png` | кадри значків стану запуску |

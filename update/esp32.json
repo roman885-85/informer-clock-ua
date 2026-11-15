@@ -1,9 +1,9 @@
 {
-  "ver": "1.1.5",
-  "date": "2026-11-09",
-  "bin": "https://raw.githubusercontent.com/roman885-85/informer-clock-ua/v1.1.5/docs/firmware/informer-clock-ua-esp32.bin",
-  "size": 1824000,
-  "md5": "f196b710017653d5afa099548ebd17ae",
-  "sha256": "ccb14bcf607d5181333f7dfafebb38a37a1de498e0095d82a76917f89c62fc46",
-  "notes": "https://github.com/roman885-85/informer-clock-ua/releases/tag/v1.1.5"
+  "ver": "1.1.6",
+  "date": "2026-11-15",
+  "bin": "https://raw.githubusercontent.com/roman885-85/informer-clock-ua/v1.1.6/docs/firmware/informer-clock-ua-esp32.bin",
+  "size": 1830480,
+  "md5": "2b3da2a2c870665b36beecb60a3bf05a",
+  "sha256": "55a287487f3bc3b519a6958760e816a4422f3eda2e1875bce43a505f806cedf0",
+  "notes": "https://github.com/roman885-85/informer-clock-ua/releases/tag/v1.1.6"
 }

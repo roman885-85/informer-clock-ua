@@ -1,5 +1,14 @@
 [
   {
+    "v": "1.1.6",
+    "date": "2026-11-15",
+    "items": [
+      { "t": "fixed", "text": "Час більше не стрибає через сервер NTP з хибним годинником (14.11.2026 годинник кілька хвилин показував час на 12 год 24 хв назад): власний клієнт NTP перевіряє відповідь, а зміну відомого часу більш ніж на хвилину спершу підтверджує другий, незалежний сервер. / The time no longer jumps because of an NTP server with a wrong clock (on 2026-11-14 the clock showed a time 12 h 24 min behind for several minutes): an own NTP client checks the reply, and a second independent server must confirm any change of the known time by more than a minute." },
+      { "t": "fixed", "text": "Бібліотека часу TimeLib — під замком: рідкісний збіг двох задач міг перевести годинник на 49,7 доби вперед. / The TimeLib time library is under a lock: a rare coincidence of two tasks could move the clock 49.7 days ahead." },
+      { "t": "added", "text": "Журнал подій: «[TIME] джерело: було -> стало» — кожна зміна часу більш ніж на хвилину (NTP, вручну, DS3231, пояс чи літній час) і відкинуті відповіді NTP; /content?ntp_diag= — остання прийнята й відкинута відповідь. / Event log: “[TIME] source: was -> became” — every time change over a minute (NTP, manual, DS3231, time zone or summer time) and rejected NTP replies; /content?ntp_diag= — the last accepted and rejected reply." }
+    ]
+  },
+  {
     "v": "1.1.5",
     "date": "2026-11-09",
     "items": [

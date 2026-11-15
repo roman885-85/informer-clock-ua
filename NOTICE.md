@@ -25,6 +25,7 @@ Informer Clock UA — незалежний проєкт: автор оригін
 | `firmware/lib/MD_MAX72XX` | MD_MAX72XX 3.2.3, majicDesigns; змінено — [FORK.md](firmware/lib/MD_MAX72XX/FORK.md) (гачки замка SPI для плавної яскравості) | LGPL-2.1 |
 | `firmware/lib/ESPAsyncWebServer-esphome` | ESPAsyncWebServer-esphome 2.1.0, Hristo Gochkov / ESPHome; змінено — [FORK.md](firmware/lib/ESPAsyncWebServer-esphome/FORK.md) (черга веб-інтерфейсу з потоку AsyncTCP) | LGPL-3.0 |
 | `firmware/lib/AsyncTCP-esphome` | AsyncTCP-esphome 1.2.2, Hristo Gochkov / ESPHome; змінено — [FORK.md](firmware/lib/AsyncTCP-esphome/FORK.md) (виправлення падінь, черга подій) | LGPL-3.0 |
+| `firmware/lib/Time` | Time (TimeLib) 1.6.1, Michael Margolis, Paul Stoffregen; змінено — [FORK.md](firmware/lib/Time/FORK.md) (замок для двох задач) | LGPL-2.1 |
 | `firmware/lib/MHZ19_uart` | за [nara256/mhz19_uart](https://github.com/nara256/mhz19_uart), відтворено з машинного коду | MIT |
 | `firmware/lib/Base64` | за [adamvr/arduino-base64](https://github.com/adamvr/arduino-base64) (Adam Rudd), відтворено з машинного коду | MIT |
 | `firmware/lib/MD5` | API як у tzikis/ArduinoMD5, реалізація власна (MD5 з ПЗУ ESP32) | CC BY-NC 4.0 |
@@ -32,7 +33,7 @@ Informer Clock UA — незалежний проєкт: автор оригін
 
 Під час збирання PlatformIO завантажує (не входять у репозиторій): ядро Arduino-ESP32 1.0.4 (LGPL-2.1) з ESP-IDF 3.3
 (Apache-2.0) і бібліотеки з `lib_deps` у `firmware/platformio.ini` — кожна за своєю ліцензією (AsyncMqttClient — MIT, ArduinoJson — MIT, FastLED — MIT, DFRobotDFPlayerMini —
-GNU LGPL, OneWire, DallasTemperature, DHTesp, бібліотеки Adafruit і SparkFun, RTClib, Time, YoutubeApi та інші).
+GNU LGPL, OneWire, DallasTemperature, DHTesp, бібліотеки Adafruit і SparkFun, RTClib, YoutubeApi та інші).
 Файли прошивки містять ці компоненти; повний вихідний код прошивки — у цьому репозиторії, тож її можна перезібрати
 з іншими версіями бібліотек. Прошивальник у браузері використовує [ESP Web Tools](https://github.com/esphome/esp-web-tools)
 (Apache-2.0), скрипти прошивки — [esptool](https://github.com/espressif/esptool) (GPL-2.0); обидва завантажуються з їхніх
@@ -51,8 +52,8 @@ changed compared to the original — [CHANGELOG.md](CHANGELOG.md), [docs/en/arch
 the git history from the `reconstructed-2.7.1` tag.
 
 The table above lists the origin and license of every part (CC BY-NC 4.0 for the author's material and this project's
-work; LGPL-2.1 for MD_Parola and MD_MAX72XX, LGPL-3.0 for ESPAsyncWebServer-esphome and AsyncTCP-esphome — all four
-modified, each with a `FORK.md` in its folder; MIT for the reconstructed MHZ19_uart and Base64). Libraries downloaded by PlatformIO at build time (Arduino-ESP32 core, ESP-IDF and
+work; LGPL-2.1 for MD_Parola, MD_MAX72XX and Time (TimeLib), LGPL-3.0 for ESPAsyncWebServer-esphome and AsyncTCP-esphome —
+all five modified, each with a `FORK.md` in its folder; MIT for the reconstructed MHZ19_uart and Base64). Libraries downloaded by PlatformIO at build time (Arduino-ESP32 core, ESP-IDF and
 the `lib_deps` in `firmware/platformio.ini`) keep their own licenses; the firmware binaries contain them, and the full
 firmware source is in this repository so it can be rebuilt with other library versions. The browser flasher uses
 ESP Web Tools (Apache-2.0) and the flashing scripts use esptool (GPL-2.0); both are fetched from their sources and are

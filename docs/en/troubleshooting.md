@@ -47,6 +47,8 @@
 |---|---|
 | The time is off by an hour | “Time” → “Summer time”: “Auto” for Europe; check the time zone |
 | The time is inaccurate after a restart without internet | expected: until the first sync the system time is shown (drifts from minutes to tens of minutes per day of operation); with a DS3231 — accurate |
+| The clock suddenly showed a completely different time (hours behind or ahead) and a few minutes later fixed itself | before 1.1.6 the clock took the time from any NTP server, even one with a wrong clock (2026-11-14 — a pool server 12 h behind): please update. Since 1.1.6 a time jump must first be confirmed by a second server, and the event log shows every time change over a minute — `[TIME] …: was -> became` — and rejected replies — `[TIME] NTP rejected …` |
+| The event log shows `[TIME] NTP rejected … no second server to confirm` | an NTP server gave a time that differs from the clock by more than a minute, and no second server answered (`time.cloudflare.com`, `time.google.com`, `1.pool.ntp.org` unreachable: no DNS, the router blocks UDP 123): the time was kept; if the next sync gives the same jump, it is accepted. The last accepted and rejected reply — `http://<address>/content?ntp_diag=` |
 
 ## Sound
 

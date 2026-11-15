@@ -1,10 +1,10 @@
 #!/bin/sh
 # Перевірка fx_dst_offset (firmware/src/timefix.cpp) на комп'ютері: дати переходів на літній час ЄС 2024–2031.
-# Функції беруться зі справжнього timefix.cpp; TimeLib — з firmware/.pio/libdeps (спершу: cd firmware && pio run -e clock).
-# EN: checks the EU summer-time switch dates using the real timefix.cpp code and TimeLib from PlatformIO libdeps.
+# Функції беруться зі справжнього timefix.cpp; TimeLib — з firmware/lib/Time (з 1.1.6 копія в репозиторії).
+# EN: checks the EU summer-time switch dates using the real timefix.cpp code and TimeLib from firmware/lib/Time.
 set -e   # -D__time_t_defined: macOS не визначає цей макрос, а TimeLib інакше оголошує свій time_t
-D=$(cd "$(dirname "$0")" && pwd); S="$D/../../../firmware/src"; T="$D/../../../firmware/.pio/libdeps/clock/Time"
-[ -f "$T/TimeLib.h" ] || { echo "немає TimeLib: спершу cd firmware && pio run -e clock / build the firmware once first"; exit 1; }
+D=$(cd "$(dirname "$0")" && pwd); S="$D/../../../firmware/src"; T="$D/../../../firmware/lib/Time"
+[ -f "$T/TimeLib.h" ] || { echo "немає firmware/lib/Time/TimeLib.h / missing TimeLib"; exit 1; }
 B="${TMPDIR:-/tmp}/dsttest.$$"; mkdir -p "$B"
 printf '#pragma once\n#include <cstdint>\nunsigned long millis();\n' > "$B/WProgram.h"
 { echo '#include "TimeLib.h"'; echo 'extern uint8_t g_c32e4;'

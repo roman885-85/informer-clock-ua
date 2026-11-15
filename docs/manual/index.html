@@ -59,6 +59,7 @@
 <h2>Час і літній час</h2>
 <ul>
   <li>Час береться з інтернету (NTP). Після перезапуску годинник одразу показує системний час (він переживає перезапуск), а точний — щойно з'явиться інтернет.</li>
+  <li>З 1.1.6 годинник перевіряє відповідь сервера NTP, а якщо час мав би змінитися більш ніж на хвилину — спершу питає другий, незалежний сервер. Кожна така зміна видна в журналі подій (сторінка System): «[TIME] …: було -&gt; стало».</li>
   <li><b>Літній час «Авто»</b> — перехід за правилами Європи (остання неділя березня й жовтня). «Увімк» — завжди +1 година, «Вимк» — без літнього часу. Зміна пояса чи літнього часу діє одразу, без чекання синхронізації.</li>
 </ul>
 <p><img src="../images/webui-time-dst.jpg" width="400" alt="Сторінка «Час»: перемикач «Літній час» — Вимк, Увімк, Авто"></p>
@@ -95,6 +96,7 @@
   <li><b>Табло погасло, а годинник у мережі.</b> Табло вимкнено командою MQTT — наприклад, світлом «Display» чи голосовою командою в Home Assistant; увімкніть там само. З 1.1.4 у журналі подій видно, коли саме: «[MQTT] Display off by command».</li>
   <li><b>Годинник сам перезапускається раз на кілька годин</b> («loop guard: loop() stuck &gt; 180 s» у журналі подій) — хибна тривога сторожа, виправлено в 1.1.4.</li>
   <li><b>У журналі Home Assistant — помилка дати «Set date».</b> До 1.1.5 годинник публікував дату порожньою, і Home Assistant при кожному запуску писав «does not match expected pattern»; оновіться.</li>
+  <li><b>Годинник раптом показав зовсім інший час і за кілька хвилин виправився сам.</b> До 1.1.6 він брав час від будь-якого сервера NTP, навіть із хибним годинником; оновіться. З 1.1.6 стрибок часу спершу підтверджує другий сервер, а журнал подій показує кожну зміну часу понад хвилину.</li>
   <li><b>Скидання налаштувань</b>: «Оновлення» → «Файл конфігурації» → «Повернення до заводських установок». Після перезапуску — знову точка «Clock ESP».</li>
   <li>Журнал подій (сторінка System) показує перезапуски, аварії та їх причини — додайте його до повідомлення про помилку.</li>
 </ul>
@@ -147,6 +149,7 @@
 <h2>Time and summer time</h2>
 <ul>
   <li>Time comes from the internet (NTP). After a restart the clock immediately shows the system time (it survives a restart), and the exact time as soon as the internet is available.</li>
+  <li>Since 1.1.6 the clock checks the NTP server's reply, and if the time would change by more than a minute, it first asks a second, independent server. Every such change is visible in the event log (System page): “[TIME] …: was -&gt; became”.</li>
   <li><b>Summer time “Auto”</b> follows the European rules (last Sunday of March and October). “On” is always +1 hour, “Off” — no summer time. Time zone and summer time changes apply immediately, without waiting for a sync.</li>
 </ul>
 <p><img src="../images/webui-time-dst.jpg" width="400" alt="“Time” page: the “Summer time” switch — Off, On, Auto (Ukrainian interface)"></p>
@@ -183,6 +186,7 @@
   <li><b>The display went dark while the clock is online.</b> It was switched off by an MQTT command — for example the “Display” light or a voice command in Home Assistant; switch it on there. Since 1.1.4 the event log shows when: “[MQTT] Display off by command”.</li>
   <li><b>The clock restarts by itself every few hours</b> (“loop guard: loop() stuck &gt; 180 s” in the event log) — a false alarm of the guard, fixed in 1.1.4.</li>
   <li><b>The Home Assistant log shows a “Set date” date error.</b> Before 1.1.5 the clock published an empty date, and Home Assistant logged “does not match expected pattern” at every start; please update.</li>
+  <li><b>The clock suddenly showed a completely different time and fixed itself a few minutes later.</b> Before 1.1.6 it took the time from any NTP server, even one with a wrong clock; please update. Since 1.1.6 a time jump must first be confirmed by a second server, and the event log shows every time change over a minute.</li>
   <li><b>Factory reset</b>: “Update” → “Config File” → “Reset configuration to factory default settings”. After the restart — the “Clock ESP” access point again.</li>
   <li>The event log (System page) shows restarts, crashes and their causes — attach it to a bug report.</li>
 </ul>

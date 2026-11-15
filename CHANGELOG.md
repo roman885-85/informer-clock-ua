@@ -3,6 +3,49 @@
 Формат: нові версії вгорі. Те саме для веб-інтерфейсу годинника — `update/changelog.json`.
 Format: newest first. The clock's web interface reads the same history from `update/changelog.json`.
 
+## 1.1.6 — 2026-11-15
+
+**Виправлено / fixed**
+- Час більше не стрибає через сервер NTP з хибним годинником. 14.11.2026 годинник кілька хвилин показував час на
+  12 год 24 хв назад (дата та сама) і сам виправився наступною синхронізацією. Причина: один із серверів `pool.ntp.org`
+  (зона ua) кілька годин віддавав час на 12–24 год назад — це видно в публічному журналі моніторингу пулу, — а клієнт
+  SNTP ядра Arduino-ESP32 1.0.4 бере будь-яку відповідь без перевірок; другий сервер автора (`time.nist.gov`) не
+  використовувався ніколи. Тепер у прошивці власний клієнт NTP: відповідь мусить повернути випадкову мітку запиту й
+  прийти з адреси сервера; відкидаються «сервер не синхронізований» (LI = 3, страта 0 чи 16), еталон, що не оновлювався
+  понад добу, і сервер, який сам оцінює свою похибку понад 1,5 с. Сервер з налаштувань (типово `pool.ntp.org`) лишається
+  основним; мовчить чи відкинутий — запасні. Якщо відомий час мав би змінитися більш ніж на хвилину, спершу його
+  підтверджує другий, незалежний сервер з іншої мережі (`time.cloudflare.com`, `time.google.com` або `1.pool.ntp.org`);
+  не підтвердив — час лишається, а в журналі подій видно, який сервер помилявся і на скільки. / The time no longer
+  jumps because of an NTP server with a wrong clock. On 2026-11-14 the clock showed a time 12 h 24 min behind (same
+  date) for several minutes and fixed itself at the next sync. The cause: one of the `pool.ntp.org` servers (ua zone)
+  served a time 12–24 h behind for several hours — it is visible in the pool's public monitoring log — and the SNTP
+  client of the Arduino-ESP32 1.0.4 core accepts any reply without checks; the author's second server
+  (`time.nist.gov`) was never used. Now the firmware has its own NTP client: a reply must return the random request
+  stamp and come from the server's address; “server unsynchronized” (LI = 3, stratum 0 or 16), a reference not updated
+  for over a day and a server that estimates its own error at over 1.5 s are rejected. The server from the settings
+  (`pool.ntp.org` by default) stays the main one; if it is silent or rejected, fallbacks are used. If the known time
+  would change by more than a minute, a second independent server from another network must confirm it first
+  (`time.cloudflare.com`, `time.google.com` or `1.pool.ntp.org`); without confirmation the time is kept, and the event
+  log shows which server was wrong and by how much.
+- Прихована помилка бібліотеки часу TimeLib: її викликають дві задачі (головний цикл і веб-сервер), і рідкісний збіг
+  на межі секунди міг перевести годинник на 49,7 доби вперед — до наступної синхронізації. Тепер бібліотека працює під
+  замком (`firmware/lib/Time`). На годиннику такого не помічено; помилку відтворено на комп'ютері
+  (`tools/sim/timelibrace`). / A hidden bug in the TimeLib time library: two tasks call it (the main loop and the web
+  server), and a rare coincidence at a second boundary could move the clock 49.7 days ahead — until the next sync. Now
+  the library works under a lock (`firmware/lib/Time`). Not seen on a clock; reproduced on a computer
+  (`tools/sim/timelibrace`).
+
+**Діагностика / diagnostics**
+- Журнал подій: кожна зміна показаного часу більш ніж на хвилину — рядок `[TIME] джерело: було -> стало (±N s)`: NTP
+  (сервер, адреса, страта; `confirmed by …` — хто підтвердив), ручне встановлення, DS3231, зміна пояса чи літнього часу.
+  Відкинута відповідь NTP, що змінила б час більш ніж на хвилину, — `[TIME] NTP rejected …` з причиною (той самий
+  хибний сервер — не частіше разу на 6 год). `/content?ntp_diag=` — остання прийнята й остання відкинута відповідь. /
+  Event log: every change of the shown time by more than a minute is a `[TIME] source: was -> became (±N s)` line: NTP
+  (server, address, stratum; `confirmed by …` — who confirmed it), manual setting, DS3231, a time zone or summer time
+  change. A rejected NTP reply that would have changed the time by more than a minute — `[TIME] NTP rejected …` with
+  the reason (the same faulty server — at most once in 6 h). `/content?ntp_diag=` — the last accepted and the last
+  rejected reply.
+
 ## 1.1.5 — 2026-11-09
 
 **Виправлено / fixed**

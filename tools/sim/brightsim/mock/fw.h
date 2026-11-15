@@ -21,7 +21,8 @@ extern uint32_t g_now;
 inline uint32_t millis() { return g_now; }
 extern int g_adc;
 inline int analogRead(int) { return g_adc; }
-struct MockP { int intensity = -1; int sets = 0; void setIntensity(uint8_t v) { intensity = v; sets++; } };
+struct MockP { int intensity = -1; int sets = 0; int ival = -1; void setIntensity(uint8_t v) { intensity = v; sets++; }
+  void setIntensityValue(uint8_t v) { ival = v; } };   // з 1.1.3: значення в зонах без запису в табло
 extern MockP P;
 // dim.cpp: FreeRTOS, SPI (ловимо команди інтенсивності 0x0A між CS LOW/HIGH) і табло — лише потрібне
 #include <cstring>

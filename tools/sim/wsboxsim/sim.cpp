@@ -1,6 +1,6 @@
 // Перевірка черги повідомлень веб-інтерфейсу (справжній код з ws.cpp: від «#define WS_BOX» до кінця ws_async_hook):
 // перехід через край кільця, порядок і цілісність повідомлень, відкидання при переповненні, зупинка, коли черга
-// клієнта повна (availableForWriteAll), не більше 24 повідомлень за раз. Без мережі: AsyncWebSocket — заглушка.
+// клієнта повна (availableForWriteAll), не більше 8 повідомлень за раз (з 1.1.0-rc4; до того — 24). Без мережі: AsyncWebSocket — заглушка.
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -20,6 +20,9 @@ struct AsyncWebSocket {
   bool availableForWriteAll() { return !full; }
   void textAll(const char *p, size_t n) { got.push_back(std::string(p, n)); }
 };
+// черга подій AsyncTCP (з 1.1.0-rc4: ws.cpp не шле, поки в ній > 16 подій); тут — порожня
+static uint32_t g_q_wait;
+uint32_t async_tcp_queue_waiting() { return g_q_wait; }
 #include "box.inc"
 int main() {
   AsyncWebSocket ws; int bad = 0;
@@ -46,13 +49,13 @@ int main() {
   bool intact = (int)ws.got.size() == put; for (auto &g : ws.got) intact = intact && g == big;
   printf("після вивантаження: доставлено %zu, цілі: %s\n", ws.got.size(), intact ? "так" : "НІ");
   bad += !intact;
-  // 3) черга клієнта повна — нічого не береться; не більше 24 за раз
+  // 3) черга клієнта повна — нічого не береться; не більше 8 за раз (1.1.0-rc4: щоб не переповнювати чергу AsyncTCP)
   ws.got.clear();
   for (int i = 0; i < 40; i++) ws_send("{\"a\":1}", 7);
   ws.full = true; ws_async_hook(&ws); size_t a = ws.got.size();
   ws.full = false; ws_async_hook(&ws); size_t b = ws.got.size();
-  printf("черга клієнта повна: взято %zu (має 0); далі за один раз %zu (має 24)\n", a, b);
-  bad += !(a == 0 && b == 24);
+  printf("черга клієнта повна: взято %zu (має 0); далі за один раз %zu (має 8)\n", a, b);
+  bad += !(a == 0 && b == 8);
   // 4) немає клієнтів — нічого не кладемо; занадто довге — відмова
   ws_async_hook(&ws); ws_async_hook(&ws);
   ws.clients = 0; ws_async_hook(&ws);

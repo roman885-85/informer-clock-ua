@@ -68,7 +68,7 @@ release files):
 
 ```sh
 ~/.platformio/packages/toolchain-xtensa32/bin/xtensa-esp32-elf-addr2line -pfiaC \
-  -e informer-clock-ua-esp32-1.1.5.elf 0x400d1234 0x400d5678
+  -e informer-clock-ua-esp32-1.1.6.elf 0x400d1234 0x400d5678
 ```
 
 If `loop()` hangs for more than 3 min, the watchdog restarts the clock and writes `[BOOT] loop guard: loop() stuck > 180 s`.
@@ -138,6 +138,21 @@ the `millis()` it calls: then the next address is the call of `fx_loop_spin_tick
   event handling stops for N s (up to 3600) and the clock re-associates; within ~8 s you should see `Restart: Wi-Fi
   events not delivered…` and `Connected` right away. `http://<address>/post?wdbg_evt_block=N` — the same with a link
   drop; within ~1 min — `Restart: status says connected, driver is not…`.
+
+## Time and NTP (since 1.1.6)
+
+Works without Wi-Fi debugging too.
+
+- `http://<address>/content?ntp_diag=` — the last accepted NTP reply (`ok:` — the new local time, server, address,
+  stratum, round trip; `2nd server` — the time was taken from the second server) and the last rejected one
+  (`rejected:` — when, server, address, LI, stratum, root distance, round trip, the reason and the “server − clock”
+  difference).
+- Event log: `[TIME] NTP …: was -> became (±N s)` — a sync changed the time by more than a minute (`confirmed by …` —
+  who confirmed the jump); `[TIME] NTP rejected …` — a rejected reply that would have changed the time by more than a
+  minute; `[TIME] manual …`, `[TIME] RTC …`, `[TIME] offset …` — manual setting, DS3231, a time zone or summer time
+  change; `[TIME] … stray packet(s) …` — foreign packets arrived on the NTP socket (at most once an hour).
+- A check on a computer — a simulator with the real `ntp.cpp` code and servers that lie, stay silent or send foreign
+  packets: `sh tools/sim/ntpsim/run.sh` ([building](building.md)).
 
 ## Security
 

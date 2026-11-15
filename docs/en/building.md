@@ -95,7 +95,13 @@ Small programs that build the **real** firmware code on a computer with core stu
 | `voicesim` | `sh tools/sim/voicesim/build.sh` | the hourly voice state machine (`sound.cpp`) |
 | `slidesim` | `sh tools/sim/slidesim/run.sh` | “stray dots” at the hour change on the sliding-digits clock face |
 | `wdbgsim` | `sh tools/sim/wdbgsim/build.sh`, then run the printed file and `nc localhost 2323` | network log (`wdbg.cpp`, port 2323 instead of 23) |
-| `dsttest` | `sh tools/sim/dsttest/build.sh` (after `pio run`: needs TimeLib) | EU summer-time switch dates 2024–2031 |
+| `dsttest` | `sh tools/sim/dsttest/build.sh` | EU summer-time switch dates 2024–2031 |
+| `dimsim` | `sh tools/sim/dimsim/run.sh` | smooth display brightness (`dim.cpp`, 1 ms step) |
+| `bigslidesim` | `sh tools/sim/bigslidesim/run.sh` | digits rolling on the big clock face (`bigslide.cpp` with the display libraries) |
+| `wsboxsim` | `sh tools/sim/wsboxsim/run.sh` | the web-interface message queue (`ws.cpp`) |
+| `newstail` | `sh tools/sim/newstail/run.sh` | trimming the GNews news tail (`feeds.cpp`, the core's real `String`) |
+| `ntpsim` | `sh tools/sim/ntpsim/run.sh` | the NTP client (`ntp.cpp`, `time.cpp`, `timefix.cpp`): servers that lie (including the 2026-11-14 case), stay silent, send foreign packets; the same scenarios on the 1.1.5 code too |
+| `timelibrace` | `sh tools/sim/timelibrace/run.sh` | the two-task race in TimeLib: the original 1.6.1 jumps by 49.7 days, `lib/Time` does not |
 | `masktest` | `sh tools/sim/masktest/build.sh` | Wi-Fi password masking in the console (`ws.cpp`) |
 | `statusprev` | `python3 tools/sim/statusprev/preview.py 1 out.gif --rows 2` | how the start-up status looks on the display (GIF) |
 | `status_icons.py` | `python3 tools/sim/status_icons.py --png icons.png` | frames of the start-up status icons |
